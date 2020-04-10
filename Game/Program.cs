@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monorail;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,8 @@ namespace Game
     {
         static void Main(string[] args)
         {
+            var game = new MyGame();    // TODO This might need to be in a using statement...
+            game.Start();
         }
     }
 }
