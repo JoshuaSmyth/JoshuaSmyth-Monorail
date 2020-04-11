@@ -1,4 +1,13 @@
-Debug/
-Monrail.Native.Graphics/Monrail.Native.Graphics.vcxproj.user
 .vs/
+Monorail.GossipScript.Test/bin/
+Monorail.GossipScript.Test/obj/
+Monorail.GossipScript/GossipScript/bin/
+*.cache
+Monorail.GossipScript/GossipScript/obj/
+Monorail.OpenGL/Monorail.Framework.csproj.user
+Monorail.OpenGL/bin/
+Monorail.OpenGL/obj/
 packages/
+SampleGame/bin/
+SampleGame/obj/x86/
+SampleGame/SampleGame.csproj.user

@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{584D6C14-C82F-4287-9E32-20781B1D65D6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Monorail</RootNamespace>
+    <AssemblyName>Monorail</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Bindings\SDL\SDL2_image.cs" />
+    <Compile Include="Bindings\SDL\SDL2_mixer.cs" />
+    <Compile Include="Bindings\SDL\SDL2_ttf.cs" />
+    <Compile Include="Mathlib\BoundingBox.cs" />
+    <Compile Include="Mathlib\Frustum.cs" />
+    <Compile Include="Mathlib\Matrix4.cs" />
+    <Compile Include="Mathlib\Plane.cs" />
+    <Compile Include="Mathlib\Point.cs" />
+    <Compile Include="Mathlib\Quaternion.cs" />
+    <Compile Include="Mathlib\Ray.cs" />
+    <Compile Include="Mathlib\Rect.cs" />
+    <Compile Include="Mathlib\Vector2.cs" />
+    <Compile Include="Mathlib\Vector3.cs" />
+    <Compile Include="Mathlib\Vector4.cs" />
+    <Compile Include="Platform\GameInput.cs" />
+    <Compile Include="Services\Async\Continuation.cs" />
+    <Compile Include="Services\Async\Coroutines.cs" />
+    <Compile Include="Services\Async\ParallelContinuation.cs" />
+    <Compile Include="Services\Async\Tweenie.cs" />
+    <Compile Include="Services\Async\WaitContinuation.cs" />
+    <Compile Include="Audio\AudioDevice.cs" />
+    <Compile Include="Audio\Presets.cs" />
+    <Compile Include="Audio\WaveData.cs" />
+    <Compile Include="Bindings\OpenGL\OpenGLBindings.cs" />
+    <Compile Include="Bindings\OpenAL\AL10.cs" />
+    <Compile Include="Bindings\OpenAL\AL11.cs" />
+    <Compile Include="Bindings\OpenAL\ALC10.cs" />
+    <Compile Include="Bindings\OpenAL\ALC11.cs" />
+    <Compile Include="Bindings\OpenAL\ALEXT.cs" />
+    <Compile Include="Bindings\OpenAL\EFX.cs" />
+    <Compile Include="GameTime.cs" />
+    <Compile Include="Graphics\DefaultColors.cs" />
+    <Compile Include="Graphics\Enums.cs" />
+    <Compile Include="Graphics\Shapes\Triangle.cs" />
+    <Compile Include="Graphics\Vertices.cs" />
+    <Compile Include="Mathlib\Color.cs" />
+    <Compile Include="Mathlib\MathHelper.cs" />
+    <Compile Include="NativeLibraryLoader.cs" />
+    <Compile Include="Bindings\SDL\SDL2.cs" />
+    <Compile Include="Platform\TextureFont.cs" />
+    <Compile Include="Platform\GameWindow.cs" />
+    <Compile Include="Platform\Game.cs" />
+    <Compile Include="Platform\Geometry.cs" />
+    <Compile Include="Platform\GraphicsCapabilities.cs" />
+    <Compile Include="Platform\IPlatformAudioDevice.cs" />
+    <Compile Include="Platform\IGraphicsDevice.cs" />
+    <Compile Include="Platform\OpenGLGraphicsDevice.cs" />
+    <Compile Include="Platform\QuadBatch.cs" />
+    <Compile Include="Platform\ShaderProgram.cs" />
+    <Compile Include="Platform\Texture2D.cs" />
+    <Compile Include="Platform\VertexArrayObject.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ServiceLocation\DependancyLocator.cs" />
+    <Compile Include="Services\ServiceLocation\ILocatableService.cs" />
+    <Compile Include="Services\ServiceLocation\IRequireServices.cs" />
+    <Compile Include="Services\ServiceLocation\IServiceMapper.cs" />
+    <Compile Include="Services\ServiceLocation\ServiceMapper.cs" />
+    <Compile Include="Services\UserInterface\Enums.cs" />
+    <Compile Include="Services\UserInterface\IElement.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="lib\x64\libpng16-16.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x64\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x64\SDL2_image.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x64\soft_oal.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x64\zlib1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x86\libfreetype-6.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x86\libpng16-16.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x86\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x86\SDL2_image.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x86\SDL2_ttf.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x86\soft_oal.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\x86\zlib1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\ObjectPooling\" />
+    <Folder Include="Services\Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.md" />
+    <None Include="TODO.md" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
