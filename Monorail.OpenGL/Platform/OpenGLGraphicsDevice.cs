@@ -62,5 +62,11 @@ namespace Monorail.Platform
         {
             GlBindings.Disable(enableFlags);
         }
+
+        public void SetTextureSamplingAttribute(TextureAttributeValue attribute)
+        {
+            GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_MIN_FILTER, attribute);
+            GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_MAG_FILTER, attribute);
+        }
     }
 }

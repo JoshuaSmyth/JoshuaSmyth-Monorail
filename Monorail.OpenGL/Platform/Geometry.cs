@@ -78,23 +78,23 @@ namespace Monorail.Platform
             return new uint[] { 0, 1, 3, 1, 2, 3 };
         }
 
-        public static VertexPositionColorTexture[] CreateIndexedQuadVerts()
+        public static VertexPositionColorTexture[] CreateIndexedQuadVerts(float scale=1.0f)
         {
             var rv = new VertexPositionColorTexture[4];
-            rv[0].Position = new Vector3(0.5f, 0.5f, 0.0f);     // Top Right
-            rv[1].Position = new Vector3(0.5f, -0.5f, 0.0f);    // Bottom Right
-            rv[2].Position = new Vector3(-0.5f, -0.5f, 0.0f);   // Bottom Left
-            rv[3].Position = new Vector3(-0.5f, 0.5f, 0.0f);    // Top Left
+            rv[0].Position = new Vector3(0.5f * scale, 0, 0.5f * scale);     // Top Right
+            rv[1].Position = new Vector3(0.5f * scale, 0, -0.5f * scale);    // Bottom Right
+            rv[2].Position = new Vector3(-0.5f * scale, 0, -0.5f * scale);   // Bottom Left
+            rv[3].Position = new Vector3(-0.5f * scale, 0, 0.5f * scale);    // Top Left
 
             rv[0].Color = new Vector3(1f, 1f, 0.0f);
             rv[1].Color = new Vector3(0.5f, 1f, 0.0f);
             rv[2].Color = new Vector3(1f, 1f, 0.0f);
             rv[3].Color = new Vector3(1f, 0.5f, 0.0f);
 
-            rv[0].Texture = new Vector2(1f, 1f);
-            rv[1].Texture = new Vector2(1f, 0f);
+            rv[0].Texture = new Vector2(1f * scale, 1f * scale);
+            rv[1].Texture = new Vector2(1f * scale, 0f);
             rv[2].Texture = new Vector2(0f, 0f);
-            rv[3].Texture = new Vector2(0f, 1f);
+            rv[3].Texture = new Vector2(0f, 1f * scale);
             return rv;
         }
     }

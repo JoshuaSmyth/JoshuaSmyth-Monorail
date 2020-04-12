@@ -24,5 +24,7 @@ namespace Monorail.Platform
         void BindTexture(TextureType textureType, int textureId, TextureUnits textureUnit=TextureUnits.GL_TEXTURE0);
 
         void BindTexture2D(int textureId, TextureUnits textureUnit = TextureUnits.GL_TEXTURE0);
+
+        void SetTextureSamplingAttribute(TextureAttributeValue attribute);
     }
 }

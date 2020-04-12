@@ -54,10 +54,10 @@ namespace Monorail.Platform
             var rv = new DefaultQuadBatchVertex[4 * quadCount];
             for (int i = 0; i < quadCount; i++)
             {
-                rv[i*4 + 0].Position = new Vector3(100.0f, 100.0f, 0.0f);       // Top Right
-                rv[i*4 + 1].Position = new Vector3(100.0f, 0, 0.0f);            // Bottom Right
+                rv[i*4 + 0].Position = new Vector3(32.0f, 32.0f, 0.0f);       // Top Right
+                rv[i*4 + 1].Position = new Vector3(32.0f, 0, 0.0f);            // Bottom Right
                 rv[i*4 + 2].Position = new Vector3(0, 0, 0.0f);                 // Bottom Left
-                rv[i*4 + 3].Position = new Vector3(0, 100.0f, 0.0f);            // Top Left
+                rv[i*4 + 3].Position = new Vector3(0, 32.0f, 0.0f);            // Top Left
 
                 rv[i*4 + 0].Color = new Vector3(1f, 1f, 1.0f);
                 rv[i*4 + 1].Color = new Vector3(1.0f, 0.0f, 0.0f);
@@ -116,10 +116,10 @@ namespace Monorail.Platform
             {
 
                 var quad = new QuadRecord();
-                quad.X = 50 + i * 100 + 10 * i + position.X;
-                quad.Y = 50 + (5*i) + position.Y;
-                quad.W = 100;
-                quad.H = 100;
+                quad.X = 32 + i * 32 + 8 * i + position.X;
+                quad.Y = 32 + (2*i) + position.Y;
+                quad.W = 64;
+                quad.H = 64;
                 PushQuad(quad);
             }
 

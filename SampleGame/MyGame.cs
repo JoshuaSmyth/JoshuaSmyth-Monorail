@@ -6,6 +6,8 @@ using System;
 
 namespace SampleGame
 {
+
+
     public class MySampleGame : Game
     {
         ShaderProgram m_ShaderProgram;
@@ -16,12 +18,10 @@ namespace SampleGame
 
         Texture2D m_Texture;
         Texture2D m_AwesomeFace;
+        Texture2D m_Default;
 
-        Matrix4 m_ModelMatrix;
-
-        Matrix4 m_ViewMatrix;
-        Matrix4 m_ProjMatrix;
-
+        GameCamera camera;
+        
         float rot;
 
         Vector3[] Positions;
@@ -30,6 +30,8 @@ namespace SampleGame
 
         public override void Load()
         {
+            camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
+
             m_QuadBatch = new QuadBatch();
 
             m_ShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
@@ -51,7 +53,7 @@ namespace SampleGame
             
             // Create Textured Indexed Quad
             {
-                var verts = Geometry.CreateIndexedQuadVerts();
+                var verts = Geometry.CreateIndexedQuadVerts(scale:4.0f);
                 uint[] indices = Geometry.CreateIndexedQuadIndicies();
                
                 m_QuadVertexArrayObject = new VertexArrayObject();
@@ -80,55 +82,74 @@ namespace SampleGame
                 }
             }
 
+            
             // Load Texture
             {
                 m_Texture = Texture2D.CreateFromFile("Resources/Textures/texture1.png");
                 m_AwesomeFace = Texture2D.CreateFromFile("Resources/Textures/awesomeface.png");
-            }
-
-            // Setup Matricies
-            {
-                m_ModelMatrix = Matrix4.CreateRotationX(MathHelper.ToRads(-55));
-                m_ViewMatrix = Matrix4.CreateTranslation(new Vector3(0.0f, 0.0f, -2.0f));
-                var aspect = GameWindow.ScreenWidth / (float)GameWindow.ScreenHeight;
-                m_ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(90), aspect, 0.5f, 100.0f);
+                m_Default = Texture2D.CreateFromFile("Resources/Textures/default.png");
             }
         }
 
         public override void Update()
         {
             base.Update();
-            
-            rot+= (float)(GameTime.ElapsedSeconds * 90.0f);
-            m_ModelMatrix = Matrix4.CreateRotationX(MathHelper.ToRads(rot));
+            camera.Update();
 
-            if (this.Input.IsDown(KeyCode.KEYCODE_UP) || this.Input.IsDown(KeyCode.KEYCODE_W))
+            rot += (float)(GameTime.ElapsedSeconds * 15.0f);
+
+            if (this.Input.IsDown(KeyCode.KEYCODE_W))
             {
-                Console.WriteLine("KeyUp Pressed");
+                camera.MoveForward(0.01f);
+            }
 
-                for(int i=0;i<Positions.Length;i++)
+            if ( this.Input.IsDown(KeyCode.KEYCODE_S))
+            {
+                camera.MoveForward(-0.01f);
+            }
+
+            if (this.Input.IsDown(KeyCode.KEYCODE_A))
+            {
+                if (this.Input.IsDown(KeyCode.KEYCODE_LSHIFT))
                 {
-                    Positions[i].Z += 0.01f;
+                    camera.MoveRight(-0.01f);
+                }
+                else
+                {
+                    camera.RotateYaw(-0.5f);
                 }
             }
 
-            if (this.Input.IsDown(KeyCode.KEYCODE_DOWN) || this.Input.IsDown(KeyCode.KEYCODE_S))
+            if (this.Input.IsDown(KeyCode.KEYCODE_D))
             {
-                Console.WriteLine("KeyDOWN Pressed");
-                for (int i = 0; i < Positions.Length; i++)
+                if (this.Input.IsDown(KeyCode.KEYCODE_LSHIFT))
                 {
-                    Positions[i].Z -= 0.01f;
+                    camera.MoveRight(0.01f);
+                }
+                else
+                {
+                    camera.RotateYaw(0.5f);
                 }
             }
 
-            if (this.Input.WasPressed(KeyCode.KEYCODE_LEFT))
+            if (this.Input.IsDown(KeyCode.KEYCODE_UP))
             {
-                Console.WriteLine("KeyLEFT Pressed");
+                camera.AdjustPitch(-0.5f);
             }
 
-            if (this.Input.WasPressed(KeyCode.KEYCODE_RIGHT))
+            if (this.Input.IsDown(KeyCode.KEYCODE_DOWN))
             {
-                Console.WriteLine("KeyRIGHT Pressed");
+                camera.AdjustPitch(0.5f);
+            }
+
+            if (this.Input.IsDown(KeyCode.KEYCODE_LEFT))
+            {
+                camera.MoveRight(-0.01f);
+            }
+
+            if (this.Input.IsDown(KeyCode.KEYCODE_RIGHT))
+            {
+                camera.MoveRight(0.01f);
             }
         }
 
@@ -137,18 +158,31 @@ namespace SampleGame
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
             GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
 
+            // Render the cubes
             m_ShaderProgram.SetUniform("texture1", 0);
             m_ShaderProgram.SetUniform("texture2", 1);
-            m_ShaderProgram.SetUniform("model", m_ModelMatrix);
-            m_ShaderProgram.SetUniform("view", m_ViewMatrix);
-            m_ShaderProgram.SetUniform("proj", m_ProjMatrix);
+            m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
+            m_ShaderProgram.SetUniform("view", camera.ViewMatrix);
+            m_ShaderProgram.SetUniform("proj", camera.ProjMatrix);
+
+            // Render the Floor quad
+            {
+                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
+                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
+                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_NEAREST);
+
+                GraphicsDevice.UseVertexArrayObject(m_QuadVertexArrayObject.VertexArrayObjectId);
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, 1 * 6, DrawElementsType.UnsignedInt, 0);
+
+                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_LINEAR);
+            }
 
             GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
             GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
             GraphicsDevice.UseVertexArrayObject(m_Cube.VertexArrayObjectId);
-            var cubeCount = 10;
-
+            var cubeCount = Positions.Length;
+            
             for (var i = 0; i < cubeCount; i++)
             {
                 // calculate the model matrix for each object and pass it to shader before drawing
@@ -163,20 +197,33 @@ namespace SampleGame
 
                 GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
             }
+
+
+            // Unbind textures
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
         }
 
         public override void Render2D()
         {
             // THis just draws the text behind atm
-            GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
+            //GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
+
+            GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
+            GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
             m_QuadBatch.Start();
 
             m_QuadBatch.DrawText("Awesome! Source!", Vector2.Zero, new TextureFont(), PresetColors.White);
-            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(10,200), new TextureFont(), PresetColors.White);
-            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(20, 400), new TextureFont(), PresetColors.White);
+            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(10,80), new TextureFont(), PresetColors.White);
+            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(20, 160), new TextureFont(), PresetColors.White);
 
             m_QuadBatch.Commit();
+
+
+            // Unbind textures
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
         }
     }
 }
