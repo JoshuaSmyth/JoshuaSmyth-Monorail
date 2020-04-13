@@ -26,5 +26,7 @@ namespace Monorail.Platform
         void BindTexture2D(int textureId, TextureUnits textureUnit = TextureUnits.GL_TEXTURE0);
 
         void SetTextureSamplingAttribute(TextureAttributeValue attribute);
+
+        void DepthFunc(DepthFunc depthFunc);
     }
 }

@@ -69,5 +69,10 @@ namespace Monorail.Platform
             GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_MIN_FILTER, attribute);
             GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_MAG_FILTER, attribute);
         }
+
+        public void DepthFunc(DepthFunc depthFunc)
+        {
+            GlBindings.DepthFunc(depthFunc);
+        }
     }
 }

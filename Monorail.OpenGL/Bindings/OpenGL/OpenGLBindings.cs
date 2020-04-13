@@ -25,6 +25,18 @@ namespace OpenGL
         GL_ELEMENT_ARRAY_BUFFER = 0x8893,
     }
 
+    public enum DepthFunc
+    {
+        GL_NEVER =                          0x0200,
+        GL_LESS =                           0x0201,
+        GL_EQUAL =                          0x0202,
+        GL_LEQUAL =                         0x0203,
+        GL_GREATER =                        0x0204,
+        GL_NOTEQUAL =                       0x0205,
+        GL_GEQUAL =                         0x0206,
+        GL_ALWAYS =                         0x0207
+    }
+
     public enum BufferUsageHint
     {
         GL_STREAM_DRAW = 0x88E0,
@@ -411,7 +423,13 @@ namespace OpenGL
         public delegate int glBufferSubDataDelegate(BufferTarget target, IntPtr offset, IntPtr size, IntPtr data);
         [BindMethod("glBufferSubData")]
         public static glBufferSubDataDelegate BufferSubData;
-        
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glDepthFuncDelegate(DepthFunc depthFunc);
+        [BindMethod("glDepthFunc")]
+        public static glDepthFuncDelegate DepthFunc;
+
+
         public static void InitaliseOpenGLEntryPoints() 
         {
             // Load EntryPoints via refelction

@@ -197,26 +197,7 @@ namespace SampleGame
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
 
 
-
-            // Render the skybox (TODO Move to the end of the pipeline)
-            {
-                // TODO   glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-
-                GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
-                GraphicsDevice.BindTexture(m_CubeMap.TextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
-
-                GraphicsDevice.UseShaderProgram(m_SkyboxShader.ShaderProgramId);
-                m_SkyboxShader.SetUniform("view", camera.GetLookAtMatrix());
-                m_SkyboxShader.SetUniform("proj", camera.ProjMatrix);
-                m_SkyboxShader.SetUniform("skybox", 0);
-
-                GraphicsDevice.UseVertexArrayObject(m_SkyBox.VertexArrayObjectId);
-                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
-
-                GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
-
-                // TODO         glDepthFunc(GL_LESS); // set depth function back to default
-            }
+         
 
 
 
@@ -265,6 +246,21 @@ namespace SampleGame
 
                     GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
                 }
+            }
+
+            // Render the skybox (TODO Move to the end of the pipeline)
+            {
+                GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LEQUAL);
+                GraphicsDevice.BindTexture(m_CubeMap.TextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
+
+                GraphicsDevice.UseShaderProgram(m_SkyboxShader.ShaderProgramId);
+                m_SkyboxShader.SetUniform("view", camera.GetLookAtMatrix());
+                m_SkyboxShader.SetUniform("proj", camera.ProjMatrix);
+                m_SkyboxShader.SetUniform("skybox", 0);
+
+                GraphicsDevice.UseVertexArrayObject(m_SkyBox.VertexArrayObjectId);
+                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
+                GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LESS);
             }
 
             // Unbind textures
