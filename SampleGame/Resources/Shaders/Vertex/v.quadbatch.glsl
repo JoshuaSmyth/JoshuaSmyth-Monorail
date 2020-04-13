@@ -12,8 +12,9 @@ void main()
 {
 	// Operates in NDC Space
 	// -1 = Near Clipping Plane 1 = Far Clipping Plane
-	vColor = vec3(aColor.x,aColor.y,aColor.z);
+	vColor = aColor;
 	TexCoord = aTexCoord;
 	vec4 pos = vec4(aPos.x, aPos.y, 0.99, 1.0f);
+
 	gl_Position = pos;
 }

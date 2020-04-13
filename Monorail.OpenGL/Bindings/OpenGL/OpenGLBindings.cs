@@ -92,39 +92,13 @@ namespace OpenGL
 
     internal enum PixelInternalFormat
     {
+
         Rgba = 0x1908,
         Rgb = 0x1907,
-        Rgba4 = 0x8056,
         Luminance = 0x1909,
-        CompressedRgbS3tcDxt1Ext = 0x83F0,
-        CompressedSrgbS3tcDxt1Ext = 0x8C4C,
-        CompressedRgbaS3tcDxt1Ext = 0x83F1,
-        CompressedRgbaS3tcDxt3Ext = 0x83F2,
-        CompressedSrgbAlphaS3tcDxt3Ext = 0x8C4E,
-        CompressedRgbaS3tcDxt5Ext = 0x83F3,
-        CompressedSrgbAlphaS3tcDxt5Ext = 0x8C4F,
-        R32f = 0x822E,
-        Rg16f = 0x822F,
-        Rgba16f = 0x881A,
-        R16f = 0x822D,
-        Rg32f = 0x8230,
-        Rgba32f = 0x8814,
-        Rg8i = 0x8237,
-        Rgba8i = 0x8D8E,
-        Rg16ui = 0x823A,
-        Rgba16ui = 0x8D76,
-        Rgb10A2ui = 0x906F,
-        Rgba16 = 0x805B,
-        // PVRTC
-        CompressedRgbPvrtc2Bppv1Img = 0x8C01,
-        CompressedRgbPvrtc4Bppv1Img = 0x8C00,
-        CompressedRgbaPvrtc2Bppv1Img = 0x8C03,
-        CompressedRgbaPvrtc4Bppv1Img = 0x8C02,
-        // ATITC
-        AtcRgbaExplicitAlphaAmd = 0x8C93,
-        AtcRgbaInterpolatedAlphaAmd = 0x87EE,
-        // DXT
-
+        CompressedTextureFormats = 0x86A3,
+        Red = 0x1903,
+        Rg = 0x8227,
     }
 
     internal enum PixelFormat
@@ -162,6 +136,20 @@ namespace OpenGL
         GL_TEXTURE_MAX_LEVEL = 0x813D,
         GL_TEXTURE_LOD_BIAS = 0x8501,
         GL_UNPACK_ALIGNMENT = 0x0CF5,
+    }
+
+    public enum Mode
+    {
+        GL_POINT = 0x1B00,
+        GL_LINE = 0x1B01,
+        GL_FILL = 0x1B02
+    }
+
+    public enum Face
+    {
+        GL_FRONT = 0x0404,
+        GL_BACK = 0x0405,
+        GL_FRONT_AND_BACK = 0x0408
     }
 
     public enum TextureAttributeValue
@@ -254,6 +242,11 @@ namespace OpenGL
         public delegate void CompileShaderDelegate(int shaderId);
         [BindMethod("glCompileShader")]
         public static CompileShaderDelegate CompileShader;
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void PolygonShaderDelegate(Face face, Mode mode);
+        [BindMethod("glPolygonMode")]
+        public static PolygonShaderDelegate PolygonMode;
 
         [SuppressUnmanagedCodeSecurity()]
         internal unsafe delegate void GetShaderDelegate(int shaderId, int parameter, int* value);

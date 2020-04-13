@@ -11,3 +11,6 @@ packages/
 SampleGame/bin/
 SampleGame/obj/x86/
 SampleGame/SampleGame.csproj.user
+OpenGL/OpenGL.vcxproj.user
+OpenGL/OpenGL.vcxproj.filters
+OpenGL/Debug/

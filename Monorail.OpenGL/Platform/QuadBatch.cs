@@ -5,8 +5,6 @@ using System;
 
 namespace Monorail.Platform
 {
-    // Codehead's Bitmap Font Generator.
-
     public class QuadBatch : IDisposable
     {
         // FEATURES
@@ -21,8 +19,13 @@ namespace Monorail.Platform
         private struct QuadRecord
         {
             public int textureId;
+
             public float U;
             public float V;
+
+            public float UW;
+            public float VH;
+
             public float X;
             public float Y;
             public float W;
@@ -60,9 +63,9 @@ namespace Monorail.Platform
                 rv[i*4 + 3].Position = new Vector3(0, 32.0f, 0.0f);            // Top Left
 
                 rv[i*4 + 0].Color = new Vector3(1f, 1f, 1.0f);
-                rv[i*4 + 1].Color = new Vector3(1.0f, 0.0f, 0.0f);
-                rv[i*4 + 2].Color = new Vector3(1f, 1f, 0.0f);
-                rv[i*4 + 3].Color = new Vector3(1f, 0.5f, 0.0f);
+                rv[i*4 + 1].Color = new Vector3(1.0f, 1.0f, 1.0f);
+                rv[i*4 + 2].Color = new Vector3(1f, 1f, 1.0f);
+                rv[i*4 + 3].Color = new Vector3(1f, 1.0f, 1.0f);
 
                 rv[i*4 + 0].Texture = new Vector2(1f, 1f);                      // Note: Inverted Y
                 rv[i*4 + 1].Texture = new Vector2(1f, 0f);
@@ -110,21 +113,84 @@ namespace Monorail.Platform
             // TODO Free the vertex and Index Buffers
         }
 
-        public void DrawText(string text, Vector2 position, TextureFont fontInfo, Vector4 color, TextureUnits textureUnit=TextureUnits.GL_TEXTURE0, int layer=0)
+        public void DrawText(string text, Vector2 position, TextureFont font, Vector4 color, TextureUnits textureUnit=TextureUnits.GL_TEXTURE0, int layer=0)
         {
+            // TODO? Make a seperate FontBatcher?
+            var fontSheetWidth = (float)font.Font.Common.ScaleW;
+            var fontSheetHeight = (float)font.Font.Common.ScaleH;
+
+
             for (int i = 0; i < text.Length; i++)
             {
 
                 var quad = new QuadRecord();
-                quad.X = 32 + i * 32 + 8 * i + position.X;
+                quad.X = 32 + i * 32 + 16 * i + position.X;
                 quad.Y = 32 + (2*i) + position.Y;
-                quad.W = 64;
-                quad.H = 64;
+                quad.W = 32;
+                quad.H = 32;
+
+                // Compute the U, V and UW, UH values
+                var charId = (byte)text[i];
+                var fontChar = font.CharLookup[charId];
+
+                quad.U = fontChar.X / fontSheetWidth;
+                quad.V = fontChar.Y / fontSheetHeight;
+
+                quad.UW = fontChar.Width / fontSheetWidth;
+                quad.VH = fontChar.Height / fontSheetHeight;
+
+
+
                 PushQuad(quad);
             }
 
-            // TODO Convert chars to quadrecord
-            //throw new NotImplementedException();
+            var device = GameWindow.GraphicsDevice;
+
+            var sX = 2 / (float)GameWindow.ScreenWidth;
+            var sY = 2 / (float)GameWindow.ScreenHeight;
+
+            var oX = -1;
+            var oY = 1;
+
+            var quadCount = m_quadRecordCount;
+
+            // Edit Vertex Data
+            for (int i = 0; i < quadCount; i++)
+            {
+                var record = quadRecords[i];
+                m_Verticies[i * 4 + 0].Position = new Vector3(oX + (record.X + record.W) * sX, oY - (record.Y + record.H) * sY, 0.0f);       // Top Right
+                m_Verticies[i * 4 + 1].Position = new Vector3(oX + (record.X + record.W) * sX, oY - (record.Y * sY), 0.0f);                  // Bottom Right
+                m_Verticies[i * 4 + 2].Position = new Vector3(oX + record.X * sX, oY - (record.Y * sY), 0.0f);                               // Bottom Left
+                m_Verticies[i * 4 + 3].Position = new Vector3(oX + record.X * sX, oY - (record.Y + record.H) * sY, 0.0f);                    // Top Left
+
+                
+                m_Verticies[i * 4 + 0].Texture = new Vector2(record.U + record.UW, record.V + record.VH);                      // Note: Inverted Y
+                m_Verticies[i * 4 + 1].Texture = new Vector2(record.U + record.UW, record.V);
+                m_Verticies[i * 4 + 2].Texture = new Vector2(record.U, record.V);
+                m_Verticies[i * 4 + 3].Texture = new Vector2(record.U, record.V + record.VH);
+                
+            }
+
+            m_VertexArrayObject.SetVertexData<DefaultQuadBatchVertex>(m_Verticies, 0, quadCount * 6);
+
+
+            // TODO Make a font.glsl shader
+        //    GlBindings.PolygonMode(Face.GL_FRONT_AND_BACK, Mode.GL_LINE);
+
+
+            GameWindow.GraphicsDevice.BindTexture2D(font.FontTexture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
+            GameWindow.GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
+
+            GameWindow.GraphicsDevice.UseShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
+
+            GameWindow.QuadBatchShader.SetUniform("texture1", 0);
+
+            GlBindings.BindVertexArray(m_VertexArrayObject.VertexArrayObjectId);
+            GlBindings.DrawElements(PrimitiveType.TriangleList, quadCount * 6, DrawElementsType.UnsignedInt, 0);
+
+       //     GlBindings.PolygonMode(Face.GL_FRONT_AND_BACK, Mode.GL_FILL);
+
+            m_quadRecordCount = 0;
         }
 
         public void DrawText(string text, Rect clipRect, TextureUnits textureUnit)
@@ -143,44 +209,40 @@ namespace Monorail.Platform
 
         private void Flush()
         {
-            var device = GameWindow.GraphicsDevice;
-
-            var sX = 2 / (float) GameWindow.ScreenWidth;
-            var sY = 2 / (float) GameWindow.ScreenHeight;
-
-            var oX = -1;
-            var oY = 1;
-
-            var quadCount = m_quadRecordCount;
-
-            // Edit Vertex Data
-            for (int i=0;i< quadCount; i++)
+            if (m_quadRecordCount > 0)
             {
-                var record = quadRecords[i];
-                m_Verticies[i * 4 + 0].Position = new Vector3(oX + (record.X + record.W) * sX, oY - (record.Y + record.H) * sY, 0.0f);       // Top Right
-                m_Verticies[i * 4 + 1].Position = new Vector3(oX + (record.X + record.W) * sX, oY - (record.Y * sY), 0.0f);                      // Bottom Right
-                m_Verticies[i * 4 + 2].Position = new Vector3(oX + record.X * sX, oY - (record.Y * sY), 0.0f);                                                   // Bottom Left
-                m_Verticies[i * 4 + 3].Position = new Vector3(oX + record.X * sX, oY - (record.Y + record.H) * sY, 0.0f);                                              // Top Left
+                var device = GameWindow.GraphicsDevice;
+
+                var sX = 2 / (float)GameWindow.ScreenWidth;
+                var sY = 2 / (float)GameWindow.ScreenHeight;
+
+                var oX = -1;
+                var oY = 1;
+
+                var quadCount = m_quadRecordCount;
+
+                // Edit Vertex Data
+                for (int i = 0; i < quadCount; i++)
+                {
+                    var record = quadRecords[i];
+                    m_Verticies[i * 4 + 0].Position = new Vector3(oX + (record.X + record.W) * sX, oY - (record.Y + record.H) * sY, 0.0f);       // Top Right
+                    m_Verticies[i * 4 + 1].Position = new Vector3(oX + (record.X + record.W) * sX, oY - (record.Y * sY), 0.0f);                  // Bottom Right
+                    m_Verticies[i * 4 + 2].Position = new Vector3(oX + record.X * sX, oY - (record.Y * sY), 0.0f);                               // Bottom Left
+                    m_Verticies[i * 4 + 3].Position = new Vector3(oX + record.X * sX, oY - (record.Y + record.H) * sY, 0.0f);                    // Top Left
+                }
+
+                m_VertexArrayObject.SetVertexData<DefaultQuadBatchVertex>(m_Verticies, 0, quadCount * 6);
+
+                // TODO Access the IPlatformGraphicsDevice
+                GameWindow.GraphicsDevice.UseShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
+                GameWindow.QuadBatchShader.SetUniform("texture1", 0);
+                GameWindow.QuadBatchShader.SetUniform("texture2", 1);
+
+                GlBindings.BindVertexArray(m_VertexArrayObject.VertexArrayObjectId);
+                GlBindings.DrawElements(PrimitiveType.TriangleList, quadCount * 6, DrawElementsType.UnsignedInt, 0);
+
+                m_quadRecordCount = 0;
             }
-
-            m_VertexArrayObject.SetVertexData<DefaultQuadBatchVertex>(m_Verticies,0,quadCount*6);
-         //   m_VertexArrayObject.SetIndexData<DefaultQuadBatchVertex>(m_Indicies);
-
-            // TODO Access the IPlatformGraphicsDevice
-            GameWindow.GraphicsDevice.UseShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
-            
-        //    device.Disable(Enable.GL_DEPTH_TEST);
-            
-            // Shader bindings
-          //  GameWindow.QuadBatchShader.SetUniform("mvp", mvp);
-            GameWindow.QuadBatchShader.SetUniform("texture1", 0);
-            GameWindow.QuadBatchShader.SetUniform("texture2", 1);
-
-            // TODO Should we get the graphics device for this?
-            GlBindings.BindVertexArray(m_VertexArrayObject.VertexArrayObjectId);
-            GlBindings.DrawElements(PrimitiveType.TriangleList, quadCount * 6, DrawElementsType.UnsignedInt, 0);
-            
-            m_quadRecordCount = 0;
         }
 
         private void PushQuad(QuadRecord record)

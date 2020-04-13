@@ -10,23 +10,31 @@ namespace SampleGame
 
     public class MySampleGame : Game
     {
+        // TODO Create resource->Shader manager
         ShaderProgram m_ShaderProgram;
+
+        // TODO Create resource->Geometry Manager
         VertexArrayObject m_TriVertexArrayObject;
         VertexArrayObject m_QuadVertexArrayObject;
-
         VertexArrayObject m_Cube;
 
+        // TODO Create resource->Texture Manager
         Texture2D m_Texture;
         Texture2D m_AwesomeFace;
         Texture2D m_Default;
 
-        GameCamera camera;
+        // TODO Create resource->Font Manager
+        TextureFont m_FontAriel;
         
-        float rot;
+        //
+        QuadBatch m_QuadBatch;
 
+        // TODO Implement multiple cameras
+        GameCamera camera;
+
+        float rot;
         Vector3[] Positions;
 
-        QuadBatch m_QuadBatch; // = new QuadBatch();    // TODO This doesn't work as The game doesn't seem to be initalised correctly at this stage.
 
         public override void Load()
         {
@@ -82,13 +90,20 @@ namespace SampleGame
                 }
             }
 
-            
+            // Load Font
+            {
+                m_FontAriel = TextureFont.CreateFromFile("Resources/Fonts/ariel.fnt");
+            }
+
             // Load Texture
             {
-                m_Texture = Texture2D.CreateFromFile("Resources/Textures/texture1.png");
+
                 m_AwesomeFace = Texture2D.CreateFromFile("Resources/Textures/awesomeface.png");
+                m_Texture = Texture2D.CreateFromFile("Resources/Textures/texture1.png");
                 m_Default = Texture2D.CreateFromFile("Resources/Textures/default.png");
             }
+
+
         }
 
         public override void Update()
@@ -212,11 +227,13 @@ namespace SampleGame
             GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
             GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
+
+            
             m_QuadBatch.Start();
 
-            m_QuadBatch.DrawText("Awesome! Source!", Vector2.Zero, new TextureFont(), PresetColors.White);
-            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(10,80), new TextureFont(), PresetColors.White);
-            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(20, 160), new TextureFont(), PresetColors.White);
+            m_QuadBatch.DrawText("Awesome! Source!", Vector2.Zero, m_FontAriel, PresetColors.White);
+            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(10,80), m_FontAriel, PresetColors.White);
+            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
 
             m_QuadBatch.Commit();
 
