@@ -48,7 +48,7 @@ namespace Monorail.Platform
             
             SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
 
-            var imgFlags = SDL_image.IMG_InitFlags.IMG_INIT_PNG;
+            var imgFlags = SDL_image.IMG_InitFlags.IMG_INIT_PNG | SDL_image.IMG_InitFlags.IMG_INIT_JPG;
             if ((SDL_image.IMG_Init(imgFlags) > 0 & imgFlags > 0) == false)
             {
                 Console.WriteLine("SDL_image could not initialize! SDL_image Error: {0}", SDL.SDL_GetError());

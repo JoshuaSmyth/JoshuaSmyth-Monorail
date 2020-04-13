@@ -80,5 +80,13 @@ namespace Monorail.Platform
 
             ViewMatrix = Matrix4.LookAt(Position, Position + Forward, Up);
         }
+
+        /// <summary>
+        /// Gets the lookat with the position removed
+        /// </summary>
+        public Matrix4 GetLookAtMatrix()
+        {
+            return Matrix4.LookAt(new Vector3(), new Vector3() + Forward, Up);
+        }
     }
 }

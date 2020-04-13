@@ -116,9 +116,11 @@ namespace Monorail.Platform
         public void DrawText(string text, Vector2 position, TextureFont font, Vector4 color, TextureUnits textureUnit=TextureUnits.GL_TEXTURE0, int layer=0)
         {
             // TODO? Make a seperate FontBatcher?
+            // See http://www.angelcode.com/products/bmfont/doc/render_text.html
+            // To improve the rendering...
+
             var fontSheetWidth = (float)font.Font.Common.ScaleW;
             var fontSheetHeight = (float)font.Font.Common.ScaleH;
-
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -176,7 +178,6 @@ namespace Monorail.Platform
 
             // TODO Make a font.glsl shader
         //    GlBindings.PolygonMode(Face.GL_FRONT_AND_BACK, Mode.GL_LINE);
-
 
             GameWindow.GraphicsDevice.BindTexture2D(font.FontTexture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
             GameWindow.GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);

@@ -9,6 +9,56 @@ namespace Monorail.Platform
 {
     public static class Geometry
     {
+        public static VertexPosition[] CreateSkyBox()
+        {
+            var rv = new VertexPosition[36];
+
+            rv[0].Position = new Vector3(-1.0f, 1.0f, -1.0f);
+            rv[1].Position = new Vector3(-1.0f, -1.0f, -1.0f);
+            rv[2].Position = new Vector3(1.0f, -1.0f, -1.0f);
+            rv[3].Position = new Vector3(1.0f, -1.0f, -1.0f);
+            rv[4].Position = new Vector3(1.0f, 1.0f, -1.0f);
+            rv[5].Position = new Vector3(-1.0f, 1.0f, -1.0f);
+
+            rv[6].Position = new Vector3(-1.0f, -1.0f, 1.0f);
+            rv[7].Position = new Vector3(-1.0f, -1.0f, -1.0f);
+            rv[8].Position = new Vector3(-1.0f, 1.0f, -1.0f);
+            rv[9].Position = new Vector3(-1.0f, 1.0f, -1.0f);
+            rv[10].Position = new Vector3(-1.0f, 1.0f, 1.0f);
+            rv[11].Position = new Vector3(-1.0f, -1.0f, 1.0f);
+
+            rv[12].Position = new Vector3(1.0f, -1.0f, -1.0f);
+            rv[13].Position = new Vector3(1.0f, -1.0f, 1.0f);
+            rv[14].Position = new Vector3(1.0f, 1.0f, 1.0f);
+            rv[15].Position = new Vector3(1.0f, 1.0f, 1.0f);
+            rv[16].Position = new Vector3(1.0f, 1.0f, -1.0f);
+            rv[17].Position = new Vector3(1.0f, -1.0f, -1.0f);
+
+            rv[18].Position = new Vector3(-1.0f, -1.0f, 1.0f);
+            rv[19].Position = new Vector3(-1.0f, 1.0f, 1.0f);
+            rv[20].Position = new Vector3(1.0f, 1.0f, 1.0f);
+            rv[21].Position = new Vector3(1.0f, 1.0f, 1.0f);
+            rv[22].Position = new Vector3(1.0f, -1.0f, 1.0f);
+            rv[23].Position = new Vector3(-1.0f, -1.0f, 1.0f);
+
+            rv[24].Position = new Vector3(-1.0f, 1.0f, -1.0f);
+            rv[25].Position = new Vector3(1.0f, 1.0f, -1.0f);
+            rv[26].Position = new Vector3(1.0f, 1.0f, 1.0f);
+            rv[27].Position = new Vector3(1.0f, 1.0f, 1.0f);
+            rv[28].Position = new Vector3(-1.0f, 1.0f, 1.0f);
+            rv[29].Position = new Vector3(-1.0f, 1.0f, -1.0f);
+
+            rv[30].Position = new Vector3(-1.0f, -1.0f, -1.0f);
+            rv[31].Position = new Vector3(-1.0f, -1.0f, 1.0f);
+            rv[32].Position = new Vector3(1.0f, -1.0f, -1.0f);
+            rv[33].Position = new Vector3(1.0f, -1.0f, -1.0f);
+            rv[34].Position = new Vector3(-1.0f, -1.0f, 1.0f);
+            rv[35].Position = new Vector3(1.0f, -1.0f, 1.0f);
+
+            return rv;
+        }
+
+
         public static VertexPositionColorTexture[] CreateCube()
         {
             var rv = new VertexPositionColorTexture[36];

@@ -41,11 +41,12 @@ namespace Monorail.Platform
             GlBindings.DrawElements(primitiveType, count, elementType, offset);
         }
 
-        public void BindTexture(TextureType textureType, int textureId, TextureUnits textureUnit=TextureUnits.GL_TEXTURE0)
+        public void BindTexture(int textureId, TextureType textureType, TextureUnits textureUnit=TextureUnits.GL_TEXTURE0)
         {
             GlBindings.ActiveTexture(textureUnit);
             GlBindings.BindTexture(textureType, textureId);
         }
+
 
         public void BindTexture2D(int textureId, TextureUnits textureUnit = TextureUnits.GL_TEXTURE0)
         {

@@ -13,6 +13,18 @@ namespace Monorail.Graphics
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct VertexPosition : IInterleavedVertex
+    {
+        public Vector3 Position;
+
+        public static int Stride = 12;
+
+        public static int[] AttributeLengths { get { return new[] { 3 }; } }
+
+        public static int[] AttributeOffsets { get { return new[] { 0 }; } }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct VertexPositionColor : IInterleavedVertex
     {
         public Vector3 Position;

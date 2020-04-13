@@ -12,8 +12,10 @@ namespace SampleGame
     {
         // TODO Create resource->Shader manager
         ShaderProgram m_ShaderProgram;
+        ShaderProgram m_SkyboxShader;
 
         // TODO Create resource->Geometry Manager
+        VertexArrayObject m_SkyBox;
         VertexArrayObject m_TriVertexArrayObject;
         VertexArrayObject m_QuadVertexArrayObject;
         VertexArrayObject m_Cube;
@@ -25,7 +27,10 @@ namespace SampleGame
 
         // TODO Create resource->Font Manager
         TextureFont m_FontAriel;
-        
+
+        // TODO Create resource->CubeMap Manager
+        TextureCubeMap m_CubeMap;
+
         //
         QuadBatch m_QuadBatch;
 
@@ -36,6 +41,8 @@ namespace SampleGame
         Vector3[] Positions;
 
 
+
+
         public override void Load()
         {
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
@@ -43,7 +50,8 @@ namespace SampleGame
             m_QuadBatch = new QuadBatch();
 
             m_ShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
-            
+            m_SkyboxShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.skybox.glsl", "Resources/Shaders/Fragment/f.skybox.glsl");
+
             // Create Triangle
             {
                 var triVerts = new VertexPositionColor[3];
@@ -90,6 +98,22 @@ namespace SampleGame
                 }
             }
 
+            // Create Skyubox
+            {
+                var verts = Geometry.CreateSkyBox();
+                m_SkyBox = new VertexArrayObject();
+                m_SkyBox.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
+
+                // Load Skybox Texture
+                    m_CubeMap = TextureCubeMap.CreateFromFile("Resources/Textures/Skybox/front.png",
+                                                              "Resources/Textures/Skybox/back.png",
+                                                              "Resources/Textures/Skybox/bottom.png",
+                                                              "Resources/Textures/Skybox/top.png",
+                                                              "Resources/Textures/Skybox/left.png",
+                                                              "Resources/Textures/Skybox/right.png");
+                
+            }
+
             // Load Font
             {
                 m_FontAriel = TextureFont.CreateFromFile("Resources/Fonts/ariel.fnt");
@@ -97,11 +121,11 @@ namespace SampleGame
 
             // Load Texture
             {
-
                 m_AwesomeFace = Texture2D.CreateFromFile("Resources/Textures/awesomeface.png");
                 m_Texture = Texture2D.CreateFromFile("Resources/Textures/texture1.png");
                 m_Default = Texture2D.CreateFromFile("Resources/Textures/default.png");
             }
+
 
 
         }
@@ -171,9 +195,35 @@ namespace SampleGame
         public override void RenderScene()
         {
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
-            GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
+
+
+
+            // Render the skybox (TODO Move to the end of the pipeline)
+            {
+                // TODO   glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+
+                GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
+                GraphicsDevice.BindTexture(m_CubeMap.TextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
+
+                GraphicsDevice.UseShaderProgram(m_SkyboxShader.ShaderProgramId);
+                m_SkyboxShader.SetUniform("view", camera.GetLookAtMatrix());
+                m_SkyboxShader.SetUniform("proj", camera.ProjMatrix);
+                m_SkyboxShader.SetUniform("skybox", 0);
+
+                GraphicsDevice.UseVertexArrayObject(m_SkyBox.VertexArrayObjectId);
+                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
+
+                GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
+
+                // TODO         glDepthFunc(GL_LESS); // set depth function back to default
+            }
+
+
+
 
             // Render the cubes
+
+            GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
             m_ShaderProgram.SetUniform("texture1", 0);
             m_ShaderProgram.SetUniform("texture2", 1);
             m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
@@ -192,27 +242,30 @@ namespace SampleGame
                 GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_LINEAR);
             }
 
-            GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
-            GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
-            GraphicsDevice.UseVertexArrayObject(m_Cube.VertexArrayObjectId);
-            var cubeCount = Positions.Length;
-            
-            for (var i = 0; i < cubeCount; i++)
+            if (true)
             {
-                // calculate the model matrix for each object and pass it to shader before drawing
-                var pos = Matrix4.CreateTranslation(Positions[i]);
-                float angle = 20.0f * i;
+                GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
+                GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
-                var rotAxis = new Vector3(1.0f, 0.0f, 1.0f);
-                rotAxis = rotAxis.Normalize();
-                var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot)) * pos;
+                GraphicsDevice.UseVertexArrayObject(m_Cube.VertexArrayObjectId);
+                var cubeCount = Positions.Length;
 
-                m_ShaderProgram.SetUniform("model", model);
+                for (var i = 0; i < cubeCount; i++)
+                {
+                    // calculate the model matrix for each object and pass it to shader before drawing
+                    var pos = Matrix4.CreateTranslation(Positions[i]);
+                    float angle = 20.0f * i;
 
-                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
+                    var rotAxis = new Vector3(1.0f, 0.0f, 1.0f);
+                    rotAxis = rotAxis.Normalize();
+                    var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot)) * pos;
+
+                    m_ShaderProgram.SetUniform("model", model);
+
+                    GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
+                }
             }
-
 
             // Unbind textures
             GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
