@@ -25,6 +25,21 @@ namespace OpenGL
         GL_ELEMENT_ARRAY_BUFFER = 0x8893,
     }
 
+    public enum BlendFunc
+    {
+        GL_ZERO =                           0,
+        GL_ONE =                            1,
+        GL_SRC_COLOR =                      0x0300,
+        GL_ONE_MINUS_SRC_COLOR =            0x0301,
+        GL_SRC_ALPHA =                      0x0302,
+        GL_ONE_MINUS_SRC_ALPHA =            0x0303,
+        GL_DST_ALPHA =                      0x0304,
+        GL_ONE_MINUS_DST_ALPHA =            0x0305,
+        GL_DST_COLOR =                      0x0306,
+        GL_ONE_MINUS_DST_COLOR =            0x0307,
+        GL_SRC_ALPHA_SATURATE =             0x0308
+    }
+
     public enum DepthFunc
     {
         GL_NEVER =                          0x0200,
@@ -203,7 +218,8 @@ namespace OpenGL
         GL_SCISSOR_TEST = 0x0C11,
         GL_DEPTH_TEST = 0x0B71,
         GL_STENCIL_TEST = 0x0B90,
-        GL_MULTISAMPLE = 0x809D
+        GL_MULTISAMPLE = 0x809D,
+        GL_BLEND = 0x0BE2
     }
 
     internal class EntryPointHelper
@@ -429,6 +445,10 @@ namespace OpenGL
         [BindMethod("glDepthFunc")]
         public static glDepthFuncDelegate DepthFunc;
 
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glBlendFuncDelegate(BlendFunc srcBlend, BlendFunc dstBlend);
+        [BindMethod("glBlendFunc")]
+        public static glBlendFuncDelegate BlendFunc;
 
         public static void InitaliseOpenGLEntryPoints() 
         {

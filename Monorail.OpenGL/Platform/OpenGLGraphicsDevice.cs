@@ -74,5 +74,10 @@ namespace Monorail.Platform
         {
             GlBindings.DepthFunc(depthFunc);
         }
+
+        public void BlendFunc(BlendFunc srcBlend, BlendFunc dstBlend)
+        {
+            GlBindings.BlendFunc(srcBlend, dstBlend);
+        }
     }
 }

@@ -28,5 +28,7 @@ namespace Monorail.Platform
         void SetTextureSamplingAttribute(TextureAttributeValue attribute);
 
         void DepthFunc(DepthFunc depthFunc);
+
+        void BlendFunc(BlendFunc srcBlend, BlendFunc dstBlend);
     }
 }

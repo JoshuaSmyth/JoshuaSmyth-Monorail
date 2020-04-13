@@ -196,12 +196,26 @@ namespace SampleGame
         {
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
 
+            // Render the skybox (TODO Move to the end of the pipeline)
+            {
+                GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
 
-         
+            //    GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LEQUAL);
+                GraphicsDevice.BindTexture(m_CubeMap.TextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
 
+                GraphicsDevice.UseShaderProgram(m_SkyboxShader.ShaderProgramId);
+                m_SkyboxShader.SetUniform("view", camera.GetLookAtMatrix());
+                m_SkyboxShader.SetUniform("proj", camera.ProjMatrix);
+                m_SkyboxShader.SetUniform("skybox", 0);
 
+                GraphicsDevice.UseVertexArrayObject(m_SkyBox.VertexArrayObjectId);
+                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
+                //  GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LESS);
+                GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
 
+            }
 
+            
             // Render the cubes
 
             GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
@@ -248,20 +262,7 @@ namespace SampleGame
                 }
             }
 
-            // Render the skybox (TODO Move to the end of the pipeline)
-            {
-                GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LEQUAL);
-                GraphicsDevice.BindTexture(m_CubeMap.TextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
-
-                GraphicsDevice.UseShaderProgram(m_SkyboxShader.ShaderProgramId);
-                m_SkyboxShader.SetUniform("view", camera.GetLookAtMatrix());
-                m_SkyboxShader.SetUniform("proj", camera.ProjMatrix);
-                m_SkyboxShader.SetUniform("skybox", 0);
-
-                GraphicsDevice.UseVertexArrayObject(m_SkyBox.VertexArrayObjectId);
-                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
-                GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LESS);
-            }
+            
 
             // Unbind textures
             GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
@@ -276,8 +277,10 @@ namespace SampleGame
             GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
             GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
+            GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
+            GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
 
-            
+
             m_QuadBatch.Start();
 
             m_QuadBatch.DrawText("Awesome! Source!", Vector2.Zero, m_FontAriel, PresetColors.White);
@@ -286,6 +289,7 @@ namespace SampleGame
 
             m_QuadBatch.Commit();
 
+            GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
             // Unbind textures
             GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
