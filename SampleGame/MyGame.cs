@@ -19,6 +19,7 @@ namespace SampleGame
         VertexArrayObject m_TriVertexArrayObject;
         VertexArrayObject m_QuadVertexArrayObject;
         VertexArrayObject m_Cube;
+        VertexArrayObject m_Bunny;
 
         // TODO Create resource->Texture Manager
         Texture2D m_Texture;
@@ -74,6 +75,13 @@ namespace SampleGame
                
                 m_QuadVertexArrayObject = new VertexArrayObject();
                 m_QuadVertexArrayObject.BindElementsArrayBuffer(verts, indices, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+            }
+
+            // Create Bunny
+            {
+                var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
+                m_Bunny = new VertexArrayObject();
+                m_Bunny.BindArrayBuffer(bunnyVerts, VertexPositionColor.Stride, VertexPositionColor.AttributeLengths, VertexPositionColor.AttributeOffsets);
             }
 
             // Create Cube
