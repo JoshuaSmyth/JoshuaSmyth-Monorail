@@ -79,10 +79,10 @@ namespace SampleGame
 
             // Create Bunny
             {
-                var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
+                var bunnyVerts = ModelLoader.LoadObj("Resources/Models/teapot.obj");
                 m_Bunny = new VertexArrayObject();
                 
-                m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColor.Stride, VertexPositionColor.AttributeLengths, VertexPositionColor.AttributeOffsets);
+                m_Bunny.BindArrayBuffer(bunnyVerts.Verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
             }
 
             // Create Cube
@@ -241,7 +241,8 @@ namespace SampleGame
                 var m = camera.WorldMatrix * Matrix4.CreateScaling(new Vector3(2,2,2));
                 m_ShaderProgram.SetUniform("model", m);
                 GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
+                //GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
+                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, m_Bunny.VertexCount);
 
             }
 

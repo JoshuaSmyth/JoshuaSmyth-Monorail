@@ -26,7 +26,7 @@ namespace Monorail.Graphics
             {
                 var rv = new Model();
                 var text = File.ReadAllText(fileName);
-                var items = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                var items = text.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
                 int vertCount = 0;
                 int faceCount = 0;
@@ -45,7 +45,7 @@ namespace Monorail.Graphics
                 }
 
                 var verts = new Vector3[vertCount];
-                var faces = new uint[faceCount * 3];
+                var faces = new Vector3[faceCount];
 
                 // Bunny.obj
                 // # vertex count = 2503
@@ -54,7 +54,11 @@ namespace Monorail.Graphics
                 var vIndex = 0;
                 for (int i = 0; i < items.Length; i++)
                 {
-                    if (items[i].StartsWith("v"))
+                    if (items[i].StartsWith("nv"))
+                    {
+                        // Skip for now
+                    }
+                    else if (items[i].StartsWith("v"))
                     {
                         var vsplit = items[i].Split(new char[] { ' ' });
                         verts[vIndex].X = float.Parse(vsplit[1], CultureInfo.InvariantCulture);
@@ -66,22 +70,32 @@ namespace Monorail.Graphics
                     else if (items[i].StartsWith("f"))
                     {
                         var vsplit = items[i].Split(new char[] { ' ' });
-                        faces[fIndex + 0] = uint.Parse(vsplit[1], CultureInfo.InvariantCulture);
-                        faces[fIndex + 1] = uint.Parse(vsplit[2], CultureInfo.InvariantCulture);
-                        faces[fIndex + 2] = uint.Parse(vsplit[3], CultureInfo.InvariantCulture);
+                        faces[fIndex].X = uint.Parse(vsplit[1], CultureInfo.InvariantCulture);
+                        faces[fIndex].Y = uint.Parse(vsplit[2], CultureInfo.InvariantCulture);
+                        faces[fIndex].Z = uint.Parse(vsplit[3], CultureInfo.InvariantCulture);
 
-                        fIndex += 3;
+                        fIndex++;
                     }
                 }
 
-                rv.Verts = new VertexPositionColorTexture[vertCount];
-                for (int i = 0; i < vertCount; i++)
+                rv.Verts = new VertexPositionColorTexture[faceCount*3];
+                for (int i = 0; i < faceCount; i+=3)
                 {
-                    rv.Verts[i].Position = verts[i];
+                    var face = faces[i/3];                    
+                    rv.Verts[i].Position = verts[(int)face.X];
                     rv.Verts[i].Color = new Vector3(1, 1, 1);
+                    rv.Verts[i].Texture = new Vector2(1, 1);
+                    
+                    rv.Verts[i + 1].Position = verts[(int)face.Y];
+                    rv.Verts[i + 1].Color = new Vector3(1, 1, 1);
+                    rv.Verts[i + 1].Texture = new Vector2(1, 1);
+                    
+                    rv.Verts[i + 2].Position = verts[(int)face.Z];
+                    rv.Verts[i + 2].Color = new Vector3(1, 1, 1);
+                    rv.Verts[i + 2].Texture = new Vector2(1, 1);
                 }
 
-                rv.Indicies = faces;
+                rv.Indicies = null;
                 return rv;
             }
         }
