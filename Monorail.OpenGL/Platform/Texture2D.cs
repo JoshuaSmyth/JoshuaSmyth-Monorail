@@ -14,7 +14,7 @@ namespace Monorail.Platform
 
         public static Texture2D CreateFromFile(string filename, bool generateMipmaps=false)
         {
-            using (TracedStopwatch.Start("Loading Texture"))
+            using (TracedStopwatch.Start("Loading Texture: " + filename))
             {
                 IntPtr intPtr = SDL2.SDL_image.IMG_Load(filename);
                 var surface = Marshal.PtrToStructure<SDL.SDL_Surface>(intPtr);

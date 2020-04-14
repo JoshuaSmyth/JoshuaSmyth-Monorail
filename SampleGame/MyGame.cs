@@ -81,7 +81,8 @@ namespace SampleGame
             {
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
                 m_Bunny = new VertexArrayObject();
-                m_Bunny.BindArrayBuffer(bunnyVerts, VertexPositionColor.Stride, VertexPositionColor.AttributeLengths, VertexPositionColor.AttributeOffsets);
+                
+                m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColor.Stride, VertexPositionColor.AttributeLengths, VertexPositionColor.AttributeOffsets);
             }
 
             // Create Cube
@@ -93,7 +94,7 @@ namespace SampleGame
                 // Create Cube Positions
                 {
                     Positions = new Vector3[10];
-                    Positions[0] = new Vector3(  0.0f,  0.0f,   0.0f);
+                    Positions[0] = new Vector3(  -2.0f,  0.0f,   0.0f);
                     Positions[1] = new Vector3(  2.0f,  5.0f, -15.0f);
                     Positions[2] = new Vector3( -1.5f,  2.2f,  -2.5f);
                     Positions[3] = new Vector3( -3.8f, -2.0f, -12.3f);
@@ -233,8 +234,20 @@ namespace SampleGame
             m_ShaderProgram.SetUniform("view", camera.ViewMatrix);
             m_ShaderProgram.SetUniform("proj", camera.ProjMatrix);
 
+            // Render the bunny
+            {
+                // TODO This does not render correctly yet.
+                // Note: Probably need a basic lighting shader 
+                var m = camera.WorldMatrix * Matrix4.CreateScaling(new Vector3(2,2,2));
+                m_ShaderProgram.SetUniform("model", m);
+                GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
+
+            }
+
             // Render the Floor quad
             {
+                m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
                 GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
                 GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
                 GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_NEAREST);
