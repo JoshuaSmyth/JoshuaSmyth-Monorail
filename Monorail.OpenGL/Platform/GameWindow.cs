@@ -34,6 +34,11 @@ namespace Monorail.Platform
             m_WindowName = windowName;
             m_ScreenWidth = screenWidth;
             m_ScreenHeight = screenHeight;
+
+            using (TracedStopwatch.Start("Init Stopwatch"))
+            {
+                // This is here just to init the traced stopwatch
+            }
         }
 
         public void Dispose()
@@ -95,7 +100,11 @@ namespace Monorail.Platform
             game.Init(audioDevice, graphicsDevice, this, GameInput);
             // TODO Embed these as resources
             QuadBatchShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.quadbatch.glsl", "Resources/Shaders/Fragment/f.quadbatch.glsl");
-            game.Load();
+
+            using (TracedStopwatch.Start("Loading Game Resources"))
+            {
+                game.Load();
+            }
 
             var stopwatch = new Stopwatch();
             var isRunning = true;
