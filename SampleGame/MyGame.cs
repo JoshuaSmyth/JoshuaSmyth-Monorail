@@ -79,7 +79,7 @@ namespace SampleGame
 
             // Create Bunny
             {
-                var bunnyVerts = ModelLoader.LoadObj("Resources/Models/teapot.obj");
+                var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
                 m_Bunny = new VertexArrayObject();
                 
                 m_Bunny.BindArrayBuffer(bunnyVerts.Verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
@@ -238,7 +238,8 @@ namespace SampleGame
             {
                 // TODO This does not render correctly yet.
                 // Note: Probably need a basic lighting shader 
-                var m = camera.WorldMatrix * Matrix4.CreateScaling(new Vector3(2,2,2));
+                var scalefactor = 12.0f;
+                var m = camera.WorldMatrix * Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor));
                 m_ShaderProgram.SetUniform("model", m);
                 GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
                 //GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
@@ -305,9 +306,9 @@ namespace SampleGame
 
             m_QuadBatch.Start();
 
-            m_QuadBatch.DrawText("Awesome! Source!", Vector2.Zero, m_FontAriel, PresetColors.White);
-            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(10,80), m_FontAriel, PresetColors.White);
-            m_QuadBatch.DrawText("Awesome! Source!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
+            m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
+            m_QuadBatch.DrawText("Bunny!", new Vector2(10,80), m_FontAriel, PresetColors.White);
+            m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
 
             m_QuadBatch.Commit();
 

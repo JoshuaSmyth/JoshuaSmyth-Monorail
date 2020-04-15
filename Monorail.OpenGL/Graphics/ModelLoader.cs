@@ -79,22 +79,23 @@ namespace Monorail.Graphics
                 }
 
                 rv.Verts = new VertexPositionColorTexture[faceCount*3];
-                for (int i = 0; i < faceCount; i+=3)
+                for (int i = 0; i < faceCount*3; i+=3)
                 {
                     var face = faces[i/3];                    
-                    rv.Verts[i].Position = verts[(int)face.X];
+                    rv.Verts[i].Position = verts[(int)face.X-1];
                     rv.Verts[i].Color = new Vector3(1, 1, 1);
                     rv.Verts[i].Texture = new Vector2(1, 1);
                     
-                    rv.Verts[i + 1].Position = verts[(int)face.Y];
+                    rv.Verts[i + 1].Position = verts[(int)face.Y-1];
                     rv.Verts[i + 1].Color = new Vector3(1, 1, 1);
                     rv.Verts[i + 1].Texture = new Vector2(1, 1);
                     
-                    rv.Verts[i + 2].Position = verts[(int)face.Z];
+                    rv.Verts[i + 2].Position = verts[(int)face.Z-1];
                     rv.Verts[i + 2].Color = new Vector3(1, 1, 1);
                     rv.Verts[i + 2].Texture = new Vector2(1, 1);
                 }
 
+                // TODO Compute Indicies
                 rv.Indicies = null;
                 return rv;
             }
