@@ -81,8 +81,9 @@ namespace SampleGame
             {
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
                 m_Bunny = new VertexArrayObject();
-                
-                m_Bunny.BindArrayBuffer(bunnyVerts.Verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+               m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+
+               //     m_Bunny.BindArrayBuffer(bunnyVerts.Verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
             }
 
             // Create Cube
@@ -242,8 +243,9 @@ namespace SampleGame
                 var m = camera.WorldMatrix * Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor));
                 m_ShaderProgram.SetUniform("model", m);
                 GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
-                //GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
-                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, m_Bunny.VertexCount);
+
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
+                //GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, m_Bunny.VertexCount);
 
             }
 

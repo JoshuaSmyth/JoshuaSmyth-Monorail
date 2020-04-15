@@ -7,6 +7,7 @@
  * https://www.khronos.org/registry/OpenGL/api/
  * 
  */
+using Monorail;
 using Monorail.Graphics;
 using Monorail.Mathlib;
 using System;
@@ -452,15 +453,18 @@ namespace OpenGL
 
         public static void InitaliseOpenGLEntryPoints() 
         {
-            // Load EntryPoints via refelction
-            var fields = typeof(GlBindings).GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var fieldInfo in fields)
+            using (TracedStopwatch.Start("Init OpenGL Bindings"))
             {
-                if (fieldInfo.IsDefined(typeof(BindMethod), false))
+                // Load EntryPoints via refelction
+                var fields = typeof(GlBindings).GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                foreach (var fieldInfo in fields)
                 {
-                    var attribute = fieldInfo.GetCustomAttributes(typeof(BindMethod), false)[0] as BindMethod;
-                    var delegateBinding = LoadEntryPoint(attribute.MethodName, fieldInfo.FieldType, true);
-                    fieldInfo.SetValue(null, delegateBinding);
+                    if (fieldInfo.IsDefined(typeof(BindMethod), false))
+                    {
+                        var attribute = fieldInfo.GetCustomAttributes(typeof(BindMethod), false)[0] as BindMethod;
+                        var delegateBinding = LoadEntryPoint(attribute.MethodName, fieldInfo.FieldType, true);
+                        fieldInfo.SetValue(null, delegateBinding);
+                    }
                 }
             }
         }
