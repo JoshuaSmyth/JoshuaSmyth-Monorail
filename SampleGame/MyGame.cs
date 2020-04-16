@@ -12,6 +12,7 @@ namespace SampleGame
     {
         // TODO Create resource->Shader manager
         ShaderProgram m_ShaderProgram;
+        ShaderProgram m_DefaultShaderProgram;
         ShaderProgram m_SkyboxShader;
 
         // TODO Create resource->Geometry Manager
@@ -52,6 +53,7 @@ namespace SampleGame
 
             m_ShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
             m_SkyboxShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.skybox.glsl", "Resources/Shaders/Fragment/f.skybox.glsl");
+            m_DefaultShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.default.glsl", "Resources/Shaders/Fragment/f.default.glsl");
 
             // Create Triangle
             {
@@ -81,7 +83,7 @@ namespace SampleGame
             {
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
                 m_Bunny = new VertexArrayObject();
-               m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+               m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
                //     m_Bunny.BindArrayBuffer(bunnyVerts.Verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
             }
@@ -228,7 +230,7 @@ namespace SampleGame
             
             // Render the cubes
 
-            GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
+            GraphicsDevice.UseShaderProgram(m_DefaultShaderProgram.ShaderProgramId);
             m_ShaderProgram.SetUniform("texture1", 0);
             m_ShaderProgram.SetUniform("texture2", 1);
             m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
@@ -245,12 +247,21 @@ namespace SampleGame
                 GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
 
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
-                //GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, m_Bunny.VertexCount);
-
+                
             }
+
+            GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
+            m_ShaderProgram.SetUniform("texture1", 0);
+            m_ShaderProgram.SetUniform("texture2", 1);
+            m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
+            m_ShaderProgram.SetUniform("view", camera.ViewMatrix);
+            m_ShaderProgram.SetUniform("proj", camera.ProjMatrix);
+
 
             // Render the Floor quad
             {
+
+
                 m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
                 GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
                 GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);

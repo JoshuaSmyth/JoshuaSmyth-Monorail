@@ -12,7 +12,7 @@ namespace Monorail.Graphics
     public class Model
     {
         // TODO A model is made up of several meshes
-        public VertexPositionColorTexture[] Verts;
+        public VertexPositionColorTextureNormal[] Verts;
         public uint[] Indicies;
     }
 
@@ -30,11 +30,16 @@ namespace Monorail.Graphics
 
                 int vertCount = 0;
                 int faceCount = 0;
+                int normalCount = 0;
 
                 // Need to know num verts/faces
                 for (int i = 0; i < items.Length; i++)
                 {
-                    if (items[i].StartsWith("v"))
+                    if (items[i].StartsWith("vn"))
+                    {
+                        normalCount++;
+                    }
+                    else if (items[i].StartsWith("v"))
                     {
                         vertCount++;
                     }
@@ -45,16 +50,17 @@ namespace Monorail.Graphics
                 }
 
                 var verts = new Vector3[vertCount];
-                var faces = new uint[faceCount * 3];//new Vector3[faceCount];
+                var faces = new uint[faceCount * 3];
 
                 // Bunny.obj
                 // # vertex count = 2503
                 // # face count = 4968
                 var fIndex = 0;
                 var vIndex = 0;
+                
                 for (int i = 0; i < items.Length; i++)
                 {
-                    if (items[i].StartsWith("nv"))
+                    if (items[i].StartsWith("vn"))
                     {
                         // Skip for now
                     }
@@ -78,21 +84,12 @@ namespace Monorail.Graphics
                     }
                 }
 
-
-                /*
-                // Verticies if using no index
-                rv.Verts = new VertexPositionColorTexture[faceCount*3];
-                for (int i = 0; i < faceCount*3; i++)
-                {
-                    var v1 = faces[i];                    
-                    rv.Verts[i].Position = verts[(int)v1-1];
-                    rv.Verts[i].Color = new Vector3(1, 1, 1);
-                    rv.Verts[i].Texture = new Vector2(1, 1);
-                }
-                */
-
+                // TODO Compute normals
+             
+                
                 // Verticies
-                rv.Verts = new VertexPositionColorTexture[vertCount];
+
+                rv.Verts = new VertexPositionColorTextureNormal[vertCount];
                 for (int i = 0; i < vertCount; i++)
                 {
                     var v1 = verts[i];
@@ -100,6 +97,26 @@ namespace Monorail.Graphics
                     rv.Verts[i].Color = new Vector3(1, 1, 1);
                     rv.Verts[i].Texture = new Vector2(1, 1);
                 }
+
+                
+                // Compute Face Normals
+                for (int i = 0; i < vertCount-1; i+=3)
+                {
+                    var v1 = verts[i];
+                    var v2 = verts[i + 1];
+                    var v3 = verts[i + 2];
+
+                    var e1 = v2 - v1;
+                    var e2 = v3 - v1;
+
+                    var n = Vector3.Cross(e1, e2);
+                    n = Vector3.Normalize(n);
+                    rv.Verts[i].Normal = n;
+                    rv.Verts[i+1].Normal = n;
+                    rv.Verts[i+2].Normal = n;
+                }
+                
+                // TODO Compute vertex normals
 
                 // Indicies
                 rv.Indicies = faces;
