@@ -241,13 +241,27 @@ namespace SampleGame
             {
                 // TODO This does not render correctly yet.
                 // Note: Probably need a basic lighting shader 
-                var scalefactor = 12.0f;
-                var m = camera.WorldMatrix * Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor));
+                var scalefactor = (float)( 12.0f * Math.Sin(rot * 0.1f) * Math.Sin(rot*0.1f)+2);
+
+                var rotAxis = new Vector3(0.0f, 1.0f, 0.0f);
+                rotAxis = rotAxis.Normalize();
+                var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot*16));
+
+                var m = Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor)) * model;
+
+           
+
+
                 m_ShaderProgram.SetUniform("model", m);
+
+                //var normalMatrix = m.Inverse().Transpose();
+                //m_ShaderProgram.SetUniform("norm", normalMatrix);
+                
                 GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
 
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
-                
+               
+
             }
 
             GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);

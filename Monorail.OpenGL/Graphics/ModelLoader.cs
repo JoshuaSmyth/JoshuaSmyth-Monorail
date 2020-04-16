@@ -100,20 +100,24 @@ namespace Monorail.Graphics
 
                 
                 // Compute Face Normals
-                for (int i = 0; i < vertCount-1; i+=3)
+                for (int i = 0; i < faces.Length - 1; i+=3)
                 {
-                    var v1 = verts[i];
-                    var v2 = verts[i + 1];
-                    var v3 = verts[i + 2];
+                    var id1 = faces[i];
+                    var id2 = faces[i+1];
+                    var id3 = faces[i+2];
+
+                    var v1 = verts[id1];
+                    var v2 = verts[id2];
+                    var v3 = verts[id3];
 
                     var e1 = v2 - v1;
                     var e2 = v3 - v1;
 
                     var n = Vector3.Cross(e1, e2);
                     n = Vector3.Normalize(n);
-                    rv.Verts[i].Normal = n;
-                    rv.Verts[i+1].Normal = n;
-                    rv.Verts[i+2].Normal = n;
+                    rv.Verts[id1].Normal = n;
+                    rv.Verts[id2].Normal = n;
+                    rv.Verts[id3].Normal = n;
                 }
                 
                 // TODO Compute vertex normals
