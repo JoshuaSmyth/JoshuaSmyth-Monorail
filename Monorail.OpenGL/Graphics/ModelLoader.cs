@@ -98,7 +98,8 @@ namespace Monorail.Graphics
                     rv.Verts[i].Texture = new Vector2(1, 1);
                 }
 
-                
+
+
                 // Compute Face Normals
                 for (int i = 0; i < faces.Length - 1; i+=3)
                 {
@@ -114,13 +115,24 @@ namespace Monorail.Graphics
                     var e2 = v3 - v1;
 
                     var n = Vector3.Cross(e1, e2);
-                    n = Vector3.Normalize(n);
-                    rv.Verts[id1].Normal = n;
-                    rv.Verts[id2].Normal = n;
-                    rv.Verts[id3].Normal = n;
+
+                    // Smooth normals
+                    rv.Verts[id1].Normal += n;
+                    rv.Verts[id2].Normal += n;
+                    rv.Verts[id3].Normal += n;
+
+                    // Face Normals
+                    /*
+                        rv.Verts[id1].Normal += n;
+                        rv.Verts[id2].Normal += n;
+                        rv.Verts[id3].Normal += n;
+                    */
                 }
-                
-                // TODO Compute vertex normals
+
+                for (int i=0;i<rv.Verts.Length;i++)
+                {
+                    rv.Verts[i].Normal = Vector3.Normalize(rv.Verts[i].Normal);
+                }
 
                 // Indicies
                 rv.Indicies = faces;
