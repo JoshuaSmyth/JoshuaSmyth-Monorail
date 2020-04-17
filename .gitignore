@@ -14,3 +14,7 @@ SampleGame/SampleGame.csproj.user
 OpenGL/OpenGL.vcxproj.user
 OpenGL/OpenGL.vcxproj.filters
 OpenGL/Debug/
+Test/Monorail.GossipScript.Test/bin/
+Test/Monorail.GossipScript.Test/obj/
+Winforms/Editor/bin/
+Winforms/Editor/obj/
