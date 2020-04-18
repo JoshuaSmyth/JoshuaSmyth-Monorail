@@ -26,8 +26,8 @@ namespace Monorail.Graphics
             var rv = new Model();
 
 
-            var width = data.Width - 1;
-            var height = data.Height - 1;
+            var width = data.Width;
+            var height = data.Height;
 
             var verts = ModelLoader.CreateIndexedQuadVerts(data.Data, width, height);
             uint[] indices = ModelLoader.CreateIndexedQuadIndicies(width, height);
