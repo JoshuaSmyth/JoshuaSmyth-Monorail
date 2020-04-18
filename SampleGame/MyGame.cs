@@ -6,8 +6,6 @@ using System;
 
 namespace SampleGame
 {
-
-
     public class MySampleGame : Game
     {
         // TODO Create resource->Shader manager
@@ -16,11 +14,13 @@ namespace SampleGame
         ShaderProgram m_SkyboxShader;
 
         // TODO Create resource->Geometry Manager
-        VertexArrayObject m_SkyBox;
         VertexArrayObject m_TriVertexArrayObject;
         VertexArrayObject m_QuadVertexArrayObject;
+        VertexArrayObject m_SkyBox;
         VertexArrayObject m_Cube;
         VertexArrayObject m_Bunny;
+        VertexArrayObject m_Terrain;
+
 
         // TODO Create resource->Texture Manager
         Texture2D m_Texture;
@@ -33,7 +33,10 @@ namespace SampleGame
         // TODO Create resource->CubeMap Manager
         TextureCubeMap m_CubeMap;
 
-        //
+        // TODO Create resource->Heightmap Manager
+        HeightMapData m_HeightMapData;
+
+        // TODO Create resource->QuadBatch Manager...
         QuadBatch m_QuadBatch;
 
         // TODO Implement multiple cameras
@@ -41,10 +44,7 @@ namespace SampleGame
 
         float rot;
         Vector3[] Positions;
-
-
-
-
+        
         public override void Load()
         {
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
@@ -54,7 +54,7 @@ namespace SampleGame
             m_ShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
             m_SkyboxShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.skybox.glsl", "Resources/Shaders/Fragment/f.skybox.glsl");
             m_DefaultShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.default.glsl", "Resources/Shaders/Fragment/f.default.glsl");
-
+            
             // Create Triangle
             {
                 var triVerts = new VertexPositionColor[3];
@@ -77,6 +77,18 @@ namespace SampleGame
                
                 m_QuadVertexArrayObject = new VertexArrayObject();
                 m_QuadVertexArrayObject.BindElementsArrayBuffer(verts, indices, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+            }
+
+            // Create Heightmap
+            {
+                m_HeightMapData = HeightMapData.LoadHeightmapData("Resources/Textures/Heightmaps/1.png");
+                var model = ModelLoader.CreateTerrain(m_HeightMapData);
+
+
+                m_Terrain = new VertexArrayObject();
+                m_Terrain.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+
+
             }
 
             // Create Bunny
@@ -260,8 +272,6 @@ namespace SampleGame
                 GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
 
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
-               
-
             }
 
             GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
@@ -271,11 +281,9 @@ namespace SampleGame
             m_ShaderProgram.SetUniform("view", camera.ViewMatrix);
             m_ShaderProgram.SetUniform("proj", camera.ProjMatrix);
 
-
+            /*
             // Render the Floor quad
             {
-
-
                 m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
                 GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
                 GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
@@ -285,8 +293,20 @@ namespace SampleGame
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList, 1 * 6, DrawElementsType.UnsignedInt, 0);
 
                 GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_LINEAR);
-            }
+            }*/
 
+            // Render Terrain
+            {
+                m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
+                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
+                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
+                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_NEAREST);
+
+                GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
+
+                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_LINEAR);
+            }
 
             if (true)
             {

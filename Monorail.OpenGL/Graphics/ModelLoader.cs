@@ -1,4 +1,5 @@
 ﻿using Monorail.Mathlib;
+using Monorail.Platform;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -19,6 +20,18 @@ namespace Monorail.Graphics
     public class ModelLoader
     {
         // TODO Refactor into a resources loader/manager class
+
+        public static Model CreateTerrain(HeightMapData data)
+        {
+            var rv = new Model();
+            var verts = Geometry.CreateIndexedQuadVerts(scale: 8.0f);
+            uint[] indices = Geometry.CreateIndexedQuadIndicies();
+
+            rv.Verts = verts;
+            rv.Indicies = indices;
+
+            return rv;
+        }
 
         public static Model LoadObj(string fileName)
         {

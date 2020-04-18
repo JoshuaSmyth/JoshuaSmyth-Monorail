@@ -128,9 +128,9 @@ namespace Monorail.Platform
             return new uint[] { 0, 1, 3, 1, 2, 3 };
         }
 
-        public static VertexPositionColorTexture[] CreateIndexedQuadVerts(float scale=1.0f)
+        public static VertexPositionColorTextureNormal[] CreateIndexedQuadVerts(float scale=1.0f)
         {
-            var rv = new VertexPositionColorTexture[4];
+            var rv = new VertexPositionColorTextureNormal[4];
             rv[0].Position = new Vector3(0.5f * scale, 0, 0.5f * scale);     // Top Right
             rv[1].Position = new Vector3(0.5f * scale, 0, -0.5f * scale);    // Bottom Right
             rv[2].Position = new Vector3(-0.5f * scale, 0, -0.5f * scale);   // Bottom Left
@@ -145,6 +145,12 @@ namespace Monorail.Platform
             rv[1].Texture = new Vector2(1f * scale, 0f);
             rv[2].Texture = new Vector2(0f, 0f);
             rv[3].Texture = new Vector2(0f, 1f * scale);
+
+            rv[0].Normal = new Vector3(0.0f, 1f, 0.0f);
+            rv[1].Normal = new Vector3(0.0f, 1f, 0.0f);
+            rv[2].Normal = new Vector3(0.0f, 1f, 0.0f);
+            rv[3].Normal = new Vector3(0.0f, 1f, 0.0f);
+
             return rv;
         }
     }
