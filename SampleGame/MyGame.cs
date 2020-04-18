@@ -163,12 +163,19 @@ namespace SampleGame
 
             if (this.Input.IsDown(KeyCode.KEYCODE_W))
             {
-                camera.MoveForward(0.01f);
+                if (this.Input.IsDown(KeyCode.KEYCODE_LSHIFT))
+                {
+                    camera.MoveForward(0.2f);
+                }
+                else
+                {
+                    camera.MoveForward(0.05f);
+                }
             }
 
             if ( this.Input.IsDown(KeyCode.KEYCODE_S))
             {
-                camera.MoveForward(-0.01f);
+                camera.MoveForward(-0.05f);
             }
 
             if (this.Input.IsDown(KeyCode.KEYCODE_A))
@@ -274,6 +281,16 @@ namespace SampleGame
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
             }
 
+            // Render Terrain
+            {
+
+
+                m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
+                GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
+                
+            }
+
             GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
             m_ShaderProgram.SetUniform("texture1", 0);
             m_ShaderProgram.SetUniform("texture2", 1);
@@ -295,18 +312,7 @@ namespace SampleGame
                 GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_LINEAR);
             }*/
 
-            // Render Terrain
-            {
-                m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
-                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
-                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
-                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_NEAREST);
-
-                GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
-
-                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_LINEAR);
-            }
+        
 
             if (true)
             {

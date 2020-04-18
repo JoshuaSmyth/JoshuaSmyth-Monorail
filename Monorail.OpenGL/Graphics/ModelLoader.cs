@@ -24,12 +24,86 @@ namespace Monorail.Graphics
         public static Model CreateTerrain(HeightMapData data)
         {
             var rv = new Model();
-            var verts = Geometry.CreateIndexedQuadVerts(scale: 8.0f);
-            uint[] indices = Geometry.CreateIndexedQuadIndicies();
+
+
+            var width = data.Width - 1;
+            var height = data.Height - 1;
+
+            var verts = ModelLoader.CreateIndexedQuadVerts(data.Data, width, height);
+            uint[] indices = ModelLoader.CreateIndexedQuadIndicies(width, height);
 
             rv.Verts = verts;
             rv.Indicies = indices;
 
+            return rv;
+        }
+
+        private static uint[] CreateIndexedQuadIndicies(int width, int height)
+        {
+            var tileCount = width * height;
+            var rv = new uint[tileCount * 6];
+
+            var offset = 0;
+            for(int i=0; i<tileCount*6; i+=6)
+            {
+                rv[i + 0] = (uint)(0 + offset);
+                rv[i + 1] = (uint)(1 + offset);
+                rv[i + 2] = (uint)(3 + offset);
+                rv[i + 3] = (uint)(1 + offset);
+                rv[i + 4] = (uint)(2 + offset);
+                rv[i + 5] = (uint)(3 + offset);
+
+                offset += 4;
+            }
+
+            return rv;
+        }
+
+        private static VertexPositionColorTextureNormal[] CreateIndexedQuadVerts(byte[] heights, int width, int height)
+        {
+            var scale = 1.0f;
+            var vertexCount = 4 * width * height;
+
+            var rv = new VertexPositionColorTextureNormal[vertexCount];
+            var widthX = 1.0f;
+            var widthZ = 1.0f;
+
+            var i = 0;
+            var h = 0;
+            for(int x=0; x < width; x++)
+            for(int z=0; z < height; z++)
+            //for (int i = 0; i < vertexCount; i += 4)
+            {
+                    // TODO Get height value
+                    var dx = widthX * x;
+                    var dz = widthZ * z;
+
+                    // TODO Work this out properly
+                    var yHeight = (float) (heights[h] / 256.0f) * 64.0f;
+
+                rv[i + 0].Position = new Vector3(dx + 0.5f, yHeight, dz + 0.5f);     // Top Right
+                rv[i + 1].Position = new Vector3(dx + 0.5f, yHeight, dz + -0.5f);    // Bottom Right
+                rv[i + 2].Position = new Vector3(dx + -0.5f, yHeight, dz + -0.5f);   // Bottom Left
+                rv[i + 3].Position = new Vector3(dx + -0.5f, yHeight, dz + 0.5f);    // Top Left
+
+                rv[i + 0].Color = new Vector3(1f, 1f, 0.0f);
+                rv[i + 1].Color = new Vector3(0.5f, 1f, 0.0f);
+                rv[i + 2].Color = new Vector3(1f, 1f, 0.0f);
+                rv[i + 3].Color = new Vector3(1f, 0.5f, 0.0f);
+
+                rv[i + 0].Texture = new Vector2(1f, 1f);
+                rv[i + 1].Texture = new Vector2(1f, 0f);
+                rv[i + 2].Texture = new Vector2(0f, 0f);
+                rv[i + 3].Texture = new Vector2(0f, 1f);
+
+                rv[i + 0].Normal = new Vector3(0.0f, 1f, 0.0f);
+                rv[i + 1].Normal = new Vector3(0.0f, 1f, 0.0f);
+                rv[i + 2].Normal = new Vector3(0.0f, 1f, 0.0f);
+                rv[i + 3].Normal = new Vector3(0.0f, 1f, 0.0f);
+                
+                i += 4;
+                h++;
+            }
             return rv;
         }
 
