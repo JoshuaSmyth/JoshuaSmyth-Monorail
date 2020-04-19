@@ -42,7 +42,7 @@ namespace Monorail.Graphics
             var width = data.Width;
             var height = data.Height;
 
-            var verts = ModelLoader.CreateIndexedQuadVerts(data.Data, width, height);
+            var verts = ModelLoader.CreateTerrainVerticies(data.Data, width, height);
 
             uint[] indices = ModelLoader.CreateIndexedQuadIndicies(width, height);
 
@@ -97,16 +97,17 @@ namespace Monorail.Graphics
                     rv[i + 2].Position = new Vector3(dx + -0.5f, yHeight, dz + -0.5f);   // Bottom Left
                     rv[i + 3].Position = new Vector3(dx + -0.5f, yHeight, dz + 0.5f);    // Top Left
 
-                    rv[i + 0].Color = new Vector3(1f, 1f, 0.0f);
-                    rv[i + 1].Color = new Vector3(0.5f, 1f, 0.0f);
-                    rv[i + 2].Color = new Vector3(1f, 1f, 0.0f);
-                    rv[i + 3].Color = new Vector3(1f, 0.5f, 0.0f);
+                    rv[i + 0].Color = new Vector4(0f, 0f, 1.0f, 0.5f);
+                    rv[i + 1].Color = new Vector4(0f, 0f, 1.0f, 0.5f);
+                    rv[i + 2].Color = new Vector4(0f, 0f, 1.0f, 0.5f);
+                    rv[i + 3].Color = new Vector4(0f, 0.0f, 1.0f, 0.5f);
 
                     rv[i + 0].Texture = new Vector2(1f, 1f);
                     rv[i + 1].Texture = new Vector2(1f, 0f);
                     rv[i + 2].Texture = new Vector2(0f, 0f);
                     rv[i + 3].Texture = new Vector2(0f, 1f);
 
+                    
                     // Temp FIXME
                     rv[i + 0].Normal = new Vector3(0.0f, 0f, 1.0f);
                     rv[i + 1].Normal = new Vector3(0.0f, 0f, 1.0f);
@@ -116,52 +117,104 @@ namespace Monorail.Graphics
                     i += 4;
                     h++;
                 }
+
             return rv;
         }
 
-        private static VertexPositionColorTextureNormal[] CreateIndexedQuadVerts(byte[] heights, int width, int height)
+        private static VertexPositionColorTextureNormal[] CreateTerrainVerticies(byte[] heights, int width, int height)
         {
-            var scale = 1.0f;
             var vertexCount = 4 * width * height;
 
             var rv = new VertexPositionColorTextureNormal[vertexCount];
-            var widthX = 1.0f;
-            var widthZ = 1.0f;
+            var tileWidthX = 1.0f;
+            var tileWidthZ = 1.0f;
+
+            var tileCountX = width-1;
+            var tileCountY = height - 1;
 
             var i = 0;
-            var h = 0;
-            for(int x=0; x < width; x++)
-            for(int z=0; z < height; z++)
+            for(int x=1; x < tileCountX; x++)
+            for(int z=1; z < tileCountY; z++)
             {
-                var dx = widthX * x;
-                var dz = widthZ * z;
+                var dx = tileWidthX * x;
+                var dz = tileWidthZ * z;
 
-                // TODO Work this out properly
-                var yHeight = (float) (heights[h] / 256.0f) * 64.0f;
+                    // TODO Work this out properly, SEEMS WE ARE FLIPPED A BIT
 
-                rv[i + 0].Position = new Vector3(dx + 0.5f, yHeight, dz + 0.5f);     // Top Right
-                rv[i + 1].Position = new Vector3(dx + 0.5f, yHeight, dz + -0.5f);    // Bottom Right
-                rv[i + 2].Position = new Vector3(dx + -0.5f, yHeight, dz + -0.5f);   // Bottom Left
-                rv[i + 3].Position = new Vector3(dx + -0.5f, yHeight, dz + 0.5f);    // Top Left
+                var hIndex = x*width+z;
 
-                rv[i + 0].Color = new Vector3(1f, 1f, 0.0f);
-                rv[i + 1].Color = new Vector3(0.5f, 1f, 0.0f);
-                rv[i + 2].Color = new Vector3(1f, 1f, 0.0f);
-                rv[i + 3].Color = new Vector3(1f, 0.5f, 0.0f);
+
+                    var heightA = (float)(heights[hIndex + width+1] / 256.0f) * 64.0f;
+                    var heightB = (float)(heights[hIndex + width] / 256.0f) * 64.0f;
+                    var heightC = (float)(heights[hIndex] / 256.0f) * 64.0f;
+                    var heightD = (float)(heights[hIndex+1] / 256.0f) * 64.0f;
+                    
+                    rv[i + 0].Position = new Vector3(dx + 0.5f, heightA, dz + 0.5f);     // Top Right
+                    
+                    rv[i + 1].Position = new Vector3(dx + 0.5f, heightB, dz -0.5f);    // Bottom Right
+                    rv[i + 2].Position = new Vector3(dx -0.5f, heightC, dz -0.5f);   // Bottom Left
+
+                    rv[i + 3].Position = new Vector3(dx -0.5f, heightD, dz + 0.5f);    // Top Left
+
+                rv[i + 0].Color = new Vector4(1f, 1f, 0.0f, 1.0f);
+                rv[i + 1].Color = new Vector4(0.5f, 1f, 0.0f, 1.0f);
+                rv[i + 2].Color = new Vector4(1f, 1f, 0.0f, 1.0f);
+                rv[i + 3].Color = new Vector4(1f, 0.5f, 0.0f, 1.0f);
 
                 rv[i + 0].Texture = new Vector2(1f, 1f);
                 rv[i + 1].Texture = new Vector2(1f, 0f);
                 rv[i + 2].Texture = new Vector2(0f, 0f);
                 rv[i + 3].Texture = new Vector2(0f, 1f);
 
-                rv[i + 0].Normal = new Vector3(0.0f, 1f, 0.0f);
-                rv[i + 1].Normal = new Vector3(0.0f, 1f, 0.0f);
-                rv[i + 2].Normal = new Vector3(0.0f, 1f, 0.0f);
-                rv[i + 3].Normal = new Vector3(0.0f, 1f, 0.0f);
-                
+                // TODO Calculate normal correctly
+                /*
+                rv[i + 0].Normal = new Vector3(1.0f, 0f, 0.0f); // Red = topright
+                rv[i + 1].Normal = new Vector3(0.0f, 1f, 0.0f); // Green = bottom right
+                rv[i + 2].Normal = new Vector3(0.0f, 0f, 1.0f); // Blue = bottom left
+                rv[i + 3].Normal = new Vector3(1.0f, 1f, 1.0f); // white = top left
+                */
                 i += 4;
-                h++;
             }
+
+
+            // FaceA = 0, 1, 3
+            // FaceB = 1, 2, 3
+
+            // TODO Calculate Normals!
+            for(int n=0; n<rv.Length-4; n++)
+            {
+                // Face A
+                var v1 = rv[n + 0].Position;
+                var v2 = rv[n + 1].Position;
+                var v3 = rv[n + 3].Position;
+                
+                var e1 = v2 - v1;
+                var e2 = v3 - v1;
+
+                var normalA = Vector3.Cross(e1, e2);
+
+                // Face B
+                var v1b = rv[n + 1].Position;
+                var v2b = rv[n + 2].Position;
+                var v3b = rv[n + 3].Position;
+                var e1b = v2b - v1b;
+                var e2b = v3b - v1b;
+                var normalB = Vector3.Cross(e1b, e2b);
+
+
+                // Face normal B
+                rv[n + 0].Normal += normalA;
+                rv[n + 1].Normal += normalA + normalB;
+                rv[n + 2].Normal += normalA + normalB;
+                rv[n + 3].Normal += normalA + normalB;
+            }
+
+
+            for (int n = 0; n < rv.Length; n++)
+            {
+                rv[n].Normal = Vector3.Normalize(rv[n].Normal);
+            }
+
             return rv;
         }
 
@@ -239,7 +292,7 @@ namespace Monorail.Graphics
                 {
                     var v1 = verts[i];
                     rv.Verts[i].Position = v1;
-                    rv.Verts[i].Color = new Vector3(1, 1, 1);
+                    rv.Verts[i].Color = new Vector4(1, 1, 1, 1);
                     rv.Verts[i].Texture = new Vector2(1, 1);
                 }
 

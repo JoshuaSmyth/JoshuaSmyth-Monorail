@@ -59,17 +59,17 @@ namespace Monorail.Graphics
     {
         public Vector3 Position;
 
-        public Vector3 Color;
+        public Vector4 Color;
 
         public Vector2 Texture;
 
         public Vector3 Normal;
 
-        public static int Stride = 44;
+        public static int Stride = 48;
 
-        public static int[] AttributeLengths { get { return new[] { 3, 3, 2, 3 }; } }
+        public static int[] AttributeLengths { get { return new[] { 3, 4, 2, 3 }; } }
 
-        public static int[] AttributeOffsets { get { return new[] { 0, 12, 24, 32 }; } }
+        public static int[] AttributeOffsets { get { return new[] { 0, 12, 28, 36 }; } }
     }
     [StructLayout(LayoutKind.Sequential)]
     internal struct DefaultQuadBatchVertex : IInterleavedVertex

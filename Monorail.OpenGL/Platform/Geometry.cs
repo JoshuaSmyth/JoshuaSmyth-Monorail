@@ -136,10 +136,10 @@ namespace Monorail.Platform
             rv[2].Position = new Vector3(-0.5f * scale, 0, -0.5f * scale);   // Bottom Left
             rv[3].Position = new Vector3(-0.5f * scale, 0, 0.5f * scale);    // Top Left
 
-            rv[0].Color = new Vector3(1f, 1f, 0.0f);
-            rv[1].Color = new Vector3(0.5f, 1f, 0.0f);
-            rv[2].Color = new Vector3(1f, 1f, 0.0f);
-            rv[3].Color = new Vector3(1f, 0.5f, 0.0f);
+            rv[0].Color = new Vector4(1f, 1f, 0.0f, 1.0f);
+            rv[1].Color = new Vector4(0.5f, 1f, 0.0f, 1.0f);
+            rv[2].Color = new Vector4(1f, 1f, 0.0f, 1.0f);
+            rv[3].Color = new Vector4(1f, 0.5f, 0.0f, 1.0f);
 
             rv[0].Texture = new Vector2(1f * scale, 1f * scale);
             rv[1].Texture = new Vector2(1f * scale, 0f);

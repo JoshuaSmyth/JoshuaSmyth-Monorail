@@ -91,7 +91,7 @@ namespace SampleGame
 
             // Create Water
             {
-                var model = ModelLoader.CreatePlane(512, 512, 5.75f);
+                var model = ModelLoader.CreatePlane(512, 512, 6.5f);
 
 
                 m_Water = new VertexArrayObject();
@@ -308,9 +308,14 @@ namespace SampleGame
 
             // Render Water
             {
+                GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
+                GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
+
                 // TODO Set water shader
                 GraphicsDevice.UseVertexArrayObject(m_Water.VertexArrayObjectId);
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Water.VertexCount, DrawElementsType.UnsignedInt, 0);
+
+                GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
             }
 
@@ -379,7 +384,7 @@ namespace SampleGame
             GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
             GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
 
-
+            /*
             m_QuadBatch.Start();
 
             m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
@@ -387,7 +392,7 @@ namespace SampleGame
             m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
 
             m_QuadBatch.Commit();
-
+            */
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
             // Unbind textures

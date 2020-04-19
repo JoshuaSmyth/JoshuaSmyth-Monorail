@@ -28,7 +28,7 @@ namespace Monorail.Platform
         public GameCamera(Vector3 position, Vector3 lookAt, float yaw, float pitch)
         {
             var aspect = GameWindow.ScreenWidth / (float)GameWindow.ScreenHeight;
-            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(60), aspect, 0.1f, 1000.0f);
+            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(60), aspect, 1f, 750.0f);
             Position = position;
 
             Forward = Vector3.Normalize(lookAt - position);

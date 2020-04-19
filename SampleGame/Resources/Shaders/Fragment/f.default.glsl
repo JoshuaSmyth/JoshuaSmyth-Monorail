@@ -1,6 +1,6 @@
 ﻿#version 330 core
 
-in vec3 vColor;
+in vec4 vColor;
 in vec2 TexCoord;
 in vec3 nNormal;
 
@@ -11,5 +11,5 @@ uniform sampler2D texture2;
 
 void main()
 {
-	FragColor =  vec4(normalize(nNormal.rgb), 1.0f);
+	FragColor =  vec4(normalize(nNormal.rgb), vColor.a) ;
 }
