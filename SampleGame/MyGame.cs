@@ -91,7 +91,7 @@ namespace SampleGame
 
             // Create Water
             {
-                var model = ModelLoader.CreatePlane(512, 512, 6.5f);
+                var model = ModelLoader.CreatePlane(512, 512, 12.25f);
 
 
                 m_Water = new VertexArrayObject();

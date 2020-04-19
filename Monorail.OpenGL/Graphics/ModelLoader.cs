@@ -144,10 +144,10 @@ namespace Monorail.Graphics
                 var hIndex = x*width+z;
 
 
-                    var heightA = (float)(heights[hIndex + width+1] / 256.0f) * 64.0f;
-                    var heightB = (float)(heights[hIndex + width] / 256.0f) * 64.0f;
-                    var heightC = (float)(heights[hIndex] / 256.0f) * 64.0f;
-                    var heightD = (float)(heights[hIndex+1] / 256.0f) * 64.0f;
+                    var heightA = (float)(heights[hIndex + width+1] / 256.0f) * 128.0f;
+                    var heightB = (float)(heights[hIndex + width] / 256.0f) * 128.0f;
+                    var heightC = (float)(heights[hIndex] / 256.0f) * 128.0f;
+                    var heightD = (float)(heights[hIndex+1] / 256.0f) * 128.0f;
                     
                     rv[i + 0].Position = new Vector3(dx + 0.5f, heightA, dz + 0.5f);     // Top Right
                     
@@ -166,16 +166,18 @@ namespace Monorail.Graphics
                 rv[i + 2].Texture = new Vector2(0f, 0f);
                 rv[i + 3].Texture = new Vector2(0f, 1f);
 
-                // TODO Calculate normal correctly
-                /*
-                rv[i + 0].Normal = new Vector3(1.0f, 0f, 0.0f); // Red = topright
-                rv[i + 1].Normal = new Vector3(0.0f, 1f, 0.0f); // Green = bottom right
-                rv[i + 2].Normal = new Vector3(0.0f, 0f, 1.0f); // Blue = bottom left
-                rv[i + 3].Normal = new Vector3(1.0f, 1f, 1.0f); // white = top left
-                */
+
                 i += 4;
             }
 
+            // Need to constuct a list of the ids verticies in each face.
+            // 2xfaces per tile, 6 verticies per tile.
+            // AKA the index buffer.
+
+            // For each face, calculate the face normal
+            //  for each vertex in the face add the face normal
+
+            // For each vertex normalize the normals
 
             // FaceA = 0, 1, 3
             // FaceB = 1, 2, 3
@@ -210,6 +212,7 @@ namespace Monorail.Graphics
             }
 
 
+            // For each vertex normalize the normals
             for (int n = 0; n < rv.Length; n++)
             {
                 rv[n].Normal = Vector3.Normalize(rv[n].Normal);
