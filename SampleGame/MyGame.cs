@@ -20,7 +20,7 @@ namespace SampleGame
         VertexArrayObject m_Cube;
         VertexArrayObject m_Bunny;
         VertexArrayObject m_Terrain;
-
+        VertexArrayObject m_Water;
 
         // TODO Create resource->Texture Manager
         Texture2D m_Texture;
@@ -86,10 +86,18 @@ namespace SampleGame
 
 
                 m_Terrain = new VertexArrayObject();
-                m_Terrain.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
-
-
+                m_Terrain.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);               
             }
+
+            // Create Water
+            {
+                var model = ModelLoader.CreatePlane(512, 512, 5.75f);
+
+
+                m_Water = new VertexArrayObject();
+                m_Water.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+            }
+        
 
             // Create Bunny
             {
@@ -175,7 +183,14 @@ namespace SampleGame
 
             if ( this.Input.IsDown(KeyCode.KEYCODE_S))
             {
-                camera.MoveForward(-0.05f);
+                if (this.Input.IsDown(KeyCode.KEYCODE_LSHIFT))
+                {
+                    camera.MoveForward(-0.2f);
+                }
+                else
+                {
+                    camera.MoveForward(-0.05f);
+                }
             }
 
             if (this.Input.IsDown(KeyCode.KEYCODE_A))
@@ -289,6 +304,14 @@ namespace SampleGame
                 GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
                 
+            }
+
+            // Render Water
+            {
+                // TODO Set water shader
+                GraphicsDevice.UseVertexArrayObject(m_Water.VertexArrayObjectId);
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Water.VertexCount, DrawElementsType.UnsignedInt, 0);
+
             }
 
             GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
