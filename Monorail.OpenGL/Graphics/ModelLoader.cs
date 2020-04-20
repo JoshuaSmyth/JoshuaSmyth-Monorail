@@ -129,95 +129,116 @@ namespace Monorail.Graphics
             var tileWidthX = 1.0f;
             var tileWidthZ = 1.0f;
 
-            var tileCountX = width-1;
+            var tileCountX = width - 1;
             var tileCountY = height - 1;
 
+            var smoothNormals = new Vector3[4 * width * height];
+
             var i = 0;
-            for(int x=1; x < tileCountX; x++)
-            for(int z=1; z < tileCountY; z++)
-            {
-                var dx = tileWidthX * x;
-                var dz = tileWidthZ * z;
+            for (int x = 1; x < tileCountX; x++)
+                for (int z = 1; z < tileCountY; z++)
+                {
+                    var dx = tileWidthX * x;
+                    var dz = tileWidthZ * z;
 
                     // TODO Work this out properly, SEEMS WE ARE FLIPPED A BIT
+                    var hIndex = x * width + z;
 
-                var hIndex = x*width+z;
+                    var idA = hIndex + width + 1;
+                    var idB = hIndex + width;
+                    var idC = hIndex;
+                    var idD = hIndex + 1;
 
+                    var heightA = (float)(heights[idA] / 256.0f) * 128.0f;
+                    var heightB = (float)(heights[idB] / 256.0f) * 128.0f;
+                    var heightC = (float)(heights[idC] / 256.0f) * 128.0f;
+                    var heightD = (float)(heights[idD] / 256.0f) * 128.0f;
 
-                    var heightA = (float)(heights[hIndex + width+1] / 256.0f) * 128.0f;
-                    var heightB = (float)(heights[hIndex + width] / 256.0f) * 128.0f;
-                    var heightC = (float)(heights[hIndex] / 256.0f) * 128.0f;
-                    var heightD = (float)(heights[hIndex+1] / 256.0f) * 128.0f;
-                    
                     rv[i + 0].Position = new Vector3(dx + 0.5f, heightA, dz + 0.5f);     // Top Right
+
+                    rv[i + 1].Position = new Vector3(dx + 0.5f, heightB, dz - 0.5f);    // Bottom Right
+                    rv[i + 2].Position = new Vector3(dx - 0.5f, heightC, dz - 0.5f);   // Bottom Left
+
+                    rv[i + 3].Position = new Vector3(dx - 0.5f, heightD, dz + 0.5f);    // Top Left
+
+                    rv[i + 0].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+                    rv[i + 1].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+                    rv[i + 2].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+                    rv[i + 3].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+
+                    rv[i + 0].Texture = new Vector2(1f, 1f);
+                    rv[i + 1].Texture = new Vector2(1f, 0f);
+                    rv[i + 2].Texture = new Vector2(0f, 0f);
+                    rv[i + 3].Texture = new Vector2(0f, 1f);
+
+                    // Compute the face normals and add to the smooth normals
+                    {
+                        // Face 1
+                        {
+                            // 0, 1, 3
+                            // A, B, D
+                            var v1 = rv[i + 0].Position;
+                            var v2 = rv[i + 1].Position;
+                            var v3 = rv[i + 3].Position;
+
+                            var e1 = v2 - v1;
+                            var e2 = v3 - v1;
+
+                            var normal = Vector3.Cross(e1, e2);
+                            smoothNormals[idA] += normal;
+                            smoothNormals[idB] += normal;
+                            smoothNormals[idD] += normal;
+                        }
+                        
+                        // Face 2
+                        {
+                            // 1, 2, 3
+                            // B, C, D
+                            var v1 = rv[i + 1].Position;
+                            var v2 = rv[i + 2].Position;
+                            var v3 = rv[i + 3].Position;
+
+                            var e1 = v2 - v1;
+                            var e2 = v3 - v1;
+
+                            var normal = Vector3.Cross(e1, e2);
+                            smoothNormals[idB] += normal;
+                            smoothNormals[idC] += normal;
+                            smoothNormals[idD] += normal;
+                        }
+                    }
+
+                    i += 4;
+                }
+
+            // Normalise the smooth normals
+            for (int n = 0; n < smoothNormals.Length; n++)
+            {
+                smoothNormals[n] = Vector3.Normalize(smoothNormals[n]);
+            }
+
+            // apply smoothed normals
+            i = 0;
+            for (int x = 1; x < tileCountX; x++)
+            {
+                for (int z = 1; z < tileCountY; z++)
+                {
+                    var hIndex = x * width + z;
+
+                    var idA = hIndex + width + 1;
+                    var idB = hIndex + width;
+                    var idC = hIndex;
+                    var idD = hIndex + 1;
+
+                    rv[i+0].Normal = smoothNormals[idA];
+                    rv[i+1].Normal = smoothNormals[idB];
+                    rv[i+2].Normal = smoothNormals[idC];
+                    rv[i+3].Normal = smoothNormals[idD];
+
+                    i += 4;
+                }
+            }
                     
-                    rv[i + 1].Position = new Vector3(dx + 0.5f, heightB, dz -0.5f);    // Bottom Right
-                    rv[i + 2].Position = new Vector3(dx -0.5f, heightC, dz -0.5f);   // Bottom Left
-
-                    rv[i + 3].Position = new Vector3(dx -0.5f, heightD, dz + 0.5f);    // Top Left
-
-                rv[i + 0].Color = new Vector4(1f, 1f, 0.0f, 1.0f);
-                rv[i + 1].Color = new Vector4(0.5f, 1f, 0.0f, 1.0f);
-                rv[i + 2].Color = new Vector4(1f, 1f, 0.0f, 1.0f);
-                rv[i + 3].Color = new Vector4(1f, 0.5f, 0.0f, 1.0f);
-
-                rv[i + 0].Texture = new Vector2(1f, 1f);
-                rv[i + 1].Texture = new Vector2(1f, 0f);
-                rv[i + 2].Texture = new Vector2(0f, 0f);
-                rv[i + 3].Texture = new Vector2(0f, 1f);
-
-
-                i += 4;
-            }
-
-            // Need to constuct a list of the ids verticies in each face.
-            // 2xfaces per tile, 6 verticies per tile.
-            // AKA the index buffer.
-
-            // For each face, calculate the face normal
-            //  for each vertex in the face add the face normal
-
-            // For each vertex normalize the normals
-
-            // FaceA = 0, 1, 3
-            // FaceB = 1, 2, 3
-
-            // TODO Calculate Normals!
-            for(int n=0; n<rv.Length-4; n++)
-            {
-                // Face A
-                var v1 = rv[n + 0].Position;
-                var v2 = rv[n + 1].Position;
-                var v3 = rv[n + 3].Position;
-                
-                var e1 = v2 - v1;
-                var e2 = v3 - v1;
-
-                var normalA = Vector3.Cross(e1, e2);
-
-                // Face B
-                var v1b = rv[n + 1].Position;
-                var v2b = rv[n + 2].Position;
-                var v3b = rv[n + 3].Position;
-                var e1b = v2b - v1b;
-                var e2b = v3b - v1b;
-                var normalB = Vector3.Cross(e1b, e2b);
-
-
-                // Face normal B
-                rv[n + 0].Normal += normalA;
-                rv[n + 1].Normal += normalA + normalB;
-                rv[n + 2].Normal += normalA + normalB;
-                rv[n + 3].Normal += normalA + normalB;
-            }
-
-
-            // For each vertex normalize the normals
-            for (int n = 0; n < rv.Length; n++)
-            {
-                rv[n].Normal = Vector3.Normalize(rv[n].Normal);
-            }
-
             return rv;
         }
 
@@ -324,9 +345,9 @@ namespace Monorail.Graphics
 
                     // Face Normals
                     /*
-                        rv.Verts[id1].Normal += n;
-                        rv.Verts[id2].Normal += n;
-                        rv.Verts[id3].Normal += n;
+                        rv.Verts[id1].Normal = n;
+                        rv.Verts[id2].Normal = n;
+                        rv.Verts[id3].Normal = n;
                     */
                 }
 

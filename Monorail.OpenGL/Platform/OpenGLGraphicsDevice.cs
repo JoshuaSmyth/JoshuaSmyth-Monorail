@@ -79,5 +79,10 @@ namespace Monorail.Platform
         {
             GlBindings.BlendFunc(srcBlend, dstBlend);
         }
+
+        public void FillMode(Mode mode)
+        {
+            GlBindings.PolygonMode(Face.GL_FRONT_AND_BACK, mode);
+        }
     }
 }

@@ -44,7 +44,9 @@ namespace SampleGame
 
         float rot;
         Vector3[] Positions;
-        
+
+        bool IsWireframeMode;
+
         public override void Load()
         {
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
@@ -168,6 +170,11 @@ namespace SampleGame
             camera.Update();
 
             rot += (float)(GameTime.ElapsedSeconds * 15.0f);
+
+            if (this.Input.WasPressed(KeyCode.KEYCODE_TAB))
+            {
+                IsWireframeMode = !IsWireframeMode;
+            }
 
             if (this.Input.IsDown(KeyCode.KEYCODE_W))
             {
@@ -298,12 +305,20 @@ namespace SampleGame
 
             // Render Terrain
             {
-
+                // TODO Toogle with tab
+                if (this.IsWireframeMode)
+                {
+                    GraphicsDevice.FillMode(OpenGL.Mode.GL_LINE);
+                }
 
                 m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
                 GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
-                
+
+                if (this.IsWireframeMode)
+                {
+                    GraphicsDevice.FillMode(OpenGL.Mode.GL_FILL);
+                }
             }
 
             // Render Water

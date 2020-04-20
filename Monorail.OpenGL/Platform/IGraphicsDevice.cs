@@ -30,5 +30,7 @@ namespace Monorail.Platform
         void DepthFunc(DepthFunc depthFunc);
 
         void BlendFunc(BlendFunc srcBlend, BlendFunc dstBlend);
+
+        void FillMode(Mode mode);
     }
 }
