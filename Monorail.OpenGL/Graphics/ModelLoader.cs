@@ -37,18 +37,13 @@ namespace Monorail.Graphics
 
         public static Model CreateTerrain(HeightMapData data)
         {
-            var rv = new Model();
             
             var width = data.Width;
             var height = data.Height;
 
-            var verts = ModelLoader.CreateTerrainVerticies(data.Data, width, height);
+            var rv = ModelLoader.CreateTerrainVerticies(data.Data, width, height);
 
-            uint[] indices = ModelLoader.CreateIndexedQuadIndicies(width, height);
-
-            rv.Verts = verts;
-            rv.Indicies = indices;
-
+            
             return rv;
         }
 
@@ -57,17 +52,17 @@ namespace Monorail.Graphics
             var tileCount = width * height;
             var rv = new uint[tileCount * 6];
 
-            var offset = 0;
+            var indexOffset = 0;
             for(int i=0; i<tileCount*6; i+=6)
             {
-                rv[i + 0] = (uint)(0 + offset);
-                rv[i + 1] = (uint)(1 + offset);
-                rv[i + 2] = (uint)(3 + offset);
-                rv[i + 3] = (uint)(1 + offset);
-                rv[i + 4] = (uint)(2 + offset);
-                rv[i + 5] = (uint)(3 + offset);
+                rv[i + 0] = (uint)(0 + indexOffset);
+                rv[i + 1] = (uint)(1 + indexOffset);
+                rv[i + 2] = (uint)(3 + indexOffset);
+                rv[i + 3] = (uint)(1 + indexOffset);
+                rv[i + 4] = (uint)(2 + indexOffset);
+                rv[i + 5] = (uint)(3 + indexOffset);
 
-                offset += 4;
+                indexOffset += 4;
             }
 
             return rv;
@@ -121,19 +116,39 @@ namespace Monorail.Graphics
             return rv;
         }
 
-        private static VertexPositionColorTextureNormal[] CreateTerrainVerticies(byte[] heights, int width, int height)
+        private static Model CreateTerrainVerticies(byte[] heights, int width, int height)
         {
+            Model rv = new Model();
             var vertexCount = 4 * width * height;
 
-            var rv = new VertexPositionColorTextureNormal[vertexCount];
+            var verts = new VertexPositionColorTextureNormal[vertexCount];
             var tileWidthX = 1.0f;
             var tileWidthZ = 1.0f;
 
             var tileCountX = width - 1;
             var tileCountY = height - 1;
 
+            var indicies = new uint[width * height * 6];
+            
             var smoothNormals = new Vector3[4 * width * height];
 
+            /*
+             * 
+             * var tileCount = width * height;
+            
+            for(int i=0; i<tileCount*6; i+=6)
+            {
+                rv[i + 0] = (uint)(0 + indexOffset);
+                rv[i + 1] = (uint)(1 + indexOffset);
+                rv[i + 2] = (uint)(3 + indexOffset);
+                rv[i + 3] = (uint)(1 + indexOffset);
+                rv[i + 4] = (uint)(2 + indexOffset);
+                rv[i + 5] = (uint)(3 + indexOffset);
+
+            }
+             */
+            {
+            var v = 0;
             var i = 0;
             for (int x = 1; x < tileCountX; x++)
                 for (int z = 1; z < tileCountY; z++)
@@ -149,67 +164,137 @@ namespace Monorail.Graphics
                     var idC = hIndex;
                     var idD = hIndex + 1;
 
-                    var heightA = (float)(heights[idA] / 256.0f) * 128.0f;
-                    var heightB = (float)(heights[idB] / 256.0f) * 128.0f;
-                    var heightC = (float)(heights[idC] / 256.0f) * 128.0f;
-                    var heightD = (float)(heights[idD] / 256.0f) * 128.0f;
+                    var heightA = (float)(heights[idA] / 256.0f) * 64.0f;
+                    var heightB = (float)(heights[idB] / 256.0f) * 64.0f;
+                    var heightC = (float)(heights[idC] / 256.0f) * 64.0f;
+                    var heightD = (float)(heights[idD] / 256.0f) * 64.0f;
 
-                    rv[i + 0].Position = new Vector3(dx + 0.5f, heightA, dz + 0.5f);     // Top Right
+                    verts[v + 0].Position = new Vector3(dx + 0.5f, heightA, dz + 0.5f);   // Top Right
+                    verts[v + 1].Position = new Vector3(dx + 0.5f, heightB, dz - 0.5f);   // Bottom Right
+                    verts[v + 2].Position = new Vector3(dx - 0.5f, heightC, dz - 0.5f);   // Bottom Left
+                    verts[v + 3].Position = new Vector3(dx - 0.5f, heightD, dz + 0.5f);   // Top Left
 
-                    rv[i + 1].Position = new Vector3(dx + 0.5f, heightB, dz - 0.5f);    // Bottom Right
-                    rv[i + 2].Position = new Vector3(dx - 0.5f, heightC, dz - 0.5f);   // Bottom Left
+                    verts[v + 0].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+                    verts[v + 1].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+                    verts[v + 2].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+                    verts[v + 3].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
 
-                    rv[i + 3].Position = new Vector3(dx - 0.5f, heightD, dz + 0.5f);    // Top Left
+                    verts[v + 0].Texture = new Vector2(1f, 1f);
+                    verts[v + 1].Texture = new Vector2(1f, 0f);
+                    verts[v + 2].Texture = new Vector2(0f, 0f);
+                    verts[v + 3].Texture = new Vector2(0f, 1f);
 
-                    rv[i + 0].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
-                    rv[i + 1].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
-                    rv[i + 2].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
-                    rv[i + 3].Color = new Vector4(1f, 1f, 1.0f, 1.0f);
+                    // Want to build the indicies such that the two faces are split along the diagonal
+                    // with the least distance between the two options.
+                    // e.g min(distance(1,3),distance(0,2))
 
-                    rv[i + 0].Texture = new Vector2(1f, 1f);
-                    rv[i + 1].Texture = new Vector2(1f, 0f);
-                    rv[i + 2].Texture = new Vector2(0f, 0f);
-                    rv[i + 3].Texture = new Vector2(0f, 1f);
+                    // StyleA    StyleB
+                    // 3---0     Vs    3---0
+                    // | \ |           | / |
+                    // 2---1           2---1 
 
-                    // Compute the face normals and add to the smooth normals
+                    var d1 = Vector3.Distance(verts[v + 1].Position, verts[v + 3].Position);
+                    var d2 = Vector3.Distance(verts[v + 0].Position, verts[v + 2].Position);
+                    if (d1 > d2)
                     {
-                        // Face 1
-                        {
-                            // 0, 1, 3
-                            // A, B, D
-                            var v1 = rv[i + 0].Position;
-                            var v2 = rv[i + 1].Position;
-                            var v3 = rv[i + 3].Position;
+                        // Style B
+                        indicies[i + 0] = (uint)(0 + v);
+                        indicies[i + 1] = (uint)(1 + v);
+                        indicies[i + 2] = (uint)(2 + v);
+                        indicies[i + 3] = (uint)(0 + v);
+                        indicies[i + 4] = (uint)(2 + v);
+                        indicies[i + 5] = (uint)(3 + v);
 
-                            var e1 = v2 - v1;
-                            var e2 = v3 - v1;
+                            // Compute the face normals and add to the smooth normals
+                            {
+                                // Face 1
+                                {
+                                    // 0, 1, 2
+                                    // A, B, C
+                                    var v1 = verts[v + 0].Position;
+                                    var v2 = verts[v + 1].Position;
+                                    var v3 = verts[v + 2].Position;
 
-                            var normal = Vector3.Cross(e1, e2);
-                            smoothNormals[idA] += normal;
-                            smoothNormals[idB] += normal;
-                            smoothNormals[idD] += normal;
+                                    var e1 = v2 - v1;
+                                    var e2 = v3 - v1;
+
+                                    var normal = Vector3.Cross(e1, e2);
+                                    smoothNormals[idA] += normal;
+                                    smoothNormals[idB] += normal;
+                                    smoothNormals[idC] += normal;
+                                }
+
+                                // Face 2
+                                {
+                                    // 0, 2, 3
+                                    // A, C, D
+                                    var v1 = verts[v + 0].Position;
+                                    var v2 = verts[v + 2].Position;
+                                    var v3 = verts[v + 3].Position;
+
+                                    var e1 = v2 - v1;
+                                    var e2 = v3 - v1;
+
+                                    var normal = Vector3.Cross(e1, e2);
+                                    smoothNormals[idA] += normal;
+                                    smoothNormals[idC] += normal;
+                                    smoothNormals[idD] += normal;
+                                }
+                            }
+
                         }
-                        
-                        // Face 2
+                    else
+                    {
+                        // Style A
+                        indicies[i + 0] = (uint)(0 + v);
+                        indicies[i + 1] = (uint)(1 + v);
+                        indicies[i + 2] = (uint)(3 + v);
+                        indicies[i + 3] = (uint)(1 + v);
+                        indicies[i + 4] = (uint)(2 + v);
+                        indicies[i + 5] = (uint)(3 + v);
+                            
+                        // Compute the face normals and add to the smooth normals
                         {
-                            // 1, 2, 3
-                            // B, C, D
-                            var v1 = rv[i + 1].Position;
-                            var v2 = rv[i + 2].Position;
-                            var v3 = rv[i + 3].Position;
+                            // Face 1
+                            {
+                                // 0, 1, 3
+                                // A, B, D
+                                var v1 = verts[v + 0].Position;
+                                var v2 = verts[v + 1].Position;
+                                var v3 = verts[v + 3].Position;
 
-                            var e1 = v2 - v1;
-                            var e2 = v3 - v1;
+                                var e1 = v2 - v1;
+                                var e2 = v3 - v1;
 
-                            var normal = Vector3.Cross(e1, e2);
-                            smoothNormals[idB] += normal;
-                            smoothNormals[idC] += normal;
-                            smoothNormals[idD] += normal;
+                                var normal = Vector3.Cross(e1, e2);
+                                smoothNormals[idA] += normal;
+                                smoothNormals[idB] += normal;
+                                smoothNormals[idD] += normal;
+                            }
+
+                            // Face 2
+                            {
+                                // 1, 2, 3
+                                // B, C, D
+                                var v1 = verts[v + 1].Position;
+                                var v2 = verts[v + 2].Position;
+                                var v3 = verts[v + 3].Position;
+
+                                var e1 = v2 - v1;
+                                var e2 = v3 - v1;
+
+                                var normal = Vector3.Cross(e1, e2);
+                                smoothNormals[idB] += normal;
+                                smoothNormals[idC] += normal;
+                                smoothNormals[idD] += normal;
+                            }
                         }
                     }
 
-                    i += 4;
+                    v += 4;
+                    i += 6;
                 }
+            }
 
             // Normalise the smooth normals
             for (int n = 0; n < smoothNormals.Length; n++)
@@ -218,27 +303,32 @@ namespace Monorail.Graphics
             }
 
             // apply smoothed normals
-            i = 0;
-            for (int x = 1; x < tileCountX; x++)
             {
-                for (int z = 1; z < tileCountY; z++)
+                int v = 0;
+                for (int x = 1; x < tileCountX; x++)
                 {
-                    var hIndex = x * width + z;
+                    for (int z = 1; z < tileCountY; z++)
+                    {
+                        var hIndex = x * width + z;
 
-                    var idA = hIndex + width + 1;
-                    var idB = hIndex + width;
-                    var idC = hIndex;
-                    var idD = hIndex + 1;
+                        var idA = hIndex + width + 1;
+                        var idB = hIndex + width;
+                        var idC = hIndex;
+                        var idD = hIndex + 1;
 
-                    rv[i+0].Normal = smoothNormals[idA];
-                    rv[i+1].Normal = smoothNormals[idB];
-                    rv[i+2].Normal = smoothNormals[idC];
-                    rv[i+3].Normal = smoothNormals[idD];
+                        verts[v + 0].Normal = smoothNormals[idA];
+                        verts[v + 1].Normal = smoothNormals[idB];
+                        verts[v + 2].Normal = smoothNormals[idC];
+                        verts[v + 3].Normal = smoothNormals[idD];
 
-                    i += 4;
+                        v += 4;
+                    }
                 }
+
             }
-                    
+
+            rv.Verts = verts;
+            rv.Indicies = indicies;//CreateIndexedQuadIndicies(width, height);
             return rv;
         }
 
