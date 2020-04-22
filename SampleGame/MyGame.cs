@@ -93,7 +93,7 @@ namespace SampleGame
 
             // Create Water
             {
-                var model = ModelLoader.CreatePlane(512, 512, 12.25f);
+                var model = ModelLoader.CreatePlane(1024, 1024, 12.2f);
 
 
                 m_Water = new VertexArrayObject();
@@ -180,7 +180,7 @@ namespace SampleGame
             {
                 if (this.Input.IsDown(KeyCode.KEYCODE_LSHIFT))
                 {
-                    camera.MoveForward(0.2f);
+                    camera.MoveForward(0.4f);
                 }
                 else
                 {
@@ -192,7 +192,7 @@ namespace SampleGame
             {
                 if (this.Input.IsDown(KeyCode.KEYCODE_LSHIFT))
                 {
-                    camera.MoveForward(-0.2f);
+                    camera.MoveForward(-0.4f);
                 }
                 else
                 {
@@ -277,6 +277,7 @@ namespace SampleGame
             m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
             m_ShaderProgram.SetUniform("view", camera.ViewMatrix);
             m_ShaderProgram.SetUniform("proj", camera.ProjMatrix);
+          //  m_ShaderProgram.SetUniform("directionalLight", new Vector3(-1,-1,-1));
 
             // Render the bunny
             {

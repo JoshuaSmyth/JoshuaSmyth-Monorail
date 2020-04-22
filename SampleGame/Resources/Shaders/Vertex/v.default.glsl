@@ -24,5 +24,5 @@ void main()
 
 	// Todo this should be cpu side and passed as uniform
 	mat3 newNorm = mat3(model);
-	nNormal = vec4(aNormal,0.0f).xyz; //(model * vec4(aNormal,0.0f)).xyz;
+	nNormal = newNorm * aNormal; //vec4(aNormal,0.0f)).xyz;
 }

@@ -132,21 +132,6 @@ namespace Monorail.Graphics
             
             var smoothNormals = new Vector3[4 * width * height];
 
-            /*
-             * 
-             * var tileCount = width * height;
-            
-            for(int i=0; i<tileCount*6; i+=6)
-            {
-                rv[i + 0] = (uint)(0 + indexOffset);
-                rv[i + 1] = (uint)(1 + indexOffset);
-                rv[i + 2] = (uint)(3 + indexOffset);
-                rv[i + 3] = (uint)(1 + indexOffset);
-                rv[i + 4] = (uint)(2 + indexOffset);
-                rv[i + 5] = (uint)(3 + indexOffset);
-
-            }
-             */
             {
             var v = 0;
             var i = 0;

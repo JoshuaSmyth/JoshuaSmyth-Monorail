@@ -417,6 +417,11 @@ namespace OpenGL
         public static Uniform1iDelegate Uniform1i;
 
         [SuppressUnmanagedCodeSecurity()]
+        public delegate void Uniform3fDelegate(int location, float v1, float v2, float v3);
+        [BindMethod("glUniform3f")]
+        public static Uniform3fDelegate Uniform3f;
+
+        [SuppressUnmanagedCodeSecurity()]
         internal delegate void glUniformMatrix4fvDelegate(int location, int count, int transpose, IntPtr data);
         [BindMethod("glUniformMatrix4fv")]
         internal static glUniformMatrix4fvDelegate UniformMatrix4fvInternal;

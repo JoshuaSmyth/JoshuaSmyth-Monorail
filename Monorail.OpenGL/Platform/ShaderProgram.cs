@@ -67,6 +67,13 @@ namespace Monorail.Platform
             }
         }
 
+        public void SetUniform(string uniformParameterName, Vector3 value)
+        {
+            // TODO Cache location
+            var location = GlBindings.GetUniformLocation(ShaderProgramId, uniformParameterName);
+            GlBindings.Uniform3f(location, value.X, value.Y, value.Z);
+        }
+
         public void SetUniform(string uniformParameterName, int value)
         {
             // TODO Cache location
