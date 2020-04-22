@@ -9,7 +9,7 @@ namespace SampleGame
     public class MySampleGame : Game
     {
         // TODO Create resource->Shader manager
-        ShaderProgram m_ShaderProgram;
+        ShaderProgram m_QuadProgram;
         ShaderProgram m_DefaultShaderProgram;
         ShaderProgram m_SkyboxShader;
 
@@ -53,7 +53,7 @@ namespace SampleGame
 
             m_QuadBatch = new QuadBatch();
 
-            m_ShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
+            m_QuadProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
             m_SkyboxShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.skybox.glsl", "Resources/Shaders/Fragment/f.skybox.glsl");
             m_DefaultShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.default.glsl", "Resources/Shaders/Fragment/f.default.glsl");
             
@@ -269,15 +269,13 @@ namespace SampleGame
             }
 
             
-            // Render the cubes
-
+            
             GraphicsDevice.UseShaderProgram(m_DefaultShaderProgram.ShaderProgramId);
-            m_ShaderProgram.SetUniform("texture1", 0);
-            m_ShaderProgram.SetUniform("texture2", 1);
-            m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
-            m_ShaderProgram.SetUniform("view", camera.ViewMatrix);
-            m_ShaderProgram.SetUniform("proj", camera.ProjMatrix);
-          //  m_ShaderProgram.SetUniform("directionalLight", new Vector3(-1,-1,-1));
+
+            m_DefaultShaderProgram.SetUniform("model", camera.WorldMatrix);
+            m_DefaultShaderProgram.SetUniform("view", camera.ViewMatrix);
+            m_DefaultShaderProgram.SetUniform("proj", camera.ProjMatrix);
+            m_DefaultShaderProgram.SetUniform("lightdir",new Vector3(1, -1, 1));
 
             // Render the bunny
             {
@@ -291,10 +289,8 @@ namespace SampleGame
 
                 var m = Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor)) * model;
 
-           
 
-
-                m_ShaderProgram.SetUniform("model", m);
+                m_DefaultShaderProgram.SetUniform("model", m);
 
                 //var normalMatrix = m.Inverse().Transpose();
                 //m_ShaderProgram.SetUniform("norm", normalMatrix);
@@ -312,7 +308,8 @@ namespace SampleGame
                     GraphicsDevice.FillMode(OpenGL.Mode.GL_LINE);
                 }
 
-                m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
+                m_DefaultShaderProgram.SetUniform("model", camera.WorldMatrix);
+                
                 GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
                 GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
 
@@ -335,12 +332,12 @@ namespace SampleGame
 
             }
 
-            GraphicsDevice.UseShaderProgram(m_ShaderProgram.ShaderProgramId);
-            m_ShaderProgram.SetUniform("texture1", 0);
-            m_ShaderProgram.SetUniform("texture2", 1);
-            m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
-            m_ShaderProgram.SetUniform("view", camera.ViewMatrix);
-            m_ShaderProgram.SetUniform("proj", camera.ProjMatrix);
+            GraphicsDevice.UseShaderProgram(m_QuadProgram.ShaderProgramId);
+            m_QuadProgram.SetUniform("texture1", 0);
+            m_QuadProgram.SetUniform("texture2", 1);
+            m_QuadProgram.SetUniform("model", camera.WorldMatrix);
+            m_QuadProgram.SetUniform("view", camera.ViewMatrix);
+            m_QuadProgram.SetUniform("proj", camera.ProjMatrix);
 
             /*
             // Render the Floor quad
@@ -376,7 +373,7 @@ namespace SampleGame
                     rotAxis = rotAxis.Normalize();
                     var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot)) * pos;
 
-                    m_ShaderProgram.SetUniform("model", model);
+                    m_QuadProgram.SetUniform("model", model);
 
                     GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
                 }

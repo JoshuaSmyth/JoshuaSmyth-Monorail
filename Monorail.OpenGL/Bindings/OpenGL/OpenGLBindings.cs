@@ -87,6 +87,7 @@ namespace OpenGL
     {
         LogLength = 0x8B84,
         LinkStatus = 0x8B82,
+        GL_ACTIVE_UNIFORMS = 0x8B86
     }
 
     public enum Capabilities
@@ -296,7 +297,7 @@ namespace OpenGL
         public delegate void AttachShaderDelegate(int programId, int shaderId);
         [BindMethod("glAttachShader")]
         public static AttachShaderDelegate AttachShader;
-        
+
         [SuppressUnmanagedCodeSecurity()]
         public delegate void LinkProgramDelegate(int programId);
         [BindMethod("glLinkProgram")]
@@ -314,7 +315,7 @@ namespace OpenGL
 
         [SuppressUnmanagedCodeSecurity()]
         public delegate void DeleteShaderDelegate(int shaderId);
-        [BindMethod("glDeleteShader")] 
+        [BindMethod("glDeleteShader")]
         public static DeleteShaderDelegate DeleteShader;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -352,28 +353,28 @@ namespace OpenGL
         [BindMethod("glBindTexture")]
         public static BindTextureDelegate BindTexture;
 
-        [SuppressUnmanagedCodeSecurity ()]
-        public unsafe delegate void BufferDataDelegate (BufferTarget target, int size, IntPtr data, BufferUsageHint usage);
+        [SuppressUnmanagedCodeSecurity()]
+        public unsafe delegate void BufferDataDelegate(BufferTarget target, int size, IntPtr data, BufferUsageHint usage);
         [BindMethod("glBufferData")]
         public static BufferDataDelegate BufferData;
 
-        [SuppressUnmanagedCodeSecurity ()]
-        public delegate void VertexAttribPointerDelegate (int location, int elementCount, VertexAttribPointerType type, int normalize, int stride, int offset);
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void VertexAttribPointerDelegate(int location, int elementCount, VertexAttribPointerType type, int normalize, int stride, int offset);
         [BindMethod("glVertexAttribPointer")]
         public static VertexAttribPointerDelegate VertexAttribPointer;
 
-        [SuppressUnmanagedCodeSecurity ()]
-        public delegate void EnableVertexAttribArrayDelegate (int attrib);
-        [BindMethod("glEnableVertexAttribArray")] 
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void EnableVertexAttribArrayDelegate(int attrib);
+        [BindMethod("glEnableVertexAttribArray")]
         public static EnableVertexAttribArrayDelegate EnableVertexAttribArray;
 
-        [SuppressUnmanagedCodeSecurity ()]
-        public delegate void UseProgramDelegate (int program);
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void UseProgramDelegate(int program);
         [BindMethod("glUseProgram")] public static UseProgramDelegate UseProgram;
 
-        [SuppressUnmanagedCodeSecurity ()]
-        public delegate void DrawArraysDelegate (PrimitiveType primitiveType, int offset, int vertexCount);
-        [BindMethod("glDrawArrays")] 
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void DrawArraysDelegate(PrimitiveType primitiveType, int offset, int vertexCount);
+        [BindMethod("glDrawArrays")]
         public static DrawArraysDelegate DrawArrays;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -456,7 +457,7 @@ namespace OpenGL
         [BindMethod("glBlendFunc")]
         public static glBlendFuncDelegate BlendFunc;
 
-        public static void InitaliseOpenGLEntryPoints() 
+        public static void InitaliseOpenGLEntryPoints()
         {
             using (TracedStopwatch.Start("Init OpenGL Bindings"))
             {
@@ -474,43 +475,43 @@ namespace OpenGL
             }
         }
 
-        unsafe static IntPtr MarshalStringToPtr (string str)
+        unsafe static IntPtr MarshalStringToPtr(string str)
         {
-            if (string.IsNullOrEmpty (str)) {
+            if (string.IsNullOrEmpty(str)) {
                 return IntPtr.Zero;
             }
-            int num = Encoding.ASCII.GetMaxByteCount (str.Length) + 1;
-            IntPtr intPtr = Marshal.AllocHGlobal (num);
+            int num = Encoding.ASCII.GetMaxByteCount(str.Length) + 1;
+            IntPtr intPtr = Marshal.AllocHGlobal(num);
             if (intPtr == IntPtr.Zero) {
-                throw new OutOfMemoryException ();
+                throw new OutOfMemoryException();
             }
             fixed (char* chars = str + RuntimeHelpers.OffsetToStringData / 2) {
-                int bytes = Encoding.ASCII.GetBytes (chars, str.Length, (byte*)((void*)intPtr), num);
-                Marshal.WriteByte (intPtr, bytes, 0);
+                int bytes = Encoding.ASCII.GetBytes(chars, str.Length, (byte*)((void*)intPtr), num);
+                Marshal.WriteByte(intPtr, bytes, 0);
                 return intPtr;
             }
         }
 
-        static IntPtr MarshalStringArrayToPtr (string[] strings)
+        static IntPtr MarshalStringArrayToPtr(string[] strings)
         {
             IntPtr intPtr = IntPtr.Zero;
             if (strings != null && strings.Length != 0) {
-                intPtr = Marshal.AllocHGlobal (strings.Length * IntPtr.Size);
+                intPtr = Marshal.AllocHGlobal(strings.Length * IntPtr.Size);
                 if (intPtr == IntPtr.Zero) {
-                    throw new OutOfMemoryException ();
+                    throw new OutOfMemoryException();
                 }
                 int i = 0;
                 try {
                     for (i = 0; i < strings.Length; i++) {
-                        IntPtr val = MarshalStringToPtr (strings [i]);
-                        Marshal.WriteIntPtr (intPtr, i * IntPtr.Size, val);
+                        IntPtr val = MarshalStringToPtr(strings[i]);
+                        Marshal.WriteIntPtr(intPtr, i * IntPtr.Size, val);
                     }
                 }
                 catch (OutOfMemoryException) {
                     for (i--; i >= 0; i--) {
-                        Marshal.FreeHGlobal (Marshal.ReadIntPtr (intPtr, i * IntPtr.Size));
+                        Marshal.FreeHGlobal(Marshal.ReadIntPtr(intPtr, i * IntPtr.Size));
                     }
-                    Marshal.FreeHGlobal (intPtr);
+                    Marshal.FreeHGlobal(intPtr);
                     throw;
                 }
             }
@@ -520,7 +521,7 @@ namespace OpenGL
         public unsafe static void ShaderSource(int shaderId, string code)
         {
             int length = code.Length;
-            IntPtr intPtr = MarshalStringArrayToPtr (new string[] { code });
+            IntPtr intPtr = MarshalStringArrayToPtr(new string[] { code });
             ShaderSourceInternal(shaderId, 1, intPtr, &length);
             FreeStringArrayPtr(intPtr, 1);
         }
@@ -559,12 +560,12 @@ namespace OpenGL
             }
         }
 
-        static void FreeStringArrayPtr (IntPtr ptr, int length)
+        static void FreeStringArrayPtr(IntPtr ptr, int length)
         {
             for (int i = 0; i < length; i++) {
-                Marshal.FreeHGlobal (Marshal.ReadIntPtr (ptr, i * IntPtr.Size));
+                Marshal.FreeHGlobal(Marshal.ReadIntPtr(ptr, i * IntPtr.Size));
             }
-            Marshal.FreeHGlobal (ptr);
+            Marshal.FreeHGlobal(ptr);
         }
 
 
@@ -576,7 +577,7 @@ namespace OpenGL
             }
         }
 
-        public unsafe static void GetShaderInfo (int shaderId, ShaderParameter name, out int result)
+        public unsafe static void GetShaderInfo(int shaderId, ShaderParameter name, out int result)
         {
             fixed (int* ptr = &result)
             {
@@ -584,7 +585,7 @@ namespace OpenGL
             }
         }
 
-        public static unsafe string GetShaderInfoLog (int shaderId) {
+        public static unsafe string GetShaderInfoLog(int shaderId) {
             int length = 0;
             GetShaderInfo(shaderId, ShaderParameter.LogLength, out length);
             byte[] message = new byte[length];
@@ -593,13 +594,20 @@ namespace OpenGL
                 return "Unknown Error";
             }
             fixed (byte* ptr = &message[0]) {
-                GetShaderInfoLogInternal (shaderId, length, IntPtr.Zero, ptr);
+                GetShaderInfoLogInternal(shaderId, length, IntPtr.Zero, ptr);
             }
-            
+
             return Encoding.ASCII.GetString(message);
         }
 
-        public static unsafe string GetProgramInfoLog (int programId)
+        public static unsafe string GetActiveUniformInfo(int programId, int uniformId) 
+        {
+            return "TODO";
+            //glGetActiveUniform(program, (GLuint)i, bufSize, &length, &size, &type, name);
+
+        }
+
+    public static unsafe string GetProgramInfoLog (int programId)
         {
             int length = 0;
             GetProgramInfo(programId, ProgramParameter.LogLength, out length);

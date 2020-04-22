@@ -14,8 +14,11 @@ namespace Monorail.Platform
         
         public static ShaderProgram CreateFromFile(string vertexShaderFileName, string fragmentShaderFileName)
         {
-            using (TracedStopwatch.Start("load shader"))
+            using (TracedStopwatch.Start("load shader: "))
             {
+                Console.WriteLine("VERT:" + vertexShaderFileName);
+                Console.WriteLine("FRAG:" + fragmentShaderFileName);
+
                 // TODO:(Joshua) This should probably be moved from a static method into a method onto a new PlatformAssetLoader class
                 var rv = new ShaderProgram();
                 {
@@ -46,6 +49,8 @@ namespace Monorail.Platform
                         Console.WriteLine("Shader Compilation Failed:/r/n" + error);
                     }
 
+
+
                     // Link Shaders
                     rv.ShaderProgramId = OpenGL.GlBindings.CreateProgram();
                     GlBindings.AttachShader(rv.ShaderProgramId, vertexShader);
@@ -58,6 +63,26 @@ namespace Monorail.Platform
                         var error = OpenGL.GlBindings.GetProgramInfoLog(rv.ShaderProgramId);
                         Console.WriteLine("Shader Link Failed:/r/n" + error);
                     }
+
+                    GlBindings.GetProgramInfo(rv.ShaderProgramId, ProgramParameter.GL_ACTIVE_UNIFORMS, out result);
+                    //if (result != (int)Result.Ok)
+                    {
+                        Console.WriteLine("Active Uniform Count:" + (int)result);
+                    }
+
+                    for (var i = 0; i < result; i++)
+                    {
+                        var uniformInfo = GlBindings.GetActiveUniformInfo(rv.ShaderProgramId, i);
+                        Console.WriteLine("Active Uniform: " + uniformInfo);
+
+                    }
+
+                    /*
+                     * glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
+printf("Active Uniforms: %d\n", count);
+
+
+                     */
 
                     GlBindings.DeleteShader(fragmentShader);
                     GlBindings.DeleteShader(vertexShader);

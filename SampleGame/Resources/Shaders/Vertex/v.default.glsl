@@ -12,7 +12,6 @@ out vec3 nNormal;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-uniform mat4 norm;
 
 void main()
 {
@@ -21,8 +20,7 @@ void main()
 
 	gl_Position = proj * view * model * vec4(aPos, 1.0);
 
-
 	// Todo this should be cpu side and passed as uniform
 	mat3 newNorm = mat3(model);
-	nNormal = newNorm * aNormal; //vec4(aNormal,0.0f)).xyz;
+	nNormal = newNorm * aNormal;
 }
