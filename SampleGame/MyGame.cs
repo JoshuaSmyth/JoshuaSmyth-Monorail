@@ -7,13 +7,12 @@ using System;
 
 namespace SampleGame
 {
-
-
     public interface IRenderableObject
     {
         int ShaderId { get; set; }
         int VaoId { get; set; }
         int VertexCount { get; set; }
+        bool HasIndexBuffer { get; set; }
 
         // TODO switch to array of textures
         int TextureIdA { get; set; }
@@ -21,8 +20,56 @@ namespace SampleGame
         int CubemapTextureId { get; set; }
 
         bool DepthBufferEnabled { get; set; }
-
+        
         void OnApplyUniforms(RenderQueue renderQueue, GameCamera camera);
+    }
+
+    public class BunnyModel : IRenderableObject
+    {
+        public int ShaderId { get; set; }
+        public int VaoId { get; set; }
+        public int VertexCount { get; set; }
+        public int TextureIdA { get; set; }
+        public int TextureIdB { get; set; }
+        public int CubemapTextureId { get; set; }
+        public bool DepthBufferEnabled { get; set; }
+        public bool HasIndexBuffer { get; set; }
+
+        Matrix4 model;
+
+        public BunnyModel(int shaderId, int vaoId, int vertexCount)
+        {
+            ShaderId = shaderId;
+            VaoId = vaoId;
+            VertexCount = vertexCount;
+
+            HasIndexBuffer = true;
+            CubemapTextureId = -1;
+            TextureIdA = -1;
+            TextureIdB = -1;
+            DepthBufferEnabled = true;
+        }
+
+        public void OnApplyUniforms(RenderQueue renderQueue, GameCamera camera)
+        {
+            renderQueue.SetUniform(ShaderId, "model", model);
+            renderQueue.SetUniform(ShaderId, "view", camera.ViewMatrix);
+            renderQueue.SetUniform(ShaderId, "proj", camera.ProjMatrix);
+            renderQueue.SetUniform(ShaderId, "lightdir", new Vector3(1, -1, 1));
+        }
+
+        float rot;
+        public void Update(long elapsedMilliseconds)
+        {
+            rot += (float)(GameTime.ElapsedSeconds * 15.0f);
+            var scalefactor = (float)(12.0f * Math.Sin(rot * 0.1f) * Math.Sin(rot * 0.1f) + 2);
+
+            var rotAxis = new Vector3(0.0f, 1.0f, 0.0f);
+            rotAxis = rotAxis.Normalize();
+            var r = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot * 16));
+
+            model = Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor))*r;
+        }
     }
 
     public class SkyBox : IRenderableObject
@@ -34,9 +81,12 @@ namespace SampleGame
         public int TextureIdB { get; set; }
         public int CubemapTextureId { get; set; }
         public bool DepthBufferEnabled { get; set; }
+        public bool HasIndexBuffer { get; set; }
 
         public SkyBox(int shaderId, int vaoId, int vertexCount, int cubeMapId)
         {
+            HasIndexBuffer = false;
+
             ShaderId = shaderId;
             VaoId = vaoId;
             VertexCount = vertexCount;
@@ -53,7 +103,6 @@ namespace SampleGame
             renderQueue.SetUniform(ShaderId, "view", camera.GetLookAtMatrix());
             renderQueue.SetUniform(ShaderId, "proj", camera.ProjMatrix);
             renderQueue.SetUniform(ShaderId, "skybox", 0);
-
         }
     }
 
@@ -67,7 +116,7 @@ namespace SampleGame
 
         public void Render(IRenderableObject renderObject, GameCamera camera)
         {
-            // TODO this should actually enqueue
+            // TODO this should actually enqueue rather than render but hey!
 
             if (renderObject.DepthBufferEnabled == false)
             {
@@ -84,7 +133,15 @@ namespace SampleGame
             renderObject.OnApplyUniforms(this, camera);
             
             m_Graphics.UseVertexArrayObject(renderObject.VaoId);
-            m_Graphics.DrawArrays(PrimitiveType.TriangleList, 0, renderObject.VertexCount);
+
+            if (renderObject.HasIndexBuffer)
+            {
+                m_Graphics.DrawElements(PrimitiveType.TriangleList, renderObject.VertexCount, DrawElementsType.UnsignedInt, 0);
+            }
+            else
+            {
+                m_Graphics.DrawArrays(PrimitiveType.TriangleList, 0, renderObject.VertexCount);
+            }
 
             if (renderObject.DepthBufferEnabled == false)
             {
@@ -114,10 +171,16 @@ namespace SampleGame
         }
     }
 
+    public class ResourceManager
+    {
+        // TODO;
+    }
+
     public class MySampleGame : Game
     {
         RenderQueue m_RenderQueue;
         SkyBox m_SkyBox;
+        BunnyModel m_BunnyModel;
 
         // TODO Create resource->Shader manager
         ShaderProgram m_QuadProgram;
@@ -125,7 +188,6 @@ namespace SampleGame
         ShaderProgram m_SkyboxShader;
 
         // TODO Create resource->Geometry Manager
-        VertexArrayObject m_TriVertexArrayObject;
         VertexArrayObject m_QuadVertexArrayObject;
         VertexArrayObject m_SkyBoxVAO;
         VertexArrayObject m_Cube;
@@ -205,6 +267,8 @@ namespace SampleGame
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
                 m_Bunny = new VertexArrayObject();
                m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+
+                m_BunnyModel = new BunnyModel(m_DefaultShaderProgram.ShaderProgramId, m_Bunny.VertexArrayObjectId, m_Bunny.VertexCount);
             }
 
             // Create Cube
@@ -266,38 +330,10 @@ namespace SampleGame
         public override void RenderScene()
         {
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
-            
-            // TODO Update the skybox renderObject before submitting
 
             m_RenderQueue.Render(m_SkyBox, camera);
+            m_RenderQueue.Render(m_BunnyModel, camera);
 
-
-            // Todo Render Bunny
-            {
-                GraphicsDevice.UseShaderProgram(m_DefaultShaderProgram.ShaderProgramId);
-
-                m_DefaultShaderProgram.SetUniform("model", camera.WorldMatrix);
-                m_DefaultShaderProgram.SetUniform("view", camera.ViewMatrix);
-                m_DefaultShaderProgram.SetUniform("proj", camera.ProjMatrix);
-
-                m_DefaultShaderProgram.SetUniform("lightdir", new Vector3(1, -1, 1));
-
-                // Render the bunny
-                {
-                    var scalefactor = (float)(12.0f * Math.Sin(rot * 0.1f) * Math.Sin(rot * 0.1f) + 2);
-
-                    var rotAxis = new Vector3(0.0f, 1.0f, 0.0f);
-                    rotAxis = rotAxis.Normalize();
-                    var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot * 16));
-
-                    var m = Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor)) * model;
-
-                    m_DefaultShaderProgram.SetUniform("model", m);
-
-                    GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
-                    GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
-                }
-            }
 
             // Render Terrain
             {
@@ -331,7 +367,7 @@ namespace SampleGame
             }
 
 
-            if (true)
+            // Render Quads
             {
                 GraphicsDevice.UseShaderProgram(m_QuadProgram.ShaderProgramId);
                 m_QuadProgram.SetUniform("texture1", 0);
@@ -340,7 +376,6 @@ namespace SampleGame
                 m_QuadProgram.SetUniform("view", camera.ViewMatrix);
                 m_QuadProgram.SetUniform("proj", camera.ProjMatrix);
             
-
                 GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
                 GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
@@ -362,12 +397,6 @@ namespace SampleGame
                     GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
                 }
             }
-
-            
-
-            // Unbind textures
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
         }
 
         public override void Render2D()
@@ -403,6 +432,7 @@ namespace SampleGame
         {
             base.Update();
             camera.Update();
+            m_BunnyModel.Update(GameTime.ElapsedMilliseconds);
 
             rot += (float)(GameTime.ElapsedSeconds * 15.0f);
 
