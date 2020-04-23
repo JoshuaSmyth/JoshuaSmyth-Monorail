@@ -79,9 +79,8 @@ namespace Monorail.Platform
 
                     /*
                      * glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
-printf("Active Uniforms: %d\n", count);
-
-
+                        printf("Active Uniforms: %d\n", count);
+                        
                      */
 
                     GlBindings.DeleteShader(fragmentShader);

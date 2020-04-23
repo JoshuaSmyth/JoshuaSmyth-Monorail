@@ -2,12 +2,123 @@
 using Monorail.Graphics;
 using Monorail.Mathlib;
 using Monorail.Platform;
+using OpenGL;
 using System;
 
 namespace SampleGame
 {
+
+
+    public interface IRenderableObject
+    {
+        int ShaderId { get; set; }
+        int VaoId { get; set; }
+        int VertexCount { get; set; }
+
+        // TODO switch to array of textures
+        int TextureIdA { get; set; }
+        int TextureIdB { get; set; }
+        int CubemapTextureId { get; set; }
+
+        bool DepthBufferEnabled { get; set; }
+
+        void OnApplyUniforms(RenderQueue renderQueue, GameCamera camera);
+    }
+
+    public class SkyBox : IRenderableObject
+    {
+        public int ShaderId { get; set; }
+        public int VaoId { get; set; }
+        public int VertexCount { get; set; }
+        public int TextureIdA { get; set; }
+        public int TextureIdB { get; set; }
+        public int CubemapTextureId { get; set; }
+        public bool DepthBufferEnabled { get; set; }
+
+        public SkyBox(int shaderId, int vaoId, int vertexCount, int cubeMapId)
+        {
+            ShaderId = shaderId;
+            VaoId = vaoId;
+            VertexCount = vertexCount;
+            CubemapTextureId = cubeMapId;
+
+            // TODO
+            TextureIdA = -1;
+            TextureIdB = -1;
+            DepthBufferEnabled = false;
+        }
+
+        public void OnApplyUniforms(RenderQueue renderQueue, GameCamera camera)
+        {
+            renderQueue.SetUniform(ShaderId, "view", camera.GetLookAtMatrix());
+            renderQueue.SetUniform(ShaderId, "proj", camera.ProjMatrix);
+            renderQueue.SetUniform(ShaderId, "skybox", 0);
+
+        }
+    }
+
+    public class RenderQueue
+    {
+        IPlatformGraphicsDevice m_Graphics;
+        public RenderQueue(IPlatformGraphicsDevice graphicsDevice)
+        {
+            m_Graphics = graphicsDevice;
+        }
+
+        public void Render(IRenderableObject renderObject, GameCamera camera)
+        {
+            // TODO this should actually enqueue
+
+            if (renderObject.DepthBufferEnabled == false)
+            {
+                m_Graphics.Disable(OpenGL.Enable.GL_DEPTH_TEST);
+            }
+
+            if (renderObject.CubemapTextureId > -1)
+            {
+                m_Graphics.BindTexture(renderObject.CubemapTextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
+            }
+
+            m_Graphics.UseShaderProgram(renderObject.ShaderId);
+            
+            renderObject.OnApplyUniforms(this, camera);
+            
+            m_Graphics.UseVertexArrayObject(renderObject.VaoId);
+            m_Graphics.DrawArrays(PrimitiveType.TriangleList, 0, renderObject.VertexCount);
+
+            if (renderObject.DepthBufferEnabled == false)
+            {
+                m_Graphics.Enable(OpenGL.Enable.GL_DEPTH_TEST);
+            }
+        }
+
+        public void SetUniform(int shaderId, string uniformParameterName, Vector3 value)
+        {
+            // TODO Cache location
+            var location = GlBindings.GetUniformLocation(shaderId, uniformParameterName);
+            GlBindings.Uniform3f(location, value.X, value.Y, value.Z);
+        }
+
+        public void SetUniform(int shaderId, string uniformParameterName, int value)
+        {
+            // TODO Cache location
+            var location = GlBindings.GetUniformLocation(shaderId, uniformParameterName);
+            GlBindings.Uniform1i(location, value);
+        }
+
+        public void SetUniform(int shaderId, string uniformParameterName, Matrix4 transform)
+        {
+            // TODO Cache location
+            var location = GlBindings.GetUniformLocation(shaderId, uniformParameterName);
+            GlBindings.UniformMatrix4fv(location, 1, 0, transform);
+        }
+    }
+
     public class MySampleGame : Game
     {
+        RenderQueue m_RenderQueue;
+        SkyBox m_SkyBox;
+
         // TODO Create resource->Shader manager
         ShaderProgram m_QuadProgram;
         ShaderProgram m_DefaultShaderProgram;
@@ -16,7 +127,7 @@ namespace SampleGame
         // TODO Create resource->Geometry Manager
         VertexArrayObject m_TriVertexArrayObject;
         VertexArrayObject m_QuadVertexArrayObject;
-        VertexArrayObject m_SkyBox;
+        VertexArrayObject m_SkyBoxVAO;
         VertexArrayObject m_Cube;
         VertexArrayObject m_Bunny;
         VertexArrayObject m_Terrain;
@@ -55,22 +166,10 @@ namespace SampleGame
 
             m_QuadProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
             m_SkyboxShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.skybox.glsl", "Resources/Shaders/Fragment/f.skybox.glsl");
+
+
             m_DefaultShaderProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.default.glsl", "Resources/Shaders/Fragment/f.default.glsl");
             
-            // Create Triangle
-            {
-                var triVerts = new VertexPositionColor[3];
-                triVerts[0].Position = new Vector3(-0.5f, -0.5f, 0.0f);
-                triVerts[1].Position = new Vector3(0.5f, -0.5f, 0.0f);
-                triVerts[2].Position = new Vector3(0.0f, 0.5f, 0.0f);
-
-                triVerts[0].Color = new Vector3(1, 0, 0);
-                triVerts[1].Color = new Vector3(1, 1, 1);
-                triVerts[2].Color = new Vector3(0, 0, 1);
-
-                m_TriVertexArrayObject = new VertexArrayObject();
-                m_TriVertexArrayObject.BindArrayBuffer(triVerts, VertexPositionColor.Stride, VertexPositionColor.AttributeLengths, VertexPositionColor.AttributeOffsets);
-            }
             
             // Create Textured Indexed Quad
             {
@@ -93,7 +192,7 @@ namespace SampleGame
 
             // Create Water
             {
-                var model = ModelLoader.CreatePlane(1024, 1024, 12.2f);
+                var model = ModelLoader.CreatePlane(512, 512, 12.2f);
 
 
                 m_Water = new VertexArrayObject();
@@ -106,8 +205,6 @@ namespace SampleGame
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
                 m_Bunny = new VertexArrayObject();
                m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
-
-               //     m_Bunny.BindArrayBuffer(bunnyVerts.Verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
             }
 
             // Create Cube
@@ -135,8 +232,8 @@ namespace SampleGame
             // Create Skyubox
             {
                 var verts = Geometry.CreateSkyBox();
-                m_SkyBox = new VertexArrayObject();
-                m_SkyBox.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
+                m_SkyBoxVAO = new VertexArrayObject();
+                m_SkyBoxVAO.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
 
                 // Load Skybox Texture
                     m_CubeMap = TextureCubeMap.CreateFromFile("Resources/Textures/Skybox/front.png",
@@ -145,7 +242,8 @@ namespace SampleGame
                                                               "Resources/Textures/Skybox/top.png",
                                                               "Resources/Textures/Skybox/left.png",
                                                               "Resources/Textures/Skybox/right.png");
-                
+
+                m_SkyBox = new SkyBox(m_SkyboxShader.ShaderProgramId, m_SkyBoxVAO.VertexArrayObjectId, m_SkyBoxVAO.VertexCount, m_CubeMap.TextureId);
             }
 
             // Load Font
@@ -160,9 +258,146 @@ namespace SampleGame
                 m_Default = Texture2D.CreateFromFile("Resources/Textures/default.png");
             }
 
-
+            m_RenderQueue = new RenderQueue(this.GraphicsDevice);
+           
 
         }
+
+        public override void RenderScene()
+        {
+            GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
+            
+            // TODO Update the skybox renderObject before submitting
+
+            m_RenderQueue.Render(m_SkyBox, camera);
+
+
+            // Todo Render Bunny
+            {
+                GraphicsDevice.UseShaderProgram(m_DefaultShaderProgram.ShaderProgramId);
+
+                m_DefaultShaderProgram.SetUniform("model", camera.WorldMatrix);
+                m_DefaultShaderProgram.SetUniform("view", camera.ViewMatrix);
+                m_DefaultShaderProgram.SetUniform("proj", camera.ProjMatrix);
+
+                m_DefaultShaderProgram.SetUniform("lightdir", new Vector3(1, -1, 1));
+
+                // Render the bunny
+                {
+                    var scalefactor = (float)(12.0f * Math.Sin(rot * 0.1f) * Math.Sin(rot * 0.1f) + 2);
+
+                    var rotAxis = new Vector3(0.0f, 1.0f, 0.0f);
+                    rotAxis = rotAxis.Normalize();
+                    var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot * 16));
+
+                    var m = Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor)) * model;
+
+                    m_DefaultShaderProgram.SetUniform("model", m);
+
+                    GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
+                    GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
+                }
+            }
+
+            // Render Terrain
+            {
+                // TODO Toogle with tab
+                if (this.IsWireframeMode)
+                {
+                    GraphicsDevice.FillMode(OpenGL.Mode.GL_LINE);
+                }
+
+                m_DefaultShaderProgram.SetUniform("model", camera.WorldMatrix);
+                
+                GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
+
+                if (this.IsWireframeMode)
+                {
+                    GraphicsDevice.FillMode(OpenGL.Mode.GL_FILL);
+                }
+            }
+
+            // Render Water
+            {
+                GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
+                GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
+
+                // TODO Set water shader
+                GraphicsDevice.UseVertexArrayObject(m_Water.VertexArrayObjectId);
+                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Water.VertexCount, DrawElementsType.UnsignedInt, 0);
+
+                GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
+            }
+
+
+            if (true)
+            {
+                GraphicsDevice.UseShaderProgram(m_QuadProgram.ShaderProgramId);
+                m_QuadProgram.SetUniform("texture1", 0);
+                m_QuadProgram.SetUniform("texture2", 1);
+                m_QuadProgram.SetUniform("model", camera.WorldMatrix);
+                m_QuadProgram.SetUniform("view", camera.ViewMatrix);
+                m_QuadProgram.SetUniform("proj", camera.ProjMatrix);
+            
+
+                GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
+                GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
+
+                GraphicsDevice.UseVertexArrayObject(m_Cube.VertexArrayObjectId);
+                var cubeCount = Positions.Length;
+
+                for (var i = 0; i < cubeCount; i++)
+                {
+                    // calculate the model matrix for each object and pass it to shader before drawing
+                    var pos = Matrix4.CreateTranslation(Positions[i]);
+                    float angle = 20.0f * i;
+
+                    var rotAxis = new Vector3(1.0f, 0.0f, 1.0f);
+                    rotAxis = rotAxis.Normalize();
+                    var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot)) * pos;
+
+                    m_QuadProgram.SetUniform("model", model);
+
+                    GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
+                }
+            }
+
+            
+
+            // Unbind textures
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
+        }
+
+        public override void Render2D()
+        {
+            // THis just draws the text behind atm
+            //GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
+
+            GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
+            GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
+
+            GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
+            GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
+
+            /*
+            m_QuadBatch.Start();
+
+            m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
+            m_QuadBatch.DrawText("Bunny!", new Vector2(10,80), m_FontAriel, PresetColors.White);
+            m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
+
+            m_QuadBatch.Commit();
+            */
+
+            GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
+
+            // Unbind textures
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
+            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
+        }
+
 
         public override void Update()
         {
@@ -188,7 +423,7 @@ namespace SampleGame
                 }
             }
 
-            if ( this.Input.IsDown(KeyCode.KEYCODE_S))
+            if (this.Input.IsDown(KeyCode.KEYCODE_S))
             {
                 if (this.Input.IsDown(KeyCode.KEYCODE_LSHIFT))
                 {
@@ -245,172 +480,5 @@ namespace SampleGame
             }
         }
 
-        public override void RenderScene()
-        {
-            GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
-
-            // Render the skybox (TODO Move to the end of the pipeline)
-            {
-                GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
-
-            //    GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LEQUAL);
-                GraphicsDevice.BindTexture(m_CubeMap.TextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
-
-                GraphicsDevice.UseShaderProgram(m_SkyboxShader.ShaderProgramId);
-                m_SkyboxShader.SetUniform("view", camera.GetLookAtMatrix());
-                m_SkyboxShader.SetUniform("proj", camera.ProjMatrix);
-                m_SkyboxShader.SetUniform("skybox", 0);
-
-                GraphicsDevice.UseVertexArrayObject(m_SkyBox.VertexArrayObjectId);
-                GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
-                //  GraphicsDevice.DepthFunc(OpenGL.DepthFunc.GL_LESS);
-                GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
-
-            }
-
-            
-            
-            GraphicsDevice.UseShaderProgram(m_DefaultShaderProgram.ShaderProgramId);
-
-            m_DefaultShaderProgram.SetUniform("model", camera.WorldMatrix);
-            m_DefaultShaderProgram.SetUniform("view", camera.ViewMatrix);
-            m_DefaultShaderProgram.SetUniform("proj", camera.ProjMatrix);
-            m_DefaultShaderProgram.SetUniform("lightdir",new Vector3(1, -1, 1));
-
-            // Render the bunny
-            {
-                // TODO This does not render correctly yet.
-                // Note: Probably need a basic lighting shader 
-                var scalefactor = (float)( 12.0f * Math.Sin(rot * 0.1f) * Math.Sin(rot*0.1f)+2);
-
-                var rotAxis = new Vector3(0.0f, 1.0f, 0.0f);
-                rotAxis = rotAxis.Normalize();
-                var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot*16));
-
-                var m = Matrix4.CreateScaling(new Vector3(scalefactor, scalefactor, scalefactor)) * model;
-
-
-                m_DefaultShaderProgram.SetUniform("model", m);
-
-                //var normalMatrix = m.Inverse().Transpose();
-                //m_ShaderProgram.SetUniform("norm", normalMatrix);
-                
-                GraphicsDevice.UseVertexArrayObject(m_Bunny.VertexArrayObjectId);
-
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList,  m_Bunny.VertexCount, DrawElementsType.UnsignedInt, 0);
-            }
-
-            // Render Terrain
-            {
-                // TODO Toogle with tab
-                if (this.IsWireframeMode)
-                {
-                    GraphicsDevice.FillMode(OpenGL.Mode.GL_LINE);
-                }
-
-                m_DefaultShaderProgram.SetUniform("model", camera.WorldMatrix);
-                
-                GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
-
-                if (this.IsWireframeMode)
-                {
-                    GraphicsDevice.FillMode(OpenGL.Mode.GL_FILL);
-                }
-            }
-
-            // Render Water
-            {
-                GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
-                GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
-
-                // TODO Set water shader
-                GraphicsDevice.UseVertexArrayObject(m_Water.VertexArrayObjectId);
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Water.VertexCount, DrawElementsType.UnsignedInt, 0);
-
-                GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
-
-            }
-
-            GraphicsDevice.UseShaderProgram(m_QuadProgram.ShaderProgramId);
-            m_QuadProgram.SetUniform("texture1", 0);
-            m_QuadProgram.SetUniform("texture2", 1);
-            m_QuadProgram.SetUniform("model", camera.WorldMatrix);
-            m_QuadProgram.SetUniform("view", camera.ViewMatrix);
-            m_QuadProgram.SetUniform("proj", camera.ProjMatrix);
-
-            /*
-            // Render the Floor quad
-            {
-                m_ShaderProgram.SetUniform("model", camera.WorldMatrix);
-                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
-                GraphicsDevice.BindTexture2D(m_Default.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
-                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_NEAREST);
-
-                GraphicsDevice.UseVertexArrayObject(m_QuadVertexArrayObject.VertexArrayObjectId);
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, 1 * 6, DrawElementsType.UnsignedInt, 0);
-
-                GraphicsDevice.SetTextureSamplingAttribute(OpenGL.TextureAttributeValue.GL_LINEAR);
-            }*/
-
-        
-
-            if (true)
-            {
-                GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
-                GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
-
-                GraphicsDevice.UseVertexArrayObject(m_Cube.VertexArrayObjectId);
-                var cubeCount = Positions.Length;
-
-                for (var i = 0; i < cubeCount; i++)
-                {
-                    // calculate the model matrix for each object and pass it to shader before drawing
-                    var pos = Matrix4.CreateTranslation(Positions[i]);
-                    float angle = 20.0f * i;
-
-                    var rotAxis = new Vector3(1.0f, 0.0f, 1.0f);
-                    rotAxis = rotAxis.Normalize();
-                    var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot)) * pos;
-
-                    m_QuadProgram.SetUniform("model", model);
-
-                    GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
-                }
-            }
-
-            
-
-            // Unbind textures
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
-        }
-
-        public override void Render2D()
-        {
-            // THis just draws the text behind atm
-            //GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
-
-            GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
-            GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
-
-            GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
-            GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
-
-            /*
-            m_QuadBatch.Start();
-
-            m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
-            m_QuadBatch.DrawText("Bunny!", new Vector2(10,80), m_FontAriel, PresetColors.White);
-            m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
-
-            m_QuadBatch.Commit();
-            */
-            GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
-
-            // Unbind textures
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
-        }
     }
 }
