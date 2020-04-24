@@ -51,6 +51,8 @@
     <Compile Include="Bindings\SDL\SDL2_mixer.cs" />
     <Compile Include="Bindings\SDL\SDL2_ttf.cs" />
     <Compile Include="Graphics\ModelLoader.cs" />
+    <Compile Include="Graphics\RenderableObject.cs" />
+    <Compile Include="Graphics\RenderQueue.cs" />
     <Compile Include="Mathlib\BoundingBox.cs" />
     <Compile Include="Mathlib\Frustum.cs" />
     <Compile Include="Mathlib\Matrix4.cs" />

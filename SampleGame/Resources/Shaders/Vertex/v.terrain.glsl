@@ -8,6 +8,7 @@ layout (location = 3) in vec3 aNormal;
 out vec4 vColor;
 out vec2 TexCoord;
 out vec3 nNormal;
+out vec3 vPos;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -19,6 +20,8 @@ void main()
 	TexCoord = aTexCoord.xy;
 
 	gl_Position = proj * view * model * vec4(aPos, 1.0);
+
+	vPos = vec3(model * vec4(aPos, 1.0));
 
 	// Todo this should be cpu side and passed as uniform
 	mat3 newNorm = mat3(model);
