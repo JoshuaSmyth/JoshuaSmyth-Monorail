@@ -6,37 +6,27 @@ using Monorail.Platform;
 using OpenGL;
 using SampleGame.GameObjects;
 using System;
+using System.Collections.Generic;
 
 namespace SampleGame
 {
-    public class ResourceManager
-    {
-        // TODO;
-    }
-
     public class MySampleGame : Game
     {
         RenderQueue m_RenderQueue;
 
         // Render Objects
-        SkyBox m_SkyBox;
-        Bunny m_BunnyModel;
-        Terrain m_Terrain;
-        Water m_Water;
+        SkyBox m_SkyBoxRenderObject;
+        Bunny m_BunnyRenderObject;
+        Terrain m_TerrainRenderObject;
+        Water m_WaterRenderObject;
 
-        // TODO Create resource->Shader manager
-        ShaderProgram m_QuadProgram;
-        ShaderProgram m_terrainShder;
-        ShaderProgram m_SkyboxShader;
-        ShaderProgram m_WaterShader;
+        Cube[] m_Cube;
+
+        ShaderProgram m_QuadShader;
 
         // TODO Create resource->Geometry Manager
         VertexArrayObject m_QuadVertexArrayObject;
         VertexArrayObject m_CubeVAO;
-        //VertexArrayObject m_waterVAO;
-        //VertexArrayObject m_TerrainVAO;
-        //VertexArrayObject m_Bunny;
-        //VertexArrayObject m_SkyBoxVAO;
 
         // TODO Create resource->Texture Manager
         Texture2D m_Texture;
@@ -48,9 +38,6 @@ namespace SampleGame
 
         // TODO Create resource->CubeMap Manager
         TextureCubeMap m_CubeMap;
-
-        // TODO Create resource->Heightmap Manager
-        //HeightMapData m_HeightMapData;
 
         // TODO Create resource->QuadBatch Manager...
         QuadBatch m_QuadBatch;
@@ -65,15 +52,17 @@ namespace SampleGame
 
         public override void Load()
         {
+            m_ResourceManager = new ResourceManager(); // TODO THis should be provided by the base class
+
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
 
             m_QuadBatch = new QuadBatch();
 
-            m_QuadProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
-            m_SkyboxShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.skybox.glsl", "Resources/Shaders/Fragment/f.skybox.glsl");
-            m_terrainShder = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.terrain.glsl", "Resources/Shaders/Fragment/f.terrain.glsl");
+            m_QuadShader = m_ResourceManager.LoadShader("vert1.glsl", "frag1.glsl");
 
-            m_WaterShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.water.glsl", "Resources/Shaders/Fragment/f.water.glsl");
+            var skyboxShader = m_ResourceManager.LoadShader("v.skybox.glsl", "f.skybox.glsl");
+            var terrainShader = m_ResourceManager.LoadShader("v.terrain.glsl", "f.terrain.glsl");
+            var waterShader = m_ResourceManager.LoadShader("v.water.glsl", "f.water.glsl");
 
             // Create Textured Indexed Quad
             {
@@ -93,7 +82,7 @@ namespace SampleGame
                 var terrainVAO = new VertexArrayObject();
                 terrainVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
-                m_Terrain = new Terrain(m_terrainShder.ShaderProgramId, terrainVAO.VertexArrayObjectId, terrainVAO.VertexCount);
+                m_TerrainRenderObject = new Terrain(terrainShader.ShaderProgramId, terrainVAO.VertexArrayObjectId, terrainVAO.VertexCount);
             }
 
             // Create Water
@@ -104,7 +93,7 @@ namespace SampleGame
                 var waterVAO = new VertexArrayObject();
                 waterVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
-                m_Water = new Water(m_WaterShader.ShaderProgramId, waterVAO.VertexArrayObjectId, waterVAO.VertexCount);
+                m_WaterRenderObject = new Water(waterShader.ShaderProgramId, waterVAO.VertexArrayObjectId, waterVAO.VertexCount);
             }
         
 
@@ -116,13 +105,13 @@ namespace SampleGame
                 var bunnyVAO = new VertexArrayObject();
                 bunnyVAO.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
-                m_BunnyModel = new Bunny(m_terrainShder.ShaderProgramId, bunnyVAO.VertexArrayObjectId, bunnyVAO.VertexCount);
+                m_BunnyRenderObject = new Bunny(terrainShader.ShaderProgramId, bunnyVAO.VertexArrayObjectId, bunnyVAO.VertexCount);
             }
 
             // Create Cube
             {
                 var verts = Geometry.CreateCube();
-                m_CubeVAO = new VertexArrayObject();
+                m_CubeVAO = new VertexArrayObject();    // TODO Generate indicies
                 m_CubeVAO.BindArrayBuffer(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
 
                 // Create Cube Positions
@@ -157,7 +146,7 @@ namespace SampleGame
                                                             "Resources/Textures/Skybox/left.png",
                                                             "Resources/Textures/Skybox/right.png");
 
-                m_SkyBox = new SkyBox(m_SkyboxShader.ShaderProgramId, skyboxVAO.VertexArrayObjectId, skyboxVAO.VertexCount, m_CubeMap.TextureId);
+                m_SkyBoxRenderObject = new SkyBox(skyboxShader.ShaderProgramId, skyboxVAO.VertexArrayObjectId, skyboxVAO.VertexCount, m_CubeMap.TextureId);
             }
 
             // Load Font
@@ -179,19 +168,21 @@ namespace SampleGame
         {
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
 
-            m_RenderQueue.Render(m_SkyBox, camera);
-            m_RenderQueue.Render(m_BunnyModel, camera);
-            m_RenderQueue.Render(m_Terrain, camera);
-            m_RenderQueue.Render(m_Water, camera);
+            m_RenderQueue.Render(m_SkyBoxRenderObject, camera);
+            m_RenderQueue.Render(m_BunnyRenderObject, camera);
+            m_RenderQueue.Render(m_TerrainRenderObject, camera);
+            m_RenderQueue.Render(m_WaterRenderObject, camera);
+
+
 
             // Render Cubes
             {
-                GraphicsDevice.UseShaderProgram(m_QuadProgram.ShaderProgramId);
-                m_QuadProgram.SetUniform("texture1", 0);
-                m_QuadProgram.SetUniform("texture2", 1);
-                m_QuadProgram.SetUniform("model", camera.WorldMatrix);
-                m_QuadProgram.SetUniform("view", camera.ViewMatrix);
-                m_QuadProgram.SetUniform("proj", camera.ProjMatrix);
+                GraphicsDevice.UseShaderProgram(m_QuadShader.ShaderProgramId);
+                m_QuadShader.SetUniform("texture1", 0);
+                m_QuadShader.SetUniform("texture2", 1);
+                m_QuadShader.SetUniform("model", camera.WorldMatrix);
+                m_QuadShader.SetUniform("view", camera.ViewMatrix);
+                m_QuadShader.SetUniform("proj", camera.ProjMatrix);
             
                 GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
                 GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
@@ -209,7 +200,7 @@ namespace SampleGame
                     rotAxis = rotAxis.Normalize();
                     var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot)) * pos;
 
-                    m_QuadProgram.SetUniform("model", model);
+                    m_QuadShader.SetUniform("model", model);
 
                     GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
                 }
@@ -249,7 +240,7 @@ namespace SampleGame
         {
             base.Update();
             camera.Update();
-            m_BunnyModel.Update(GameTime.ElapsedMilliseconds);
+            m_BunnyRenderObject.Update(GameTime.ElapsedMilliseconds);
 
             rot += (float)(GameTime.ElapsedSeconds * 15.0f);
 

@@ -11,17 +11,14 @@ namespace Monorail.Platform
         public GameWindow Window;
         public Coroutines Coroutines;
         public GameInput Input;
-        
+        public ResourceManager m_ResourceManager;
+
         public Game()
         {
-            // TODO Init Window
-
-            // TODO Init Graphics Device
-
-            // TODO Init Audio Device
-
             Coroutines = new Coroutines();
             DependancyLocator.AddDepenancy(Coroutines);
+
+            m_ResourceManager = new ResourceManager();
         }
 
         internal void Init(IPlatformAudioDevice audioDevice,

@@ -12,7 +12,11 @@ namespace Monorail.Platform
     {
         public int ShaderProgramId { get;  private set; }
         
-        public static ShaderProgram CreateFromFile(string vertexShaderFileName, string fragmentShaderFileName)
+        public string VertexShaderFileName { get; private set; }
+
+        public string FragmentShaderFileName { get; private set; }
+
+        internal static ShaderProgram CreateFromFile(string vertexShaderFileName, string fragmentShaderFileName)
         {
             using (TracedStopwatch.Start("load shader: "))
             {
@@ -21,6 +25,8 @@ namespace Monorail.Platform
 
                 // TODO:(Joshua) This should probably be moved from a static method into a method onto a new PlatformAssetLoader class
                 var rv = new ShaderProgram();
+                rv.VertexShaderFileName = vertexShaderFileName;
+                rv.FragmentShaderFileName = fragmentShaderFileName;
                 {
                     // Vertex Shader
                     var vertShader = File.ReadAllText(vertexShaderFileName);

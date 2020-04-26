@@ -68,6 +68,7 @@
     <Compile Include="Platform\GameCamera.cs" />
     <Compile Include="Platform\GameInput.cs" />
     <Compile Include="Platform\TextureCubeMap.cs" />
+    <Compile Include="ResourceManager.cs" />
     <Compile Include="Services\Async\Continuation.cs" />
     <Compile Include="Services\Async\Coroutines.cs" />
     <Compile Include="Services\Async\ParallelContinuation.cs" />
