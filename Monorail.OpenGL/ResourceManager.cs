@@ -16,11 +16,38 @@ namespace Monorail
         private Dictionary<int, VertexArrayObject> VertexArrayObjects = new Dictionary<int, VertexArrayObject>();
 
         // TODO Set Resources Folder
+        const string TexturesFolder = "Resources/Textures/";
+        const string VertexShadersFolder = "Resources/Shaders/Vertex/";
+        const string FragmentShaderFolder = "Resources/Shaders/Fragment/";
+        const string FontsFolder = "Resources/Fonts/";
+
+        public TextureFont LoadTextureFont(string filename)
+        {
+            var rv = TextureFont.CreateFromFile(FontsFolder + filename);
+            TextureFonts.Add(rv.FontTexture.TextureId, rv);
+            return rv;
+        }
+
+        public Texture2D LoadTexture2d(string filename, bool generateMipmaps=false)
+        {
+            // TODO Setup Texture hotswapping
+            var rv = Texture2D.CreateFromFile(TexturesFolder + filename, generateMipmaps);
+            Textures.Add(rv.TextureId, rv);
+            return rv;
+        }
+
+        public TextureCubeMap LoadCubeMap(string front, string back, string bottom, string top, string left, string right)
+        {
+            // TODO Setup Cubemap hotswapping
+            var rv = TextureCubeMap.CreateFromFile(TexturesFolder + front, TexturesFolder + back, TexturesFolder + bottom, TexturesFolder + top, TexturesFolder + left, TexturesFolder + right);
+            CubeMaps.Add(rv.TextureId, rv);
+            return rv;
+        }
 
         public ShaderProgram LoadShader(string vShaderFileName, string fShaderFileName)
         {
             // TODO Setup shader hotswapping
-            var rv = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/" + vShaderFileName, "Resources/Shaders/Fragment/" + fShaderFileName);
+            var rv = ShaderProgram.CreateFromFile(VertexShadersFolder + vShaderFileName, FragmentShaderFolder + fShaderFileName);
             Shaders.Add(rv.ShaderProgramId, rv);
             return rv;
         }
@@ -31,7 +58,7 @@ namespace Monorail
             rv.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
 
             // TODO Error Checking!
-            VertexArrayObjects.Add(rv.VertexArrayObjectId, rv);
+            VertexArrayObjects.Add(rv.VaoId, rv);
 
             return rv;
         }

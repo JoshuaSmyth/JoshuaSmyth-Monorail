@@ -20,7 +20,7 @@ namespace Monorail.Platform
 
         // TODO Support Kerning Pairs
 
-        public static TextureFont CreateFromFile(string filename)
+        internal static TextureFont CreateFromFile(string filename)
         {
             // TODO: Convert to binary format at some stage for improved loadtimes
             Font font = null;

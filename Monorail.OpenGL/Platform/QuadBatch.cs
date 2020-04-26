@@ -186,7 +186,7 @@ namespace Monorail.Platform
 
             GameWindow.QuadBatchShader.SetUniform("texture1", 0);
 
-            GlBindings.BindVertexArray(m_VertexArrayObject.VertexArrayObjectId);
+            GlBindings.BindVertexArray(m_VertexArrayObject.VaoId);
             GlBindings.DrawElements(PrimitiveType.TriangleList, quadCount * 6, DrawElementsType.UnsignedInt, 0);
 
        //     GlBindings.PolygonMode(Face.GL_FRONT_AND_BACK, Mode.GL_FILL);
@@ -239,7 +239,7 @@ namespace Monorail.Platform
                 GameWindow.QuadBatchShader.SetUniform("texture1", 0);
                 GameWindow.QuadBatchShader.SetUniform("texture2", 1);
 
-                GlBindings.BindVertexArray(m_VertexArrayObject.VertexArrayObjectId);
+                GlBindings.BindVertexArray(m_VertexArrayObject.VaoId);
                 GlBindings.DrawElements(PrimitiveType.TriangleList, quadCount * 6, DrawElementsType.UnsignedInt, 0);
 
                 m_quadRecordCount = 0;

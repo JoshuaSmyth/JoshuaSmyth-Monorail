@@ -15,7 +15,7 @@ namespace Monorail.Platform
         private int m_TextureId;
         public int TextureId { get { return m_TextureId; } }
 
-        public static TextureCubeMap CreateFromFile(string front, string back, string bottom, string top, string left, string right, bool generateMipmaps = false)
+        internal static TextureCubeMap CreateFromFile(string front, string back, string bottom, string top, string left, string right, bool generateMipmaps = false)
         {
             using (TracedStopwatch.Start("Loading Cubemap: " + front))
             {

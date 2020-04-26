@@ -76,7 +76,7 @@ namespace Monorail.Platform
         private int m_TextureId;
         public int TextureId {  get { return m_TextureId; } }
 
-        public static Texture2D CreateFromFile(string filename, bool generateMipmaps=false)
+        internal static Texture2D CreateFromFile(string filename, bool generateMipmaps=false)
         {
             using (TracedStopwatch.Start("Loading Texture: " + filename))
             {

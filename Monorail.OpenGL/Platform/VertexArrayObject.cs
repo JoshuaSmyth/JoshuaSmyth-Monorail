@@ -7,8 +7,8 @@ namespace Monorail.Platform
 {
     public class VertexArrayObject
     {
-        private int m_VertexArrayObjectId;
-        public int VertexArrayObjectId { get { return m_VertexArrayObjectId; } }
+        private int m_VaoId;
+        public int VaoId { get { return m_VaoId; } }
 
         private int m_VertexArrayBufferId;
         public int VertexArrayBufferId { get { return m_VertexArrayBufferId; } }
@@ -90,12 +90,12 @@ namespace Monorail.Platform
         /// </summary>
         public unsafe void InitElementsArrayBuffer<T>(int stride, int[] attributeLengths, int[] attributeOffsets, BufferUsageHint hint = BufferUsageHint.GL_STATIC_DRAW) where T : IInterleavedVertex
         {
-            GlBindings.GenVertexArrays(1, out m_VertexArrayObjectId);
+            GlBindings.GenVertexArrays(1, out m_VaoId);
 
             GlBindings.GenBuffers(1, out m_VertexArrayBufferId);
             GlBindings.GenBuffers(1, out m_ElementArrayBufferId);
 
-            GlBindings.BindVertexArray(m_VertexArrayObjectId);
+            GlBindings.BindVertexArray(m_VaoId);
 
             //GCHandle handleVerticies = GCHandle.Alloc(verts, GCHandleType.Pinned);
             //GCHandle handleIndicies = GCHandle.Alloc(indicies, GCHandleType.Pinned);
@@ -132,12 +132,12 @@ namespace Monorail.Platform
         /// </summary>
         public unsafe void BindElementsArrayBuffer<T>(T[] verts, uint[] indicies, int stride, int[] attributeLengths, int[] attributeOffsets, BufferUsageHint hint = BufferUsageHint.GL_STATIC_DRAW) where T : IInterleavedVertex
         {
-            GlBindings.GenVertexArrays(1, out m_VertexArrayObjectId);
+            GlBindings.GenVertexArrays(1, out m_VaoId);
 
             GlBindings.GenBuffers(1, out m_VertexArrayBufferId);
             GlBindings.GenBuffers(1, out m_ElementArrayBufferId);
 
-            GlBindings.BindVertexArray(m_VertexArrayObjectId);
+            GlBindings.BindVertexArray(m_VaoId);
 
             GCHandle handleVerticies = GCHandle.Alloc(verts, GCHandleType.Pinned);
             GCHandle handleIndicies = GCHandle.Alloc(indicies, GCHandleType.Pinned);
@@ -169,10 +169,10 @@ namespace Monorail.Platform
 
         public unsafe void BindArrayBuffer<T>(T[] verts, int stride, int[] attributeLengths, int[] attributeOffsets, BufferUsageHint hint = BufferUsageHint.GL_STATIC_DRAW) where T: IInterleavedVertex
         {
-            GlBindings.GenVertexArrays(1, out m_VertexArrayObjectId);
+            GlBindings.GenVertexArrays(1, out m_VaoId);
 
             GlBindings.GenBuffers(1, out m_VertexArrayBufferId);
-            GlBindings.BindVertexArray(m_VertexArrayObjectId);
+            GlBindings.BindVertexArray(m_VaoId);
             
             GCHandle handle = GCHandle.Alloc(verts, GCHandleType.Pinned);
             IntPtr ptrVerticies = handle.AddrOfPinnedObject();

@@ -29,10 +29,22 @@ namespace Monorail.Graphics
                 m_Graphics.Disable(OpenGL.Enable.GL_DEPTH_TEST);
             }
 
+            // TODO This texture setting needs improving
             if (renderObject.CubemapTextureId > -1)
             {
                 m_Graphics.BindTexture(renderObject.CubemapTextureId, OpenGL.TextureType.GL_TEXTURE_CUBE_MAP, OpenGL.TextureUnits.GL_TEXTURE0);
             }
+
+            if (renderObject.TextureIdA > -1)
+            {
+                m_Graphics.BindTexture(renderObject.TextureIdA, OpenGL.TextureType.GL_TEXTURE_2D, OpenGL.TextureUnits.GL_TEXTURE0);
+            }
+
+            if (renderObject.TextureIdB > -1)
+            {
+                m_Graphics.BindTexture(renderObject.TextureIdB, OpenGL.TextureType.GL_TEXTURE_2D, OpenGL.TextureUnits.GL_TEXTURE1);
+            }
+
 
             m_Graphics.UseShaderProgram(renderObject.ShaderId);
 

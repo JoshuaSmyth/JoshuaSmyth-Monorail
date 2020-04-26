@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameObjects\Bunny.cs" />
+    <Compile Include="GameObjects\Cube.cs" />
     <Compile Include="GameObjects\Terrain.cs" />
     <Compile Include="GameObjects\Water.cs" />
     <Compile Include="ImGuiDriver.cs" />
@@ -154,7 +155,7 @@
     <None Include="Resources\Shaders\Fragment\f.skybox.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Shaders\Fragment\frag1.glsl">
+    <None Include="Resources\Shaders\Fragment\f.cube.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\Shaders\Vertex\v.quadbatch.glsl">
@@ -166,7 +167,7 @@
     <None Include="Resources\Shaders\Vertex\v.water.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\Shaders\Vertex\vert1.glsl">
+    <None Include="Resources\Shaders\Vertex\v.cube.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

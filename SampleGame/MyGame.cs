@@ -22,22 +22,12 @@ namespace SampleGame
 
         Cube[] m_Cube;
 
-        ShaderProgram m_QuadShader;
-
-        // TODO Create resource->Geometry Manager
-        VertexArrayObject m_QuadVertexArrayObject;
-        VertexArrayObject m_CubeVAO;
-
-        // TODO Create resource->Texture Manager
         Texture2D m_Texture;
         Texture2D m_AwesomeFace;
-        Texture2D m_Default;
 
         // TODO Create resource->Font Manager
         TextureFont m_FontAriel;
 
-        // TODO Create resource->CubeMap Manager
-        TextureCubeMap m_CubeMap;
 
         // TODO Create resource->QuadBatch Manager...
         QuadBatch m_QuadBatch;
@@ -45,9 +35,8 @@ namespace SampleGame
         // TODO Implement multiple cameras
         GameCamera camera;
 
-        float rot;
-        Vector3[] Positions;
 
+        float rot;
         bool IsWireframeMode;
 
         public override void Load()
@@ -58,22 +47,22 @@ namespace SampleGame
 
             m_QuadBatch = new QuadBatch();
 
-            m_QuadShader = m_ResourceManager.LoadShader("vert1.glsl", "frag1.glsl");
+            var cubeShader = m_ResourceManager.LoadShader("v.cube.glsl", "f.cube.glsl");
 
             var skyboxShader = m_ResourceManager.LoadShader("v.skybox.glsl", "f.skybox.glsl");
             var terrainShader = m_ResourceManager.LoadShader("v.terrain.glsl", "f.terrain.glsl");
             var waterShader = m_ResourceManager.LoadShader("v.water.glsl", "f.water.glsl");
 
-            // Create Textured Indexed Quad
+
+            // Load Textures
             {
-                var verts = Geometry.CreateIndexedQuadVerts(scale:4.0f);
-                uint[] indices = Geometry.CreateIndexedQuadIndicies();
-               
-                m_QuadVertexArrayObject = new VertexArrayObject();
-                m_QuadVertexArrayObject.BindElementsArrayBuffer(verts, indices, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+                m_AwesomeFace = m_ResourceManager.LoadTexture2d("awesomeface.png");
+                m_Texture = m_ResourceManager.LoadTexture2d("texture1.png");
+                //m_Default = m_ResourceManager.LoadTexture2d("default.png");
             }
 
-            // Create Heightmap
+
+            // Load Terrain
             {
                 var heightMapData = HeightMapData.LoadHeightmapData("Resources/Textures/Heightmaps/1.png");
                 var model = ModelLoader.CreateTerrain(heightMapData);
@@ -82,7 +71,7 @@ namespace SampleGame
                 var terrainVAO = new VertexArrayObject();
                 terrainVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
-                m_TerrainRenderObject = new Terrain(terrainShader.ShaderProgramId, terrainVAO.VertexArrayObjectId, terrainVAO.VertexCount);
+                m_TerrainRenderObject = new Terrain(terrainShader.ShaderProgramId, terrainVAO.VaoId, terrainVAO.VertexCount);
             }
 
             // Create Water
@@ -93,10 +82,9 @@ namespace SampleGame
                 var waterVAO = new VertexArrayObject();
                 waterVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
-                m_WaterRenderObject = new Water(waterShader.ShaderProgramId, waterVAO.VertexArrayObjectId, waterVAO.VertexCount);
+                m_WaterRenderObject = new Water(waterShader.ShaderProgramId, waterVAO.VaoId, waterVAO.VertexCount);
             }
         
-
             // Create Bunny
             {
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
@@ -105,28 +93,38 @@ namespace SampleGame
                 var bunnyVAO = new VertexArrayObject();
                 bunnyVAO.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
-                m_BunnyRenderObject = new Bunny(terrainShader.ShaderProgramId, bunnyVAO.VertexArrayObjectId, bunnyVAO.VertexCount);
+                m_BunnyRenderObject = new Bunny(terrainShader.ShaderProgramId, bunnyVAO.VaoId, bunnyVAO.VertexCount);
             }
 
             // Create Cube
             {
                 var verts = Geometry.CreateCube();
-                m_CubeVAO = new VertexArrayObject();    // TODO Generate indicies
+
+                // memory leak
+                var m_CubeVAO = new VertexArrayObject();    // TODO Generate indicies
                 m_CubeVAO.BindArrayBuffer(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+
+                m_Cube = new Cube[10];
+                for(int i=0;i<10;i++)
+                {
+                    m_Cube[i] = new Cube(cubeShader.ShaderProgramId, m_CubeVAO.VaoId, m_CubeVAO.VertexCount);
+                    m_Cube[i].i = i;
+                    m_Cube[i].TextureIdA = m_AwesomeFace.TextureId;
+                    m_Cube[i].TextureIdB = m_Texture.TextureId;
+                }
 
                 // Create Cube Positions
                 {
-                    Positions = new Vector3[10];
-                    Positions[0] = new Vector3(  -2.0f,  0.0f,   0.0f);
-                    Positions[1] = new Vector3(  2.0f,  5.0f, -15.0f);
-                    Positions[2] = new Vector3( -1.5f,  2.2f,  -2.5f);
-                    Positions[3] = new Vector3( -3.8f, -2.0f, -12.3f);
-                    Positions[4] = new Vector3(  2.4f, -0.4f,  -3.5f);
-                    Positions[5] = new Vector3( -1.7f,  3.0f,  -7.5f);
-                    Positions[6] = new Vector3(  1.3f, -2.0f,  -2.5f);
-                    Positions[7] = new Vector3(  1.5f,  2.0f,  -2.5f);
-                    Positions[8] = new Vector3(  1.5f,  0.2f,  -1.5f);
-                    Positions[9] = new Vector3( -1.3f,  1.0f,  -1.5f);
+                    m_Cube[0].Position = new Vector3(  -2.0f,  0.0f,   0.0f);
+                    m_Cube[1].Position = new Vector3(  2.0f,  5.0f, -15.0f);
+                    m_Cube[2].Position = new Vector3( -1.5f,  2.2f,  -2.5f);
+                    m_Cube[3].Position = new Vector3( -3.8f, -2.0f, -12.3f);
+                    m_Cube[4].Position = new Vector3(  2.4f, -0.4f,  -3.5f);
+                    m_Cube[5].Position = new Vector3( -1.7f,  3.0f,  -7.5f);
+                    m_Cube[6].Position = new Vector3(  1.3f, -2.0f,  -2.5f);
+                    m_Cube[7].Position = new Vector3(  1.5f,  2.0f,  -2.5f);
+                    m_Cube[8].Position = new Vector3(  1.5f,  0.2f,  -1.5f);
+                    m_Cube[9].Position = new Vector3( -1.3f,  1.0f,  -1.5f);
                 }
             }
 
@@ -138,27 +136,14 @@ namespace SampleGame
                 var skyboxVAO = new VertexArrayObject();
                 skyboxVAO.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
 
-                // Load Skybox Texture
-                m_CubeMap = TextureCubeMap.CreateFromFile("Resources/Textures/Skybox/front.png",
-                                                            "Resources/Textures/Skybox/back.png",
-                                                            "Resources/Textures/Skybox/bottom.png",
-                                                            "Resources/Textures/Skybox/top.png",
-                                                            "Resources/Textures/Skybox/left.png",
-                                                            "Resources/Textures/Skybox/right.png");
+                var cubeMap = m_ResourceManager.LoadCubeMap("Skybox/front.png", "Skybox/back.png", "Skybox/bottom.png", "Skybox/top.png", "Skybox/left.png", "Skybox/right.png");
 
-                m_SkyBoxRenderObject = new SkyBox(skyboxShader.ShaderProgramId, skyboxVAO.VertexArrayObjectId, skyboxVAO.VertexCount, m_CubeMap.TextureId);
+                m_SkyBoxRenderObject = new SkyBox(skyboxShader.ShaderProgramId, skyboxVAO.VaoId, skyboxVAO.VertexCount, cubeMap.TextureId);
             }
 
             // Load Font
             {
-                m_FontAriel = TextureFont.CreateFromFile("Resources/Fonts/ariel.fnt");
-            }
-
-            // Load Texture
-            {
-                m_AwesomeFace = Texture2D.CreateFromFile("Resources/Textures/awesomeface.png");
-                m_Texture = Texture2D.CreateFromFile("Resources/Textures/texture1.png");
-                m_Default = Texture2D.CreateFromFile("Resources/Textures/default.png");
+                m_FontAriel = m_ResourceManager.LoadTextureFont("ariel.fnt");
             }
 
             m_RenderQueue = new RenderQueue(this.GraphicsDevice);
@@ -168,43 +153,18 @@ namespace SampleGame
         {
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
 
+            m_TerrainRenderObject.IsWireframe = IsWireframeMode;
+
             m_RenderQueue.Render(m_SkyBoxRenderObject, camera);
             m_RenderQueue.Render(m_BunnyRenderObject, camera);
             m_RenderQueue.Render(m_TerrainRenderObject, camera);
-            m_RenderQueue.Render(m_WaterRenderObject, camera);
 
-
-
-            // Render Cubes
+            foreach (var cube in m_Cube)
             {
-                GraphicsDevice.UseShaderProgram(m_QuadShader.ShaderProgramId);
-                m_QuadShader.SetUniform("texture1", 0);
-                m_QuadShader.SetUniform("texture2", 1);
-                m_QuadShader.SetUniform("model", camera.WorldMatrix);
-                m_QuadShader.SetUniform("view", camera.ViewMatrix);
-                m_QuadShader.SetUniform("proj", camera.ProjMatrix);
-            
-                GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
-                GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
-
-                GraphicsDevice.UseVertexArrayObject(m_CubeVAO.VertexArrayObjectId);
-                var cubeCount = Positions.Length;
-
-                for (var i = 0; i < cubeCount; i++)
-                {
-                    // calculate the model matrix for each object and pass it to shader before drawing
-                    var pos = Matrix4.CreateTranslation(Positions[i]);
-                    float angle = 20.0f * i;
-
-                    var rotAxis = new Vector3(1.0f, 0.0f, 1.0f);
-                    rotAxis = rotAxis.Normalize();
-                    var model = Matrix4.CreateRotation(rotAxis, MathHelper.ToRads(rot)) * pos;
-
-                    m_QuadShader.SetUniform("model", model);
-
-                    GraphicsDevice.DrawArrays(PrimitiveType.TriangleList, 0, 36);
-                }
+                m_RenderQueue.Render(cube, camera);
             }
+
+            m_RenderQueue.Render(m_WaterRenderObject, camera);
         }
 
         public override void Render2D()
@@ -243,6 +203,11 @@ namespace SampleGame
             m_BunnyRenderObject.Update(GameTime.ElapsedMilliseconds);
 
             rot += (float)(GameTime.ElapsedSeconds * 15.0f);
+
+            foreach (var cube in m_Cube)
+            {
+                cube.Update(rot);
+            }
 
             if (this.Input.WasPressed(KeyCode.KEYCODE_TAB))
             {
@@ -317,6 +282,5 @@ namespace SampleGame
                 camera.MoveRight(0.01f);
             }
         }
-
     }
 }
