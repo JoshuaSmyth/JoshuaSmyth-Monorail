@@ -12,8 +12,10 @@ uniform vec3 lightdir = vec3(1.0f, 1.0f, 1.0f);
 
 void main()
 {
-// -ve Y is down
-    vec3 colorA = vec3(0.9f, 0.9f, 0.9f);						// Snow
+	// TODO Work out specular but prob just for snow?
+
+
+    vec3 colorA = vec3(1.0f, 1.0f, 1.0f);						// Snow
 	vec3 colorB = vec3(0.5,0.4,0.5);							// Rock
 	vec3 colorC = vec3(46/255.0f, 180/255.0f, 47/255.0f);		// Grass
 	vec3 colorD = vec3(0.89, 0.84, 0.57);						// Sand

@@ -1,6 +1,12 @@
 ﻿using Monorail.Platform;
 namespace Monorail.Graphics
 {
+    public enum BlendModes
+    {
+        Opaque = 0,
+        Alpha = 1
+    }
+
     public abstract class RenderableObject
     {
         public int ShaderId { get; set; }
@@ -13,6 +19,8 @@ namespace Monorail.Graphics
         public int TextureIdB { get; set; }
         public int CubemapTextureId { get; set; }
         public bool DepthBufferEnabled { get; set; }
+        public bool IsWireframe { get; set; }
+        public BlendModes BlendMode { get; set; }
 
         public abstract void OnApplyUniforms(RenderQueue renderQueue, GameCamera camera);
     }

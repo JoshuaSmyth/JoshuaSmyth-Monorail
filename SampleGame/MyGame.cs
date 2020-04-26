@@ -1,8 +1,10 @@
-﻿using Monorail;
+﻿using ImGuiNET;
+using Monorail;
 using Monorail.Graphics;
 using Monorail.Mathlib;
 using Monorail.Platform;
 using OpenGL;
+using SampleGame.GameObjects;
 using System;
 
 namespace SampleGame
@@ -15,21 +17,26 @@ namespace SampleGame
     public class MySampleGame : Game
     {
         RenderQueue m_RenderQueue;
+
+        // Render Objects
         SkyBox m_SkyBox;
-        BunnyModel m_BunnyModel;
+        Bunny m_BunnyModel;
+        Terrain m_Terrain;
+        Water m_Water;
 
         // TODO Create resource->Shader manager
         ShaderProgram m_QuadProgram;
         ShaderProgram m_terrainShder;
         ShaderProgram m_SkyboxShader;
+        ShaderProgram m_WaterShader;
 
         // TODO Create resource->Geometry Manager
         VertexArrayObject m_QuadVertexArrayObject;
-        VertexArrayObject m_SkyBoxVAO;
-        VertexArrayObject m_Cube;
-        VertexArrayObject m_Bunny;
-        VertexArrayObject m_Terrain;
-        VertexArrayObject m_Water;
+        VertexArrayObject m_CubeVAO;
+        //VertexArrayObject m_waterVAO;
+        //VertexArrayObject m_TerrainVAO;
+        //VertexArrayObject m_Bunny;
+        //VertexArrayObject m_SkyBoxVAO;
 
         // TODO Create resource->Texture Manager
         Texture2D m_Texture;
@@ -43,7 +50,7 @@ namespace SampleGame
         TextureCubeMap m_CubeMap;
 
         // TODO Create resource->Heightmap Manager
-        HeightMapData m_HeightMapData;
+        //HeightMapData m_HeightMapData;
 
         // TODO Create resource->QuadBatch Manager...
         QuadBatch m_QuadBatch;
@@ -64,9 +71,10 @@ namespace SampleGame
 
             m_QuadProgram = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/vert1.glsl", "Resources/Shaders/Fragment/frag1.glsl");
             m_SkyboxShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.skybox.glsl", "Resources/Shaders/Fragment/f.skybox.glsl");
-
             m_terrainShder = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.terrain.glsl", "Resources/Shaders/Fragment/f.terrain.glsl");
-                        
+
+            m_WaterShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.water.glsl", "Resources/Shaders/Fragment/f.water.glsl");
+
             // Create Textured Indexed Quad
             {
                 var verts = Geometry.CreateIndexedQuadVerts(scale:4.0f);
@@ -78,36 +86,44 @@ namespace SampleGame
 
             // Create Heightmap
             {
-                m_HeightMapData = HeightMapData.LoadHeightmapData("Resources/Textures/Heightmaps/1.png");
-                var model = ModelLoader.CreateTerrain(m_HeightMapData);
+                var heightMapData = HeightMapData.LoadHeightmapData("Resources/Textures/Heightmaps/1.png");
+                var model = ModelLoader.CreateTerrain(heightMapData);
 
-                m_Terrain = new VertexArrayObject();
-                m_Terrain.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);               
+                // Memory leak this has to come from somewhere...
+                var terrainVAO = new VertexArrayObject();
+                terrainVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+
+                m_Terrain = new Terrain(m_terrainShder.ShaderProgramId, terrainVAO.VertexArrayObjectId, terrainVAO.VertexCount);
             }
 
             // Create Water
             {
                 var model = ModelLoader.CreatePlane(512, 512, 12.2f);
 
-                m_Water = new VertexArrayObject();
-                m_Water.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+                // Memory Leak
+                var waterVAO = new VertexArrayObject();
+                waterVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+
+                m_Water = new Water(m_WaterShader.ShaderProgramId, waterVAO.VertexArrayObjectId, waterVAO.VertexCount);
             }
         
 
             // Create Bunny
             {
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
-                m_Bunny = new VertexArrayObject();
-                m_Bunny.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
-                m_BunnyModel = new BunnyModel(m_terrainShder.ShaderProgramId, m_Bunny.VertexArrayObjectId, m_Bunny.VertexCount);
+                // Memory leak this needs to be cleaned up
+                var bunnyVAO = new VertexArrayObject();
+                bunnyVAO.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+
+                m_BunnyModel = new Bunny(m_terrainShder.ShaderProgramId, bunnyVAO.VertexArrayObjectId, bunnyVAO.VertexCount);
             }
 
             // Create Cube
             {
                 var verts = Geometry.CreateCube();
-                m_Cube = new VertexArrayObject();
-                m_Cube.BindArrayBuffer(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+                m_CubeVAO = new VertexArrayObject();
+                m_CubeVAO.BindArrayBuffer(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
 
                 // Create Cube Positions
                 {
@@ -128,8 +144,10 @@ namespace SampleGame
             // Create Skyubox
             {
                 var verts = Geometry.CreateSkyBox();
-                m_SkyBoxVAO = new VertexArrayObject();
-                m_SkyBoxVAO.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
+
+                // Memory leak this has to be unloaded
+                var skyboxVAO = new VertexArrayObject();
+                skyboxVAO.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
 
                 // Load Skybox Texture
                 m_CubeMap = TextureCubeMap.CreateFromFile("Resources/Textures/Skybox/front.png",
@@ -139,7 +157,7 @@ namespace SampleGame
                                                             "Resources/Textures/Skybox/left.png",
                                                             "Resources/Textures/Skybox/right.png");
 
-                m_SkyBox = new SkyBox(m_SkyboxShader.ShaderProgramId, m_SkyBoxVAO.VertexArrayObjectId, m_SkyBoxVAO.VertexCount, m_CubeMap.TextureId);
+                m_SkyBox = new SkyBox(m_SkyboxShader.ShaderProgramId, skyboxVAO.VertexArrayObjectId, skyboxVAO.VertexCount, m_CubeMap.TextureId);
             }
 
             // Load Font
@@ -163,39 +181,8 @@ namespace SampleGame
 
             m_RenderQueue.Render(m_SkyBox, camera);
             m_RenderQueue.Render(m_BunnyModel, camera);
-
-
-            // Render Terrain
-            {
-                // TODO Toogle with tab
-                if (this.IsWireframeMode)
-                {
-                    GraphicsDevice.FillMode(OpenGL.Mode.GL_LINE);
-                }
-
-                m_terrainShder.SetUniform("model", camera.WorldMatrix);
-                
-                GraphicsDevice.UseVertexArrayObject(m_Terrain.VertexArrayObjectId);
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Terrain.VertexCount, DrawElementsType.UnsignedInt, 0);
-
-                if (this.IsWireframeMode)
-                {
-                    GraphicsDevice.FillMode(OpenGL.Mode.GL_FILL);
-                }
-            }
-
-            // Render Water
-            {
-                GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
-                GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
-
-                // TODO Set water shader
-                GraphicsDevice.UseVertexArrayObject(m_Water.VertexArrayObjectId);
-                GraphicsDevice.DrawElements(PrimitiveType.TriangleList, m_Water.VertexCount, DrawElementsType.UnsignedInt, 0);
-
-                GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
-            }
-
+            m_RenderQueue.Render(m_Terrain, camera);
+            m_RenderQueue.Render(m_Water, camera);
 
             // Render Cubes
             {
@@ -209,7 +196,7 @@ namespace SampleGame
                 GraphicsDevice.BindTexture2D(m_Texture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
                 GraphicsDevice.BindTexture2D(m_AwesomeFace.TextureId, OpenGL.TextureUnits.GL_TEXTURE1);
 
-                GraphicsDevice.UseVertexArrayObject(m_Cube.VertexArrayObjectId);
+                GraphicsDevice.UseVertexArrayObject(m_CubeVAO.VertexArrayObjectId);
                 var cubeCount = Positions.Length;
 
                 for (var i = 0; i < cubeCount; i++)

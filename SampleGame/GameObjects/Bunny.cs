@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace SampleGame
 {
-    public class BunnyModel : RenderableObject
+    public class Bunny : RenderableObject
     {
         Matrix4 model;
 
-        public BunnyModel(int shaderId, int vaoId, int vertexCount)
+        public Bunny(int shaderId, int vaoId, int vertexCount)
         {
             ShaderId = shaderId;
             VaoId = vaoId;

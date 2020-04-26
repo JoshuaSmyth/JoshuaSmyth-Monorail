@@ -17,6 +17,13 @@ namespace Monorail.Graphics
         {
             // TODO this should actually enqueue rather than render but hey!
 
+            
+
+            if (renderObject.IsWireframe)
+            {
+                m_Graphics.FillMode(OpenGL.Mode.GL_LINE);
+            }
+
             if (renderObject.DepthBufferEnabled == false)
             {
                 m_Graphics.Disable(OpenGL.Enable.GL_DEPTH_TEST);
@@ -30,6 +37,12 @@ namespace Monorail.Graphics
             m_Graphics.UseShaderProgram(renderObject.ShaderId);
 
             renderObject.OnApplyUniforms(this, camera);
+
+            if (renderObject.BlendMode == BlendModes.Alpha)
+            {
+                m_Graphics.Enable(OpenGL.Enable.GL_BLEND);
+                m_Graphics.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
+            }
 
             m_Graphics.UseVertexArrayObject(renderObject.VaoId);
 
@@ -45,6 +58,16 @@ namespace Monorail.Graphics
             if (renderObject.DepthBufferEnabled == false)
             {
                 m_Graphics.Enable(OpenGL.Enable.GL_DEPTH_TEST);
+            }
+
+            if (renderObject.IsWireframe)
+            {
+                m_Graphics.FillMode(OpenGL.Mode.GL_FILL);
+            }
+
+            if (renderObject.BlendMode == BlendModes.Alpha)
+            {
+                m_Graphics.Disable(OpenGL.Enable.GL_BLEND);
             }
         }
 
