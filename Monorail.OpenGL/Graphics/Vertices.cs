@@ -29,7 +29,7 @@ namespace Monorail.Graphics
     {
         public Vector3 Position;
 
-        public Vector3 Color;
+        public Vector3 Color;   // TODO Color should be a uint
 
         public static int Stride = 24;
         
@@ -43,7 +43,7 @@ namespace Monorail.Graphics
     {
         public Vector3 Position;
 
-        public Vector3 Color;
+        public Vector3 Color;   // TODO Color should be a uint
 
         public Vector2 Texture;
 
@@ -59,7 +59,7 @@ namespace Monorail.Graphics
     {
         public Vector3 Position;
 
-        public Vector4 Color;
+        public Vector4 Color;   // TODO Color should be a uint
 
         public Vector2 Texture;
 
@@ -76,7 +76,7 @@ namespace Monorail.Graphics
     {
         public Vector3 Position;
 
-        public Vector3 Color;
+        public Vector3 Color;   // TODO Color should be a uint
 
         public Vector2 Texture;
 

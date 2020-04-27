@@ -457,6 +457,13 @@ namespace OpenGL
         [BindMethod("glBlendFunc")]
         public static glBlendFuncDelegate BlendFunc;
 
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glScissorFuncDelegate(int x​, int y​, uint width​, uint height​);
+        [BindMethod("glScissor")]
+        public static glScissorFuncDelegate glScissor;
+
+
+
         public static void InitaliseOpenGLEntryPoints()
         {
             using (TracedStopwatch.Start("Init OpenGL Bindings"))

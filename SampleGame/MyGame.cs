@@ -9,6 +9,8 @@ namespace SampleGame
 {
     public class MySampleGame : Game
     {
+        ImGuiDriver m_ImGuiDriver;
+
         // Render Objects
         SkyBox m_SkyBoxRenderObject;
         Bunny m_BunnyRenderObject;
@@ -31,6 +33,9 @@ namespace SampleGame
 
         public override void Load()
         {
+            m_ImGuiDriver = new ImGuiDriver();
+            m_ImGuiDriver.Initalise();
+
             m_ResourceManager = new ResourceManager(); // TODO THis should be provided by the base class
 
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
@@ -142,6 +147,11 @@ namespace SampleGame
 
             m_TerrainRenderObject.IsWireframe = IsWireframeMode;
 
+            /*
+            OpenGL.GlBindings.Enable(OpenGL.Enable.GL_SCISSOR_TEST);
+            OpenGL.GlBindings.glScissor(200, 200, 250, 250);
+            */
+
             m_RenderQueue.Render(m_SkyBoxRenderObject, camera);
             m_RenderQueue.Render(m_BunnyRenderObject, camera);
             m_RenderQueue.Render(m_TerrainRenderObject, camera);
@@ -177,9 +187,14 @@ namespace SampleGame
 
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
-            // Unbind textures
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE0);
-            GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
+
+            // Render IMGUI
+            m_ImGuiDriver.Begin();
+
+            // TODO ImGUI calls here.
+                m_ImGuiDriver.Draw();
+
+            m_ImGuiDriver.End();
         }
 
 

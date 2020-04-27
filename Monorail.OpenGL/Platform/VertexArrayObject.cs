@@ -18,8 +18,8 @@ namespace Monorail.Platform
 
         public bool HasElementsIndex;
 
-        private int m_ElementArrayBufferId;
-        public int ElementArrayBufferId { get { return m_ElementArrayBufferId; } }
+        private int m_IndexBufferId;
+        public int IndexBufferId { get { return m_IndexBufferId; } }
 
         private int m_Stride;
         public int Stride { get { return m_Stride; } }
@@ -43,7 +43,7 @@ namespace Monorail.Platform
             GlBindings.BindBuffer(BufferTarget.GL_ARRAY_BUFFER, m_VertexArrayBufferId);
             GlBindings.BufferData(BufferTarget.GL_ARRAY_BUFFER, m_Stride * verts.Length, ptrVerticies, m_BufferUsage);
 
-            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_ElementArrayBufferId);
+            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferId);
             GlBindings.BufferData(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, indicies.Length * 4, ptrIndicies, m_BufferUsage);   // TODO Support UnsignedInt and UnsignedShort
 
             handleVerticies.Free();
@@ -82,7 +82,7 @@ namespace Monorail.Platform
 
             IntPtr ptrIndicies = handleIndicies.AddrOfPinnedObject();
 
-            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_ElementArrayBufferId);
+            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferId);
             GlBindings.BufferData(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, indicies.Length * 4, ptrIndicies, m_BufferUsage);   // TODO Support UnsignedInt and UnsignedShort
             handleIndicies.Free();
 
@@ -98,24 +98,14 @@ namespace Monorail.Platform
             GlBindings.GenVertexArrays(1, out m_VaoId);
 
             GlBindings.GenBuffers(1, out m_VertexArrayBufferId);
-            GlBindings.GenBuffers(1, out m_ElementArrayBufferId);
+            GlBindings.GenBuffers(1, out m_IndexBufferId);
 
             GlBindings.BindVertexArray(m_VaoId);
 
-            //GCHandle handleVerticies = GCHandle.Alloc(verts, GCHandleType.Pinned);
-            //GCHandle handleIndicies = GCHandle.Alloc(indicies, GCHandleType.Pinned);
-
-            //IntPtr ptrVerticies = handleVerticies.AddrOfPinnedObject();
-            //IntPtr ptrIndicies = handleIndicies.AddrOfPinnedObject();
-
             GlBindings.BindBuffer(BufferTarget.GL_ARRAY_BUFFER, m_VertexArrayBufferId);
-            //GlBindings.BufferData(BufferTarget.GL_ARRAY_BUFFER, stride * verts.Length, (void*)ptrVerticies, hint);
 
-            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_ElementArrayBufferId);
-            //GlBindings.BufferData(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, indicies.Length * 4, (void*)ptrIndicies, hint);   // TODO Support UnsignedInt and UnsignedShort
+            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferId);
 
-            //handleVerticies.Free();
-            //handleIndicies.Free();
 
             // Setup Attributes
             for (int i = 0; i < attributeLengths.Length; i++)
@@ -140,7 +130,7 @@ namespace Monorail.Platform
             GlBindings.GenVertexArrays(1, out m_VaoId);
 
             GlBindings.GenBuffers(1, out m_VertexArrayBufferId);
-            GlBindings.GenBuffers(1, out m_ElementArrayBufferId);
+            GlBindings.GenBuffers(1, out m_IndexBufferId);
 
             GlBindings.BindVertexArray(m_VaoId);
 
@@ -153,7 +143,7 @@ namespace Monorail.Platform
             GlBindings.BindBuffer(BufferTarget.GL_ARRAY_BUFFER, m_VertexArrayBufferId);
             GlBindings.BufferData(BufferTarget.GL_ARRAY_BUFFER, stride * verts.Length, ptrVerticies, hint);
 
-            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_ElementArrayBufferId);
+            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferId);
             GlBindings.BufferData(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, indicies.Length * 4, ptrIndicies, hint);   // TODO Support UnsignedInt and UnsignedShort
 
             handleVerticies.Free();
