@@ -1,6 +1,7 @@
 ﻿using System;
 using Monorail.Framework.Services.Async;
 using Monorail.Framework.Services.ServiceLocation;
+using Monorail.Graphics;
 
 namespace Monorail.Platform
 {
@@ -12,6 +13,7 @@ namespace Monorail.Platform
         public Coroutines Coroutines;
         public GameInput Input;
         public ResourceManager m_ResourceManager;
+        public RenderQueue m_RenderQueue;
 
         public Game()
         {
@@ -30,6 +32,8 @@ namespace Monorail.Platform
             Audio = audioDevice;
             GraphicsDevice = graphicsDevice;
             Input = input;
+
+            m_RenderQueue = new RenderQueue(graphicsDevice);
 
             DependancyLocator.AddDepenancy(Window);
             DependancyLocator.AddDepenancy(Audio);

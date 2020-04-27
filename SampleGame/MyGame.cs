@@ -3,17 +3,12 @@ using Monorail;
 using Monorail.Graphics;
 using Monorail.Mathlib;
 using Monorail.Platform;
-using OpenGL;
 using SampleGame.GameObjects;
-using System;
-using System.Collections.Generic;
 
 namespace SampleGame
 {
     public class MySampleGame : Game
     {
-        RenderQueue m_RenderQueue;
-
         // Render Objects
         SkyBox m_SkyBoxRenderObject;
         Bunny m_BunnyRenderObject;
@@ -24,12 +19,7 @@ namespace SampleGame
 
         Texture2D m_Texture;
         Texture2D m_AwesomeFace;
-
-        // TODO Create resource->Font Manager
         TextureFont m_FontAriel;
-
-
-        // TODO Create resource->QuadBatch Manager...
         QuadBatch m_QuadBatch;
 
         // TODO Implement multiple cameras
@@ -47,8 +37,8 @@ namespace SampleGame
 
             m_QuadBatch = new QuadBatch();
 
-            var cubeShader = m_ResourceManager.LoadShader("v.cube.glsl", "f.cube.glsl");
 
+            var cubeShader = m_ResourceManager.LoadShader("v.cube.glsl", "f.cube.glsl");
             var skyboxShader = m_ResourceManager.LoadShader("v.skybox.glsl", "f.skybox.glsl");
             var terrainShader = m_ResourceManager.LoadShader("v.terrain.glsl", "f.terrain.glsl");
             var waterShader = m_ResourceManager.LoadShader("v.water.glsl", "f.water.glsl");
@@ -68,8 +58,9 @@ namespace SampleGame
                 var model = ModelLoader.CreateTerrain(heightMapData);
 
                 // Memory leak this has to come from somewhere...
-                var terrainVAO = new VertexArrayObject();
-                terrainVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+                //var terrainVAO = new VertexArrayObject();
+                var terrainVAO = m_ResourceManager.LoadVAO(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+                //terrainVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
                 m_TerrainRenderObject = new Terrain(terrainShader.ShaderProgramId, terrainVAO.VaoId, terrainVAO.VertexCount);
             }
@@ -79,8 +70,8 @@ namespace SampleGame
                 var model = ModelLoader.CreatePlane(512, 512, 12.2f);
 
                 // Memory Leak
-                var waterVAO = new VertexArrayObject();
-                waterVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+                //var waterVAO = new VertexArrayObject();
+                var waterVAO = m_ResourceManager.LoadVAO(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
                 m_WaterRenderObject = new Water(waterShader.ShaderProgramId, waterVAO.VaoId, waterVAO.VertexCount);
             }
@@ -90,8 +81,8 @@ namespace SampleGame
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
 
                 // Memory leak this needs to be cleaned up
-                var bunnyVAO = new VertexArrayObject();
-                bunnyVAO.BindElementsArrayBuffer(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
+                //var bunnyVAO = new VertexArrayObject();
+                var bunnyVAO = m_ResourceManager.LoadVAO(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
                 m_BunnyRenderObject = new Bunny(terrainShader.ShaderProgramId, bunnyVAO.VaoId, bunnyVAO.VertexCount);
             }
@@ -101,8 +92,8 @@ namespace SampleGame
                 var verts = Geometry.CreateCube();
 
                 // memory leak
-                var m_CubeVAO = new VertexArrayObject();    // TODO Generate indicies
-                m_CubeVAO.BindArrayBuffer(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+               // var m_CubeVAO = new VertexArrayObject();    // TODO Generate indicies
+                var m_CubeVAO = m_ResourceManager.LoadVAO(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
 
                 m_Cube = new Cube[10];
                 for(int i=0;i<10;i++)
@@ -130,11 +121,9 @@ namespace SampleGame
 
             // Create Skyubox
             {
-                var verts = Geometry.CreateSkyBox();
+                var verts = Geometry.CreateSkyBoxVerticies();
+                var skyboxVAO = m_ResourceManager.LoadVAO(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
 
-                // Memory leak this has to be unloaded
-                var skyboxVAO = new VertexArrayObject();
-                skyboxVAO.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
 
                 var cubeMap = m_ResourceManager.LoadCubeMap("Skybox/front.png", "Skybox/back.png", "Skybox/bottom.png", "Skybox/top.png", "Skybox/left.png", "Skybox/right.png");
 
@@ -145,8 +134,6 @@ namespace SampleGame
             {
                 m_FontAriel = m_ResourceManager.LoadTextureFont("ariel.fnt");
             }
-
-            m_RenderQueue = new RenderQueue(this.GraphicsDevice);
         }
 
         public override void RenderScene()

@@ -27,6 +27,11 @@ namespace Monorail.Platform
         private BufferUsageHint m_BufferUsage;
         public BufferUsageHint BufferUsage { get { return m_BufferUsage; } }
 
+        internal VertexArrayObject()
+        {
+
+        }
+
         public unsafe void SetData<T>(T[] verts, uint[] indicies)
         {
             GCHandle handleVerticies = GCHandle.Alloc(verts, GCHandleType.Pinned);

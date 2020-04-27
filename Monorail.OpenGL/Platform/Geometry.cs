@@ -9,7 +9,7 @@ namespace Monorail.Platform
 {
     public static class Geometry
     {
-        public static VertexPosition[] CreateSkyBox()
+        public static VertexPosition[] CreateSkyBoxVerticies()
         {
             var rv = new VertexPosition[36];
 

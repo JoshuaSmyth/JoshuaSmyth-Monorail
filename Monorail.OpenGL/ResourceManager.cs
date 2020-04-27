@@ -55,14 +55,23 @@ namespace Monorail
         public VertexArrayObject LoadVAO<T>(T[] verts, int stride, int[] attributeLengths, int[] attributeOffsets) where T : IInterleavedVertex
         {
             var rv = new VertexArrayObject();
-            rv.BindArrayBuffer(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
+            rv.BindArrayBuffer(verts, stride, attributeLengths, attributeOffsets);
 
             // TODO Error Checking!
             VertexArrayObjects.Add(rv.VaoId, rv);
 
             return rv;
         }
+        public VertexArrayObject LoadVAO<T>(T[] verts, uint[] indicies, int stride, int[] attributeLengths, int[] attributeOffsets) where T : IInterleavedVertex
+        {
+            var rv = new VertexArrayObject();
+            rv.BindElementsArrayBuffer(verts, indicies, stride, attributeLengths, attributeOffsets);
 
+            // TODO Error Checking!
+            VertexArrayObjects.Add(rv.VaoId, rv);
+
+            return rv;
+        }
 
         public void UnloadAll()
         {

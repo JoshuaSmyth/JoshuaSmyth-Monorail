@@ -6,7 +6,6 @@ using SDL2;
 
 namespace Monorail.Platform
 {
-
     public class GameWindow : IDisposable
     {
         private static Int32 m_ScreenWidth;
@@ -110,6 +109,8 @@ namespace Monorail.Platform
             var isRunning = true;
             while (isRunning)
             {
+                // TODO Reset stats counters
+
                 stopwatch.Restart();
                 ProcessEvents();
                 
