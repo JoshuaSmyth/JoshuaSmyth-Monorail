@@ -34,19 +34,17 @@ namespace SampleGame
         public override void Load()
         {
             m_ImGuiDriver = new ImGuiDriver();
-            m_ImGuiDriver.Initalise();
-
-            m_ResourceManager = new ResourceManager(); // TODO THis should be provided by the base class
+            m_ImGuiDriver.Initalise(m_ResourceManager);
 
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
 
             m_QuadBatch = new QuadBatch();
 
 
-            var cubeShader = m_ResourceManager.LoadShader("v.cube.glsl", "f.cube.glsl");
-            var skyboxShader = m_ResourceManager.LoadShader("v.skybox.glsl", "f.skybox.glsl");
-            var terrainShader = m_ResourceManager.LoadShader("v.terrain.glsl", "f.terrain.glsl");
-            var waterShader = m_ResourceManager.LoadShader("v.water.glsl", "f.water.glsl");
+            var cubeShader = m_ResourceManager.LoadShaderFromFile("v.cube.glsl", "f.cube.glsl");
+            var skyboxShader = m_ResourceManager.LoadShaderFromFile("v.skybox.glsl", "f.skybox.glsl");
+            var terrainShader = m_ResourceManager.LoadShaderFromFile("v.terrain.glsl", "f.terrain.glsl");
+            var waterShader = m_ResourceManager.LoadShaderFromFile("v.water.glsl", "f.water.glsl");
 
 
             // Load Textures

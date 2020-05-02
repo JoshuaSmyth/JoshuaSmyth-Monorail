@@ -5,6 +5,31 @@ using System.Collections.Generic;
 
 namespace Monorail
 {
+    // TODO Put these into their own files
+    public class VertexBuffer<T> where T : IInterleavedVertex
+    {
+        public int Id;
+        public T[] Data = new T[0];
+
+        public int Stride;
+
+        public int Size
+        {
+            get
+            {
+                return Data.Length * this.Stride;
+            }
+        }
+    }
+
+    // TODO Put this into it's own files
+    public class IndexBuffer
+    {
+        public int Id;
+        public int vertexBufferSize;
+        public ushort Data;
+    }
+
     public class ResourceManager
     {
         // TODO What about QuadBatches?
@@ -20,6 +45,11 @@ namespace Monorail
         const string VertexShadersFolder = "Resources/Shaders/Vertex/";
         const string FragmentShaderFolder = "Resources/Shaders/Fragment/";
         const string FontsFolder = "Resources/Fonts/";
+
+        internal ResourceManager()
+        {
+
+        }
 
         public TextureFont LoadTextureFont(string filename)
         {
@@ -44,7 +74,15 @@ namespace Monorail
             return rv;
         }
 
-        public ShaderProgram LoadShader(string vShaderFileName, string fShaderFileName)
+        public ShaderProgram LoadShaderFromString(string vertexShaderCode, string fragmentShaderCode)
+        {
+            // TODO Setup shader hotswapping
+            var rv = ShaderProgram.CreateFromString(vertexShaderCode, fragmentShaderCode);
+            Shaders.Add(rv.ShaderProgramId, rv);
+            return rv;
+        }
+
+        public ShaderProgram LoadShaderFromFile(string vShaderFileName, string fShaderFileName)
         {
             // TODO Setup shader hotswapping
             var rv = ShaderProgram.CreateFromFile(VertexShadersFolder + vShaderFileName, FragmentShaderFolder + fShaderFileName);

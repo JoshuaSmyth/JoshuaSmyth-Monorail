@@ -36,9 +36,13 @@ namespace SampleGame
 
         private IntPtr? _fontTextureId;
 
+        private ResourceManager m_ResourceManager;
 
+        private ShaderProgram m_ShaderProgram;
+        private VertexBuffer<VertexImGui> m_VertexBuffer;
+        private IndexBuffer m_IndexBuffer;
 
-        string fragShader = @"#version 330 core
+        string fragShaderCode = @"#version 330 core
                                uniform sampler2D FontTexture;
 
                                in vec4 color;
@@ -51,7 +55,7 @@ namespace SampleGame
                                     outputColor = color * texture(FontTexture, texCoord);
                                }";
 
-        string vertShader = @"#version 330 core
+        string vertShaderCode = @"#version 330 core
                                uniform ProjectionMatrixBuffer
                                {
                                    mat4 projection_matrix;
@@ -71,19 +75,35 @@ namespace SampleGame
                                    texCoord = in_texCoord;
                                }";
 
-        public void Initalise()
+        public void Initalise(ResourceManager resourceManager)
         {
+            m_ResourceManager = resourceManager;
+
             // Load Context
-            IntPtr context = ImGui.CreateContext();
-            ImGui.SetCurrentContext(context);
+            {
+                IntPtr context = ImGui.CreateContext();
+                ImGui.SetCurrentContext(context);
+            }
 
             // Load Fonts
-            var fonts = ImGui.GetIO().Fonts;
-            ImGui.GetIO().Fonts.AddFontDefault();
+            {
+                var fonts = ImGui.GetIO().Fonts;
+                ImGui.GetIO().Fonts.AddFontDefault();
+            }
 
             // Load Shaders
+            {
+                m_ShaderProgram = m_ResourceManager.LoadShaderFromString(this.vertShaderCode, this.fragShaderCode);
+
+
+            }
 
             // Load Default vertex and index buffers
+            {
+                // 65535
+                throw new Exception("TODO Create index and vertex buffers via the resource manager!!!");
+            }
+
 
             // TODO Add OpenGL ScissorRect
             // void glScissor(GLint x​, GLint y​, GLsizei width​, GLsizei height​);
