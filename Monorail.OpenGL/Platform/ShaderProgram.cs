@@ -16,11 +16,24 @@ namespace Monorail.Platform
 
         public string FragmentShaderFileName { get; private set; }
 
+        public string VertexShaderCode { get; private set; }
+
+        public string FragmentShaderCode { get; private set; }
+
+        // TODO Store Shader Code
+
+
         internal static ShaderProgram CreateFromString(string vertexShaderCode, string fragmentShaderCode)
         {
             using (TracedStopwatch.Start("load shader from string: "))
             {
-                var rv = new ShaderProgram();
+                var rv = new ShaderProgram
+                {
+                    VertexShaderFileName = "Created From String",
+                    FragmentShaderFileName = "Created From String",
+                    VertexShaderCode = vertexShaderCode,
+                    FragmentShaderCode = fragmentShaderCode
+                };
 
                 var vertexShader = OpenGL.GlBindings.CreateShader(ShaderType.VertexShader);
                 GlBindings.ShaderSource(vertexShader, vertexShaderCode);
