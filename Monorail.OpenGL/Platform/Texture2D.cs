@@ -76,8 +76,7 @@ namespace Monorail.Platform
         private int m_TextureId;
         public int TextureId {  get { return m_TextureId; } }
 
-        // TODO Make internal so only the resourcemanager has access.
-        public static Texture2D Create(IntPtr pixels, int width, int height, int bytesPerPixel)
+        internal static Texture2D Create(IntPtr pixels, int width, int height, int bytesPerPixel)
         {
             var rv = new Texture2D();
 

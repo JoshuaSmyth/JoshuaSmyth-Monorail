@@ -104,10 +104,6 @@ namespace SampleGame
                 throw new Exception("TODO Create index and vertex buffers via the resource manager!!!");
             }
 
-
-            // TODO Add OpenGL ScissorRect
-            // void glScissor(GLint x​, GLint y​, GLsizei width​, GLsizei height​);
-
             SetKeyMappings();
             BuildFontAtlas();
             CreateTexture();
@@ -126,8 +122,8 @@ namespace SampleGame
             var io = ImGui.GetIO();
             io.Fonts.GetTexDataAsRGBA32(out IntPtr pixelData, out int width, out int height, out int bytesPerPixel);
 
-            // Create and register the texture as an XNA texture
-            var tex2d = Texture2D.Create(pixels, width, height, bytesPerPixel);
+            // Create and register the texture
+            var tex2d = m_ResourceManager.CreateTexture2d(pixels, width, height, bytesPerPixel);
 
             // Should a texture already have been build previously, unbind it first so it can be deallocated
             if (_fontTextureId.HasValue)

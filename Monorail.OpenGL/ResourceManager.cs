@@ -111,6 +111,15 @@ namespace Monorail
             return rv;
         }
 
+        public Texture2D CreateTexture2d(IntPtr pixels, int width, int height, int bytesPerPixel)
+        {
+            var rv = Texture2D.Create(pixels, width, height, bytesPerPixel);
+
+            // TODO Error Checking!
+            Textures.Add(rv.TextureId, rv);
+            return rv;
+        }
+
         public void UnloadAll()
         {
             Console.WriteLine("TODO!");
