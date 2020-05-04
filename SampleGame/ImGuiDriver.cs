@@ -56,7 +56,7 @@ namespace SampleGame
                                }";
 
         string vertShaderCode = @"#version 330 core
-                               mat4 projection_matrix;
+                               uniform mat4 projection_matrix;
 
                                in vec2 in_position;
                                in vec2 in_texCoord;
@@ -245,8 +245,8 @@ namespace SampleGame
                 m_Indicies32[i] = m_Indicies16[i];
             }
        
-            m_VertexArrayObject.UpdateVertexData(m_Verts,0, vertCount);
-            m_VertexArrayObject.SetIndexData32(m_Indicies32);
+            m_VertexArrayObject.UpdateVertexData<VertexImGui>(m_Verts, 0, vertCount);
+            m_VertexArrayObject.UpdateIndexData32(m_Indicies32);
 
             return;
         }

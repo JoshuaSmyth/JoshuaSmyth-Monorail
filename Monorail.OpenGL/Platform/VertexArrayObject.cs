@@ -96,7 +96,7 @@ namespace Monorail.Platform
             IntPtr ptrIndicies = handleIndicies.AddrOfPinnedObject();
 
             GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferId);
-            GlBindings.BufferSubData(BufferTarget.GL_ARRAY_BUFFER, (IntPtr)0, (IntPtr)(4 * indicies.Length), ptrIndicies);
+            GlBindings.BufferSubData(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, (IntPtr)0, (IntPtr)(4 * indicies.Length), ptrIndicies);
             handleIndicies.Free();
 
             m_VertexCount = indicies.Length;
