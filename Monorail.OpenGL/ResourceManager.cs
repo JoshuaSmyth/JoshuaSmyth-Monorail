@@ -125,6 +125,7 @@ namespace Monorail
         {
             var rv = new VertexArrayObject();
             rv.BindElementsArrayBuffer(verts, indicies, stride, attributeLengths, attributeOffsets, hint);
+            rv.Stride = stride;
 
             // TODO Error Checking!
             VertexArrayObjects.Add(rv.VaoId, rv);

@@ -58,17 +58,19 @@ namespace SampleGame
         string vertShaderCode = @"#version 330 core
                                uniform mat4 projection_matrix;
 
-                               in vec2 in_position;
-                               in vec2 in_texCoord;
-                               in vec4 in_color;
+                               layout (location = 0) in vec2 in_position;
+                               layout (location = 1) in vec2 in_texCoord;
+                               layout (location = 2) in int in_color;
 
                                out vec4 color;
                                out vec2 texCoord;
 
                                void main()
                                {
-                                   gl_Position = projection_matrix * vec4(in_position, 0, 1);
-                                   color = in_color;
+                                   gl_Position = projection_matrix * vec4(in_position, 1, 1);
+                                   gl_Position.z = 1.0f;
+
+                                   color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
                                    texCoord = in_texCoord;
                                }";
 
@@ -253,8 +255,8 @@ namespace SampleGame
 
         private void RenderCommandLists(ImDrawDataPtr drawData)
         {
-            // TODO Need othomatrix
-            var m_Ortho = Monorail.Mathlib.Matrix4.CreateOrthographic(1280, 800, 0.1f, 100);
+            // TODO Pass in the game window to get the screen width and height
+            var m_Ortho = Monorail.Mathlib.Matrix4.CreateOrthographicOffCenter(0, 1280, 720, 0, -1, 1);
 
             m_GraphicsDevice.BindVertexArrayObject(m_VertexArrayObject.VaoId);
 
@@ -275,11 +277,6 @@ namespace SampleGame
 
 
                     /*
-       
-                    */
-
-
-                    /*
                      *  (int)drawCmd.ClipRect.X,
                         (int)drawCmd.ClipRect.Y,
                         (int)(drawCmd.ClipRect.Z - drawCmd.ClipRect.X),
@@ -288,16 +285,17 @@ namespace SampleGame
 
                     // TODO If textureId not loaded?
                     //   m_GraphicsDevice.ScissorRect();
-
-                    //  m_ShaderProgram.SetUniform("projection_matrix", m_Ortho);
                     m_GraphicsDevice.BindShaderProgram(m_ShaderProgram.ShaderProgramId);
-
-                    m_ShaderProgram.SetUniform("projection_matrix", m_Ortho);
 
                     m_GraphicsDevice.BindVertexArrayObject(m_VertexArrayObject.VaoId);
                     m_GraphicsDevice.BindTexture(m_Texture.TextureId, OpenGL.TextureType.GL_TEXTURE_2D);
 
-                    m_GraphicsDevice.DrawElements(PrimitiveType.TriangleList, cmdList.VtxBuffer.Size, DrawElementsType.UnsignedInt, idxOffset);
+
+                    m_ShaderProgram.SetUniform("projection_matrix", m_Ortho);
+                    m_ShaderProgram.SetUniform("FontTexture", 0);
+
+
+                    m_GraphicsDevice.DrawElements(PrimitiveType.TriangleList, (int)drawCmd.ElemCount, DrawElementsType.UnsignedInt, idxOffset);
 
 
                     drawcount++;

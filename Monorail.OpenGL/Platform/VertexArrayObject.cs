@@ -22,14 +22,14 @@ namespace Monorail.Platform
         public int IndexBufferId { get { return m_IndexBufferId; } }
 
         private int m_Stride;
-        public int Stride { get { return m_Stride; } }
+        public int Stride { get { return m_Stride; } internal set { m_Stride = value; } }
 
         private BufferUsageHint m_BufferUsage;
         public BufferUsageHint BufferUsage { get { return m_BufferUsage; } }
 
         internal VertexArrayObject()
         {
-
+            m_Stride = -1;
         }
 
         public unsafe void SetData<T>(T[] verts, uint[] indicies)
@@ -57,6 +57,7 @@ namespace Monorail.Platform
             GCHandle handleVerticies = GCHandle.Alloc(verts, GCHandleType.Pinned);
 
             IntPtr ptrVerticies = handleVerticies.AddrOfPinnedObject();
+
 
             GlBindings.BindBuffer(BufferTarget.GL_ARRAY_BUFFER, m_VertexArrayBufferId);
             GlBindings.BufferSubData(BufferTarget.GL_ARRAY_BUFFER, (IntPtr)0, (IntPtr)(m_Stride*vertexCount), ptrVerticies);
