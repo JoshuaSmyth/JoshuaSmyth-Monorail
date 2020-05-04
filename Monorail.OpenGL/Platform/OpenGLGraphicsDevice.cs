@@ -21,12 +21,12 @@ namespace Monorail.Platform
             GlBindings.Clear(mask);
         }
 
-        public void UseShaderProgram(int shaderId)
+        public void BindShaderProgram(int shaderId)
         {
             GlBindings.UseProgram(shaderId);
         }
 
-        public void UseVertexArrayObject(int vertexArrayObjectId)
+        public void BindVertexArrayObject(int vertexArrayObjectId)
         {
             GlBindings.BindVertexArray(vertexArrayObjectId);
         }

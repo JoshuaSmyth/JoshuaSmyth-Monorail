@@ -94,7 +94,7 @@ namespace Monorail.Platform
 
             m_VertexArrayObject = new VertexArrayObject();
             m_VertexArrayObject.InitElementsArrayBuffer<DefaultQuadBatchVertex>(DefaultQuadBatchVertex.Stride, DefaultQuadBatchVertex.AttributeLengths, DefaultQuadBatchVertex.AttributeOffsets, BufferUsageHint.GL_DYNAMIC_DRAW);
-            m_VertexArrayObject.SetIndexData<uint>(m_Indicies);
+            m_VertexArrayObject.SetIndexData32(m_Indicies);
             m_VertexArrayObject.SetVertexData<DefaultQuadBatchVertex>(m_Verticies);
         }
 
@@ -173,7 +173,7 @@ namespace Monorail.Platform
                 
             }
 
-            m_VertexArrayObject.SetVertexData<DefaultQuadBatchVertex>(m_Verticies, 0, quadCount * 6);
+            m_VertexArrayObject.UpdateVertexData<DefaultQuadBatchVertex>(m_Verticies, 0, quadCount * 6);
 
 
             // TODO Make a font.glsl shader
@@ -182,14 +182,14 @@ namespace Monorail.Platform
             GameWindow.GraphicsDevice.BindTexture2D(font.FontTexture.TextureId, OpenGL.TextureUnits.GL_TEXTURE0);
             GameWindow.GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
 
-            GameWindow.GraphicsDevice.UseShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
+            GameWindow.GraphicsDevice.BindShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
 
             GameWindow.QuadBatchShader.SetUniform("texture1", 0);
 
             GlBindings.BindVertexArray(m_VertexArrayObject.VaoId);
             GlBindings.DrawElements(PrimitiveType.TriangleList, quadCount * 6, DrawElementsType.UnsignedInt, 0);
 
-       //     GlBindings.PolygonMode(Face.GL_FRONT_AND_BACK, Mode.GL_FILL);
+            GlBindings.BindVertexArray(0);
 
             m_quadRecordCount = 0;
         }
@@ -232,10 +232,10 @@ namespace Monorail.Platform
                     m_Verticies[i * 4 + 3].Position = new Vector3(oX + record.X * sX, oY - (record.Y + record.H) * sY, 0.0f);                    // Top Left
                 }
 
-                m_VertexArrayObject.SetVertexData<DefaultQuadBatchVertex>(m_Verticies, 0, quadCount * 6);
+                m_VertexArrayObject.UpdateVertexData<DefaultQuadBatchVertex>(m_Verticies, 0, quadCount * 6);
 
                 // TODO Access the IPlatformGraphicsDevice
-                GameWindow.GraphicsDevice.UseShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
+                GameWindow.GraphicsDevice.BindShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
                 GameWindow.QuadBatchShader.SetUniform("texture1", 0);
                 GameWindow.QuadBatchShader.SetUniform("texture2", 1);
 

@@ -1,5 +1,6 @@
 ﻿using Monorail.Graphics;
 using Monorail.Platform;
+using OpenGL;
 using System;
 using System.Collections.Generic;
 
@@ -20,6 +21,11 @@ namespace Monorail
                 return Data.Length * this.Stride;
             }
         }
+
+        internal static VertexBuffer<T> Create(ushort maxValue)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // TODO Put this into it's own files
@@ -28,6 +34,11 @@ namespace Monorail
         public int Id;
         public int vertexBufferSize;
         public ushort Data;
+
+        internal static IndexBuffer Create16(ushort maxValue)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ResourceManager
@@ -90,7 +101,17 @@ namespace Monorail
             return rv;
         }
 
-        public VertexArrayObject LoadVAO<T>(T[] verts, int stride, int[] attributeLengths, int[] attributeOffsets) where T : IInterleavedVertex
+        public VertexBuffer<T> CreateVertexBuffer<T>(ushort maxValue) where T : IInterleavedVertex
+        {
+            return VertexBuffer<T>.Create(maxValue);
+        }
+
+        public IndexBuffer CreateIndexBuffer16(ushort maxValue)
+        {
+            return IndexBuffer.Create16(maxValue);
+        }
+
+        public VertexArrayObject LoadNonIndexedVAO<T>(T[] verts, int stride, int[] attributeLengths, int[] attributeOffsets) where T : IInterleavedVertex
         {
             var rv = new VertexArrayObject();
             rv.BindArrayBuffer(verts, stride, attributeLengths, attributeOffsets);
@@ -100,10 +121,10 @@ namespace Monorail
 
             return rv;
         }
-        public VertexArrayObject LoadVAO<T>(T[] verts, uint[] indicies, int stride, int[] attributeLengths, int[] attributeOffsets) where T : IInterleavedVertex
+        public VertexArrayObject LoadVAO<T>(T[] verts, uint[] indicies, int stride, int[] attributeLengths, int[] attributeOffsets, BufferUsageHint hint = BufferUsageHint.GL_STATIC_DRAW) where T : IInterleavedVertex
         {
             var rv = new VertexArrayObject();
-            rv.BindElementsArrayBuffer(verts, indicies, stride, attributeLengths, attributeOffsets);
+            rv.BindElementsArrayBuffer(verts, indicies, stride, attributeLengths, attributeOffsets, hint);
 
             // TODO Error Checking!
             VertexArrayObjects.Add(rv.VaoId, rv);

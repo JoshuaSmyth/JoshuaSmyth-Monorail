@@ -52,7 +52,7 @@ namespace Monorail.Platform
             m_VertexCount = indicies.Length;
         }
 
-        public unsafe void SetVertexData<T>(T[] verts, int offset, int vertexCount)
+        public unsafe void UpdateVertexData<T>(T[] verts, int offset, int vertexCount)
         {
             GCHandle handleVerticies = GCHandle.Alloc(verts, GCHandleType.Pinned);
 
@@ -76,7 +76,7 @@ namespace Monorail.Platform
             handleVerticies.Free();
         }
 
-        public unsafe void SetIndexData<T>(uint[] indicies)
+        public unsafe void SetIndexData32(uint[] indicies)
         {
             GCHandle handleIndicies = GCHandle.Alloc(indicies, GCHandleType.Pinned);
 
@@ -89,6 +89,18 @@ namespace Monorail.Platform
             m_VertexCount = indicies.Length;
         }
 
+        public unsafe void UpdateIndexData32(uint[] indicies)
+        {
+            GCHandle handleIndicies = GCHandle.Alloc(indicies, GCHandleType.Pinned);
+
+            IntPtr ptrIndicies = handleIndicies.AddrOfPinnedObject();
+
+            GlBindings.BindBuffer(BufferTarget.GL_ELEMENT_ARRAY_BUFFER, m_IndexBufferId);
+            GlBindings.BufferSubData(BufferTarget.GL_ARRAY_BUFFER, (IntPtr)0, (IntPtr)(4 * indicies.Length), ptrIndicies);
+            handleIndicies.Free();
+
+            m_VertexCount = indicies.Length;
+        }
 
         /// <summary>
         /// Initalises the Vertex Array Object without seting any vertex or index data

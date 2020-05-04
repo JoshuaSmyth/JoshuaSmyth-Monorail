@@ -16,9 +16,6 @@ namespace Monorail.Graphics
         public void Render(RenderableObject renderObject, GameCamera camera)
         {
             // TODO this should actually enqueue rather than render but hey!
-
-            
-
             if (renderObject.IsWireframe)
             {
                 m_Graphics.FillMode(OpenGL.Mode.GL_LINE);
@@ -46,7 +43,7 @@ namespace Monorail.Graphics
             }
 
 
-            m_Graphics.UseShaderProgram(renderObject.ShaderId);
+            m_Graphics.BindShaderProgram(renderObject.ShaderId);
 
             renderObject.OnApplyUniforms(this, camera);
 
@@ -56,7 +53,7 @@ namespace Monorail.Graphics
                 m_Graphics.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
             }
 
-            m_Graphics.UseVertexArrayObject(renderObject.VaoId);
+            m_Graphics.BindVertexArrayObject(renderObject.VaoId);
 
             if (renderObject.HasIndexBuffer)
             {

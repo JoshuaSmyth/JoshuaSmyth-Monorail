@@ -26,21 +26,21 @@ namespace SampleGame
 
     public class ImGuiDriver
     {
-        private byte[] _vertexData;
-        private int _vertexBufferId;        // TODO Abstract this
-        private int _vertexBufferSize;
-
-        private byte[] _indexData;
-        private int _indexBufferId;         // TODO Abstrat this
-        private int _indexBufferSize;
+        private VertexArrayObject m_VertexArrayObject;
+        private VertexImGui[] m_Verts = new VertexImGui[65536];
+        private ushort[] m_Indicies16 = new ushort[65536];
+        private uint[] m_Indicies32 = new uint[65536];
 
         private IntPtr? _fontTextureId;
 
         private ResourceManager m_ResourceManager;
 
         private ShaderProgram m_ShaderProgram;
+        private Texture2D m_Texture;
         private VertexBuffer<VertexImGui> m_VertexBuffer;
         private IndexBuffer m_IndexBuffer;
+
+        private IPlatformGraphicsDevice m_GraphicsDevice;
 
         string fragShaderCode = @"#version 330 core
                                uniform sampler2D FontTexture;
@@ -56,10 +56,7 @@ namespace SampleGame
                                }";
 
         string vertShaderCode = @"#version 330 core
-                               uniform ProjectionMatrixBuffer
-                               {
-                                   mat4 projection_matrix;
-                               };
+                               mat4 projection_matrix;
 
                                in vec2 in_position;
                                in vec2 in_texCoord;
@@ -75,9 +72,10 @@ namespace SampleGame
                                    texCoord = in_texCoord;
                                }";
 
-        public void Initalise(ResourceManager resourceManager)
+        public void Initalise(IPlatformGraphicsDevice graphicsDevice, ResourceManager resourceManager)
         {
             m_ResourceManager = resourceManager;
+            m_GraphicsDevice = graphicsDevice;
 
             // Load Context
             {
@@ -91,22 +89,15 @@ namespace SampleGame
                 ImGui.GetIO().Fonts.AddFontDefault();
             }
 
-            // Load Shaders
+            // Load Graphics Resources
             {
                 m_ShaderProgram = m_ResourceManager.LoadShaderFromString(this.vertShaderCode, this.fragShaderCode);
+                m_VertexArrayObject = m_ResourceManager.LoadVAO<VertexImGui>(m_Verts, m_Indicies32, VertexImGui.Stride, VertexImGui.AttributeLengths, VertexImGui.AttributeOffsets, OpenGL.BufferUsageHint.GL_DYNAMIC_DRAW );
 
-
+                SetKeyMappings();
+                BuildFontAtlas();
+                CreateTexture();
             }
-
-            // Load Default vertex and index buffers
-            {
-                // 65535
-                throw new Exception("TODO Create index and vertex buffers via the resource manager!!!");
-            }
-
-            SetKeyMappings();
-            BuildFontAtlas();
-            CreateTexture();
         }
 
         private void CreateTexture()
@@ -123,7 +114,7 @@ namespace SampleGame
             io.Fonts.GetTexDataAsRGBA32(out IntPtr pixelData, out int width, out int height, out int bytesPerPixel);
 
             // Create and register the texture
-            var tex2d = m_ResourceManager.CreateTexture2d(pixels, width, height, bytesPerPixel);
+            m_Texture = m_ResourceManager.CreateTexture2d(pixels, width, height, bytesPerPixel);
 
             // Should a texture already have been build previously, unbind it first so it can be deallocated
             if (_fontTextureId.HasValue)
@@ -132,7 +123,7 @@ namespace SampleGame
                 //UnbindTexture(_fontTextureId.Value);
             }
 
-            _fontTextureId = (IntPtr) tex2d.TextureId;
+            _fontTextureId = (IntPtr) m_Texture.TextureId;
 
             io.Fonts.SetTexID(_fontTextureId.Value);
             io.Fonts.ClearTexData();
@@ -140,6 +131,8 @@ namespace SampleGame
 
         public void Begin()
         {
+            
+
             UpdateIO();
 
             ImGui.NewFrame();
@@ -186,7 +179,7 @@ namespace SampleGame
             }
         }
 
-        public void End()
+        public void Submit()
         {
             ImGui.Render();
             unsafe { RenderDrawData(ImGui.GetDrawData()); }
@@ -207,50 +200,67 @@ namespace SampleGame
             }
 
             // Can we fit the verticies in the current vertex buffer?
-            if (drawData.TotalVtxCount > _vertexBufferSize)
+            if (drawData.TotalVtxCount > m_Verts.Length)
             {
                 // TODO resize vertex buffer
-                //throw new Exception("TODO need a vertex buffer");
+                // Or multiple buffers
+                // Or multiple draw calls
+                throw new Exception("TODO need a vertex buffer");
+                return;
             }
 
             // Can we fit the indicies in the current index buffer
-            if (drawData.TotalIdxCount > _indexBufferSize)
+            if (drawData.TotalIdxCount > m_Indicies16.Length)
             {
                 // TODO resize index buffer
-                //throw new Exception("TODO need an index buffer");
+                // Or multiple buffers
+                // Or multiple draw calls
+                throw new Exception("TODO need an index buffer");
+                return;
             }
 
-            return;
-            // TODO I could probably use these pointers directly
-            // Copy ImGui's vertices and indices to a set of managed byte arrays
-            int vtxOffset = 0;
-            int idxOffset = 0;
+
+            int vertCount = 0;
+            int indexCount = 0;
 
             for (int n = 0; n < drawData.CmdListsCount; n++)
             {
                 ImDrawListPtr cmdList = drawData.CmdListsRange[n];
 
-                fixed (void* vtxDstPtr = &_vertexData[vtxOffset * 20])
-                fixed (void* idxDstPtr = &_indexData[idxOffset * sizeof(ushort)])
+                fixed (void* vtxDstPtr = &m_Verts[vertCount * 20])
+                fixed (void* idxDstPtr = &m_Indicies16[indexCount * sizeof(ushort)])
                 {
-                    Buffer.MemoryCopy((void*)cmdList.VtxBuffer.Data, vtxDstPtr, _vertexData.Length, cmdList.VtxBuffer.Size * VertexImGui.Stride);
-                    Buffer.MemoryCopy((void*)cmdList.IdxBuffer.Data, idxDstPtr, _indexData.Length, cmdList.IdxBuffer.Size * sizeof(ushort));
+                    Buffer.MemoryCopy((void*)cmdList.VtxBuffer.Data, vtxDstPtr, m_Verts.Length, cmdList.VtxBuffer.Size * VertexImGui.Stride);
+                    Buffer.MemoryCopy((void*)cmdList.IdxBuffer.Data, idxDstPtr, m_Indicies16.Length, cmdList.IdxBuffer.Size * sizeof(ushort));
                 }
 
-                vtxOffset += cmdList.VtxBuffer.Size;
-                idxOffset += cmdList.IdxBuffer.Size;
+                vertCount += cmdList.VtxBuffer.Size;
+                indexCount += cmdList.IdxBuffer.Size;
             }
 
-            // Copy the managed byte arrays to the gpu vertex- and index buffers
+            // This is a bit of a hack but lets copy the 16bit indicies into 32bit buffers
+            // This is a slow path was we don't have 16bit VAOs yet.
+            for(int i=0;i<indexCount;i++)
+            {
+                m_Indicies32[i] = m_Indicies16[i];
+            }
+       
+            m_VertexArrayObject.UpdateVertexData(m_Verts,0, vertCount);
+            m_VertexArrayObject.SetIndexData32(m_Indicies32);
 
-            
-            //_vertexBuffer.SetData(_vertexData, 0, drawData.TotalVtxCount * VertexImGui.Stride);
-            //_indexBuffer.SetData(_indexData, 0, drawData.TotalIdxCount * sizeof(ushort));
-
+            return;
         }
 
         private void RenderCommandLists(ImDrawDataPtr drawData)
         {
+            // TODO Need othomatrix
+            var m_Ortho = Monorail.Mathlib.Matrix4.CreateOrthographic(1280, 800, 0.1f, 100);
+
+            m_GraphicsDevice.BindVertexArrayObject(m_VertexArrayObject.VaoId);
+
+            var drawcount = 0;
+            int vtxOffset = 0;
+            int idxOffset = 0;
             for (int n = 0; n < drawData.CmdListsCount; n++)
             {
                 ImDrawListPtr cmdList = drawData.CmdListsRange[n];
@@ -258,8 +268,47 @@ namespace SampleGame
                 {
                     ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
                     var texId = drawCmd.TextureId;
+
+
+//                    OpenGL.GlBindings.Enable(OpenGL.Enable.GL_SCISSOR_TEST);
+  //                  OpenGL.GlBindings.glScissor((int)drawCmd.ClipRect.X, (int)drawCmd.ClipRect.Y, (uint)(drawCmd.ClipRect.Z - drawCmd.ClipRect.X), (uint)(drawCmd.ClipRect.W - drawCmd.ClipRect.Y));
+
+
+                    /*
+       
+                    */
+
+
+                    /*
+                     *  (int)drawCmd.ClipRect.X,
+                        (int)drawCmd.ClipRect.Y,
+                        (int)(drawCmd.ClipRect.Z - drawCmd.ClipRect.X),
+                        (int)(drawCmd.ClipRect.W - drawCmd.ClipRect.Y
+                     */
+
+                    // TODO If textureId not loaded?
+                    //   m_GraphicsDevice.ScissorRect();
+
+                    //  m_ShaderProgram.SetUniform("projection_matrix", m_Ortho);
+                    m_GraphicsDevice.BindShaderProgram(m_ShaderProgram.ShaderProgramId);
+
+                    m_ShaderProgram.SetUniform("projection_matrix", m_Ortho);
+
+                    m_GraphicsDevice.BindVertexArrayObject(m_VertexArrayObject.VaoId);
+                    m_GraphicsDevice.BindTexture(m_Texture.TextureId, OpenGL.TextureType.GL_TEXTURE_2D);
+
+                    m_GraphicsDevice.DrawElements(PrimitiveType.TriangleList, cmdList.VtxBuffer.Size, DrawElementsType.UnsignedInt, idxOffset);
+
+
+                    drawcount++;
+
+                    idxOffset += (int)drawCmd.ElemCount;
                 }
+                vtxOffset += cmdList.VtxBuffer.Size;
             }
+
+       //     OpenGL.GlBindings.Disable(OpenGL.Enable.GL_SCISSOR_TEST);
+
         }
 
         private static void SetKeyMappings()

@@ -34,7 +34,7 @@ namespace SampleGame
         public override void Load()
         {
             m_ImGuiDriver = new ImGuiDriver();
-            m_ImGuiDriver.Initalise(m_ResourceManager);
+            m_ImGuiDriver.Initalise(GraphicsDevice, m_ResourceManager);
 
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
 
@@ -96,7 +96,7 @@ namespace SampleGame
 
                 // memory leak
                // var m_CubeVAO = new VertexArrayObject();    // TODO Generate indicies
-                var m_CubeVAO = m_ResourceManager.LoadVAO(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
+                var m_CubeVAO = m_ResourceManager.LoadNonIndexedVAO(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
 
                 m_Cube = new Cube[10];
                 for(int i=0;i<10;i++)
@@ -125,7 +125,7 @@ namespace SampleGame
             // Create Skyubox
             {
                 var verts = Geometry.CreateSkyBoxVerticies();
-                var skyboxVAO = m_ResourceManager.LoadVAO(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
+                var skyboxVAO = m_ResourceManager.LoadNonIndexedVAO(verts, VertexPosition.Stride, VertexPosition.AttributeLengths, VertexPosition.AttributeOffsets);
 
 
                 var cubeMap = m_ResourceManager.LoadCubeMap("Skybox/front.png", "Skybox/back.png", "Skybox/bottom.png", "Skybox/top.png", "Skybox/left.png", "Skybox/right.png");
@@ -144,11 +144,6 @@ namespace SampleGame
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
 
             m_TerrainRenderObject.IsWireframe = IsWireframeMode;
-
-            /*
-            OpenGL.GlBindings.Enable(OpenGL.Enable.GL_SCISSOR_TEST);
-            OpenGL.GlBindings.glScissor(200, 200, 250, 250);
-            */
 
             m_RenderQueue.Render(m_SkyBoxRenderObject, camera);
             m_RenderQueue.Render(m_BunnyRenderObject, camera);
@@ -173,7 +168,7 @@ namespace SampleGame
             GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
             GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
 
-            /*
+            
             m_QuadBatch.Start();
 
             m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
@@ -181,7 +176,7 @@ namespace SampleGame
             m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
 
             m_QuadBatch.Commit();
-            */
+            
 
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
@@ -192,7 +187,8 @@ namespace SampleGame
             // TODO ImGUI calls here.
                 m_ImGuiDriver.Draw();
 
-            m_ImGuiDriver.End();
+            m_ImGuiDriver.Submit();
+            
         }
 
 

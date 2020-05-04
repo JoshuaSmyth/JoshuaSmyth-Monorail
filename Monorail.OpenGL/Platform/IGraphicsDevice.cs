@@ -13,9 +13,9 @@ namespace Monorail.Platform
 
         void Clear(Vector4 color, ClearBufferMask mask = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        void UseShaderProgram(int shaderId);
+        void BindShaderProgram(int shaderId);
 
-        void UseVertexArrayObject(int vertexArrayObjectId);
+        void BindVertexArrayObject(int vertexArrayObjectId);
 
         void DrawArrays(PrimitiveType triangles, int offset, int vertexCount);
 
