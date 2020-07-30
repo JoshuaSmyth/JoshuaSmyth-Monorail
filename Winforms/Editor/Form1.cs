@@ -40,17 +40,19 @@ public partial class Form1 : Form
     {
         InitializeComponent();
 
-
+        var h = this.Handle;
         ThreadPool.QueueUserWorkItem((c) =>
         {
+            // TODO Fix this up so we can pass the correct size/width and parent information into the window
             using (var window = new GameWindow("Test", 1280, 720))
             {
                 gameWindow = window;
-                window.RunGame(new MySampleGame());
+
+                window.RunGame(new MySampleGame(), true, () => SetParent(gameWindow.Win32Ptr, h));
             }
         });
 
-
+        /*
         // This button just helps with some debugging
         Button button = new Button();
         button.Text = "Whatever";
@@ -58,31 +60,71 @@ public partial class Form1 : Form
             (Size.Width / 2) - (button.Size.Width / 2),
             10
         );
-
+        */
+        /*
         button.Click += (o, s) =>
         {
 
-            var point = splitContainer1.Panel2.PointToScreen(new Point());
-            var w = splitContainer1.Panel2.Width;
-            var h = splitContainer1.Panel2.Height;
+            SetParent(gameWindow.Win32Ptr, this.Handle);
+            UpdateOpenGL();
 
-            // Move the SDL2 window to 0, 0
-            SetWindowPos(
-                gameWindow.Win32Ptr,
-                this.Handle,
-                point.X,
-                point.Y,
-                w,
-                h,
-                0x0000
-            );
-
-            ShowWindow(this.gameHwnd, 1); // SHOWNORMAL
         };
 
         splitContainer1.Panel2.Controls.Add(button);
+        */
     }
 
+    protected override void WndProc(ref Message m)
+    {
+        base.WndProc(ref m);
+
+        if (m.Msg == 0x0112) // WM_SYSCOMMAND
+        {
+            
+            // Check your window state here
+            if (m.WParam == new IntPtr(0xF030) || 
+                m.WParam == new IntPtr(0xF120) ||
+                m.WParam == new IntPtr(0xF012) ||
+                m.WParam == new IntPtr(0xF160) ||
+                m.WParam == new IntPtr(0xF002) ||
+                m.WParam == new IntPtr(0xF122) ||
+                m.WParam == new IntPtr(0xF032) ||
+                m.WParam == new IntPtr(0xF003) ||
+                m.WParam == new IntPtr(0xF008) ||
+                m.WParam == new IntPtr(0xF006) ||
+                m.WParam == new IntPtr(0xF001)
+                )
+            {
+                // The window is being changed
+                UpdateOpenGL();
+            }
+            else
+            {
+                // Are there any more cases?
+            }
+        }
+    }
+
+    private void UpdateOpenGL()
+    {
+        Point locationOnForm = splitContainer1.Panel2.FindForm().PointToClient(splitContainer1.Panel2.Parent.PointToScreen(splitContainer1.Panel2.Location));
+
+        var x = locationOnForm.X;
+        var y = locationOnForm.Y;
+
+        var w = splitContainer1.Panel2.Width;
+        var h = splitContainer1.Panel2.Height;
+
+        SetWindowPos(
+            gameWindow.Win32Ptr,
+            this.Handle,
+            x,
+            y,
+            w,
+            h,
+            0x0004
+        );
+    }
 
     private StatusStrip statusStrip1;
     private ToolStrip toolStrip1;

@@ -54,7 +54,7 @@ namespace Monorail.Platform
             // TODO Tear down
         }
 
-        public void RunGame(Game game)
+        public void RunGame(Game game, bool borderless = false, Action a = null)
         {
             NativeLibraryLoader.SetNativeLibaryFolder();
 
@@ -91,7 +91,12 @@ namespace Monorail.Platform
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_MULTISAMPLESAMPLES, 8);
 
             // TODO Register the Audio device in the dependancy locator
-            WindowPtr = SDL.SDL_CreateWindow(m_WindowName, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, ScreenWidth, ScreenHeight, /*SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS |*/ SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
+            var windowStyle = /*SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS |*/ SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL;
+            if (borderless == true)
+            {
+                windowStyle = windowStyle | SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+            }
+            WindowPtr = SDL.SDL_CreateWindow(m_WindowName, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, ScreenWidth, ScreenHeight, windowStyle);
             OpenGLPtr = SDL.SDL_GL_CreateContext(WindowPtr);
 
             // Get the Win32 HWND from the SDL2 window
@@ -111,6 +116,13 @@ namespace Monorail.Platform
             AudioDevice = audioDevice;
 
             game.Init(audioDevice, graphicsDevice, this, GameInput);
+
+            // TODO Rename to OnLoadedWindow
+            if (a != null)
+            {
+                a.Invoke();
+            }
+
             // TODO Embed these as resources
             QuadBatchShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.quadbatch.glsl", "Resources/Shaders/Fragment/f.quadbatch.glsl");
 
