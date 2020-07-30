@@ -69,6 +69,9 @@ namespace Monorail.Platform
 
         public void Update()
         {
+            var aspect = GameWindow.ScreenWidth / (float)GameWindow.ScreenHeight;
+            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(60), aspect, 1f, 1000.0f);
+
             Forward.X = (float)(Math.Cos(MathHelper.ToRads(Yaw)) * Math.Cos(MathHelper.ToRads(Pitch)));
             Forward.Y = (float)Math.Sin(MathHelper.ToRads(Pitch));
             Forward.Z = (float)(Math.Sin(MathHelper.ToRads(Yaw)) * Math.Cos(MathHelper.ToRads(Pitch)));

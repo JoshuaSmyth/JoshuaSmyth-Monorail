@@ -6,19 +6,28 @@ using SDL2;
 
 namespace Monorail.Platform
 {
+    public enum VSyncStatus
+    {
+        VSYNC_DISABLE = 0,
+        VSYNC_ENABLE = 1
+    }
+
     public class GameWindow : IDisposable
     {
         private static Int32 m_ScreenWidth;
         private static Int32 m_ScreenHeight;
+
         String m_WindowName;
+
         internal IntPtr WindowPtr;
         internal IntPtr OpenGLPtr;
+        public IntPtr Win32Ptr;
 
         internal bool HasQuit;
 
-        public static int ScreenHeight { get { return m_ScreenHeight; } }
+        public static int ScreenHeight { get { return m_ScreenHeight; } set { m_ScreenHeight = value; } }
 
-        public static int ScreenWidth { get { return m_ScreenWidth; } }
+        public static int ScreenWidth { get { return m_ScreenWidth; } set { m_ScreenWidth = value; } }
 
         public static IPlatformGraphicsDevice GraphicsDevice { get; private set; }
 
@@ -82,8 +91,13 @@ namespace Monorail.Platform
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_MULTISAMPLESAMPLES, 8);
 
             // TODO Register the Audio device in the dependancy locator
-            WindowPtr = SDL.SDL_CreateWindow(m_WindowName, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, ScreenWidth, ScreenHeight, SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
+            WindowPtr = SDL.SDL_CreateWindow(m_WindowName, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, ScreenWidth, ScreenHeight, /*SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS |*/ SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
             OpenGLPtr = SDL.SDL_GL_CreateContext(WindowPtr);
+
+            // Get the Win32 HWND from the SDL2 window
+            SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
+            SDL.SDL_GetWindowWMInfo(WindowPtr, ref info);
+            Win32Ptr = info.info.win.window;
 
             OpenGL.GlBindings.InitaliseOpenGLEntryPoints();
 
@@ -128,7 +142,8 @@ namespace Monorail.Platform
                 GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
                 game.Render2D();
 
-                // TODO Multimedia Timer
+                // TODO Multimedia Timer or sleep for time...
+                // TODO Stats for frame time and fps
 
                 // Update window with OpenGL rendering
                 SDL.SDL_GL_SwapWindow(WindowPtr);
@@ -144,11 +159,7 @@ namespace Monorail.Platform
             SDL.SDL_Quit();
         }
 
-        public enum VSyncStatus
-        {
-            VSYNC_DISABLE = 0,
-            VSYNC_ENABLE = 1
-        }
+
 
         // TODO Move to GraphicsDevice?
         private static void SetVSync(VSyncStatus vsyncstatus)
@@ -166,6 +177,23 @@ namespace Monorail.Platform
                     HasQuit = true;
                 }
 
+                if (sdlEvent.type == SDL.SDL_EventType.SDL_WINDOWEVENT)
+                {
+                    if (sdlEvent.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
+                    {
+                        // TODO Respond to resize event properly
+                        var width = sdlEvent.window.data1;
+                        var height = sdlEvent.window.data2;
+
+                        Console.WriteLine("Resize Event: width:" + width + "height:" + height);
+
+                        GameWindow.ScreenWidth = width;
+                        GameWindow.ScreenHeight = height;
+
+                        GraphicsDevice.SetViewport(0, 0, (uint)width, (uint)height);
+                    }
+                }
+
                 if (sdlEvent.type == SDL.SDL_EventType.SDL_KEYDOWN)
                 {
                     var value = (int)sdlEvent.key.keysym.scancode;
@@ -180,6 +208,7 @@ namespace Monorail.Platform
                         break;
                     }
                 }
+
                 if (sdlEvent.type == SDL.SDL_EventType.SDL_KEYUP)
                 {
                     GameInput.SetKeyUp((int)sdlEvent.key.keysym.scancode);

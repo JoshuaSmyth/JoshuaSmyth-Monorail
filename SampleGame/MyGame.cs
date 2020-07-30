@@ -9,7 +9,7 @@ namespace SampleGame
 {
     public class MySampleGame : Game
     {
-        ImGuiDriver m_ImGuiDriver;
+     //   ImGuiDriver m_ImGuiDriver;
 
         // Render Objects
         SkyBox m_SkyBoxRenderObject;
@@ -33,8 +33,8 @@ namespace SampleGame
 
         public override void Load()
         {
-            m_ImGuiDriver = new ImGuiDriver();
-            m_ImGuiDriver.Initalise(GraphicsDevice, m_ResourceManager);
+         //   m_ImGuiDriver = new ImGuiDriver();
+         //   m_ImGuiDriver.Initalise(GraphicsDevice, m_ResourceManager);
 
             camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
 
@@ -181,13 +181,13 @@ namespace SampleGame
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
 
-            // Render IMGUI
-            m_ImGuiDriver.Begin();
+            //// Render IMGUI
+            //m_ImGuiDriver.Begin();
 
-            // TODO ImGUI calls here.
-                m_ImGuiDriver.Draw();
+            //// TODO ImGUI calls here.
+            //    m_ImGuiDriver.Draw();
 
-            m_ImGuiDriver.Submit();
+            //m_ImGuiDriver.Submit();
             
         }
 

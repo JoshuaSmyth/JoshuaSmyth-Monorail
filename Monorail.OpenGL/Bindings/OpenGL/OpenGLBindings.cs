@@ -463,6 +463,11 @@ namespace OpenGL
         public static glScissorFuncDelegate glScissor;
 
 
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glViewportFuncDelegate(int x​, int y​, uint width​, uint height​);
+        [BindMethod("glViewport")]
+        public static glViewportFuncDelegate glViewport;
+
 
         public static void InitaliseOpenGLEntryPoints()
         {

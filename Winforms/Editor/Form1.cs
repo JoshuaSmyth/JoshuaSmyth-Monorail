@@ -1,48 +1,21 @@
-﻿#region License
-/* SDL2 Window for System.Windows.Forms Example
- * Written by Ethan "flibitijibibo" Lee
- * http://www.flibitijibibo.com/
- *
- * Released under public domain.
- * No warranty implied; use at your own risk.
- */
-#endregion
-
+﻿
 #region Using Statements
+using Monorail.Platform;
+using SampleGame;
 using SDL2;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 
 #endregion
 
 public partial class Form1 : Form
 {
-    #region Private SDL2 Window/Control Variables
-
-    // These are the variables you care about.
     private Panel gamePanel;
-    private IntPtr gameWindow; // For FNA, this is Game.Window.Handle
-
-    #endregion
-
-    #region Private GL Variables
-
-    // IGNORE MEEEEE
-    private Random random;
-    private IntPtr glContext;
-    private delegate void Viewport(int x, int y, int width, int height);
-    private delegate void ClearColor(float r, float g, float b, float a);
-    private delegate void Clear(uint flags);
-    private Viewport glViewport;
-    private ClearColor glClearColor;
-    private Clear glClear;
-
-    #endregion
-
-    #region WinAPI Entry Points
-
+ 
+   
     [DllImport("user32.dll")]
     private static extern IntPtr SetWindowPos(
         IntPtr handle,
@@ -58,124 +31,123 @@ public partial class Form1 : Form
     [DllImport("user32.dll")]
     private static extern IntPtr ShowWindow(IntPtr handle, int command);
 
-    #endregion
 
-    #region Form Constructor
+    IntPtr gameHwnd;
+
+    static GameWindow gameWindow;
 
     public Form1()
     {
-        // This is what we're going to attach the SDL2 window to
-        gamePanel = new Panel();
-        gamePanel.Size = new Size(320, 480);
-        gamePanel.Location = new Point(80, 10);
+        InitializeComponent();
 
-        // Make the WinForms window
-        Size = new Size(800, 600);
-        FormClosing += new FormClosingEventHandler(WindowClosing);
+
+        ThreadPool.QueueUserWorkItem((c) =>
+        {
+            using (var window = new GameWindow("Test", 1280, 720))
+            {
+                gameWindow = window;
+                window.RunGame(new MySampleGame());
+            }
+        });
+
+
+        // This button just helps with some debugging
         Button button = new Button();
         button.Text = "Whatever";
         button.Location = new Point(
             (Size.Width / 2) - (button.Size.Width / 2),
-            gamePanel.Location.Y + gamePanel.Size.Height + 10
-        );
-        button.Click += new EventHandler(ClickedButton);
-        Controls.Add(button);
-        Controls.Add(gamePanel);
-
-        // IGNORE MEEEEE
-        random = new Random();
-        SDL.SDL_Init(SDL.SDL_INIT_VIDEO);
-        gameWindow = SDL.SDL_CreateWindow(
-            String.Empty,
-            0,
-            0,
-            gamePanel.Size.Width,
-            gamePanel.Size.Height,
-            SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS | SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL
-        );
-        glContext = SDL.SDL_GL_CreateContext(gameWindow);
-        glViewport = (Viewport)Marshal.GetDelegateForFunctionPointer(
-            SDL.SDL_GL_GetProcAddress("glViewport"),
-            typeof(Viewport)
-        );
-        glClearColor = (ClearColor)Marshal.GetDelegateForFunctionPointer(
-            SDL.SDL_GL_GetProcAddress("glClearColor"),
-            typeof(ClearColor)
-        );
-        glClear = (Clear)Marshal.GetDelegateForFunctionPointer(
-            SDL.SDL_GL_GetProcAddress("glClear"),
-            typeof(Clear)
-        );
-        glViewport(0, 0, gamePanel.Size.Width, gamePanel.Size.Height);
-        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-        glClear(0x4000);
-        SDL.SDL_GL_SwapWindow(gameWindow);
-
-        // Get the Win32 HWND from the SDL2 window
-        SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-        SDL.SDL_GetWindowWMInfo(gameWindow, ref info);
-        IntPtr winHandle = info.info.win.window;
-
-        // Move the SDL2 window to 0, 0
-        SetWindowPos(
-            winHandle,
-            Handle,
-            0,
-            0,
-            0,
-            0,
-            0x0401 // NOSIZE | SHOWWINDOW
+            10
         );
 
-        // Attach the SDL2 window to the panel
-        SetParent(winHandle, gamePanel.Handle);
-        ShowWindow(winHandle, 1); // SHOWNORMAL
+        button.Click += (o, s) =>
+        {
+
+            var point = splitContainer1.Panel2.PointToScreen(new Point());
+            var w = splitContainer1.Panel2.Width;
+            var h = splitContainer1.Panel2.Height;
+
+            // Move the SDL2 window to 0, 0
+            SetWindowPos(
+                gameWindow.Win32Ptr,
+                this.Handle,
+                point.X,
+                point.Y,
+                w,
+                h,
+                0x0000
+            );
+
+            ShowWindow(this.gameHwnd, 1); // SHOWNORMAL
+        };
+
+        splitContainer1.Panel2.Controls.Add(button);
     }
 
-    #endregion
 
-    #region Button Event Method
+    private StatusStrip statusStrip1;
+    private ToolStrip toolStrip1;
 
-    private void ClickedButton(object sender, EventArgs e)
+    private void InitializeComponent()
     {
-        glClearColor(
-            (float)random.NextDouble(),
-            (float)random.NextDouble(),
-            (float)random.NextDouble(),
-            1.0f
-        );
-        glClear(0x4000); // GL_COLOR_BUFFER_BIT
-        SDL.SDL_GL_SwapWindow(gameWindow);
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Location = new System.Drawing.Point(0, 518);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1037, 22);
+            this.statusStrip1.TabIndex = 0;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1037, 25);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 25);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint);
+            this.splitContainer1.Size = new System.Drawing.Size(1037, 493);
+            this.splitContainer1.SplitterDistance = 345;
+            this.splitContainer1.TabIndex = 2;
+            // 
+            // Form1
+            // 
+            this.ClientSize = new System.Drawing.Size(1037, 540);
+            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.statusStrip1);
+            this.Name = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load_2);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
     }
 
-    #endregion
-
-    #region Window Close Method
-
-    private void WindowClosing(object sender, FormClosingEventArgs e)
-    {
-        glClear = null;
-        glClearColor = null;
-        glViewport = null;
-        SDL.SDL_GL_DeleteContext(glContext);
-        glContext = IntPtr.Zero;
-        SDL.SDL_DestroyWindow(gameWindow);
-        gameWindow = IntPtr.Zero;
-        SDL.SDL_Quit();
-    }
-
-    #endregion
-
-    #region Program Entry Point
-
-    #endregion
-
-    private void Form1_Load(object sender, EventArgs e)
+    private void Form1_Load_2(object sender, EventArgs e)
     {
 
     }
 
-    private void Form1_Load_1(object sender, EventArgs e)
+    private SplitContainer splitContainer1;
+
+    private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
     {
 
     }

@@ -76,6 +76,37 @@ namespace Monorail.Platform
         private int m_TextureId;
         public int TextureId {  get { return m_TextureId; } }
 
+
+        internal static Texture2D Create(int width, int height, int bytesPerPixel)
+        {
+            byte[] bytearray = new byte[width * height * bytesPerPixel];
+
+            // is there a faster way to create white?
+            for(int i=0;i<bytearray.Length; i++)
+            {
+                bytearray[i] = 255;
+            }
+
+            GCHandle pinnedArray = GCHandle.Alloc(bytearray, GCHandleType.Pinned);
+            IntPtr pixels = pinnedArray.AddrOfPinnedObject();
+            
+            var rv = new Texture2D();
+            {
+
+                GlBindings.GenTextures(1, out rv.m_TextureId);
+                GlBindings.BindTexture(TextureType.GL_TEXTURE_2D, rv.m_TextureId);
+                GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_WRAP_S, TextureAttributeValue.GL_REPEAT);
+                GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_WRAP_T, TextureAttributeValue.GL_REPEAT);
+                GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_MIN_FILTER, TextureAttributeValue.GL_LINEAR);
+                GlBindings.TexParameteri(TextureType.GL_TEXTURE_2D, TextureAttribute.GL_TEXTURE_MAG_FILTER, TextureAttributeValue.GL_LINEAR);
+
+                GlBindings.TexImage2D(TextureType.GL_TEXTURE_2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixels);
+            }
+            pinnedArray.Free();
+
+            return rv;
+        }
+
         internal static Texture2D Create(IntPtr pixels, int width, int height, int bytesPerPixel)
         {
             var rv = new Texture2D();

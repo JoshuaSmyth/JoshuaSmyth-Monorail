@@ -121,6 +121,9 @@ namespace Monorail
 
             return rv;
         }
+
+
+
         public VertexArrayObject LoadVAO<T>(T[] verts, uint[] indicies, int stride, int[] attributeLengths, int[] attributeOffsets, BufferUsageHint hint = BufferUsageHint.GL_STATIC_DRAW) where T : IInterleavedVertex
         {
             var rv = new VertexArrayObject();
@@ -136,6 +139,15 @@ namespace Monorail
         public Texture2D CreateTexture2d(IntPtr pixels, int width, int height, int bytesPerPixel)
         {
             var rv = Texture2D.Create(pixels, width, height, bytesPerPixel);
+
+            // TODO Error Checking!
+            Textures.Add(rv.TextureId, rv);
+            return rv;
+        }
+
+        public Texture2D CreateTexture2d(int width, int height, int bytesPerPixel)
+        {
+            var rv = Texture2D.Create(width, height, bytesPerPixel);
 
             // TODO Error Checking!
             Textures.Add(rv.TextureId, rv);

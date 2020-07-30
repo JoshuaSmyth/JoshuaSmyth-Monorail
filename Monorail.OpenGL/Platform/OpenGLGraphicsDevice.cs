@@ -84,5 +84,10 @@ namespace Monorail.Platform
         {
             GlBindings.PolygonMode(Face.GL_FRONT_AND_BACK, mode);
         }
+
+        public void SetViewport(int x, int y, uint width, uint height)
+        {
+            GlBindings.glViewport(x, y, width, height);
+        }
     }
 }
