@@ -7,42 +7,74 @@ in vec3 vPos;
 
 out vec4 FragColor;
 
-vec3 vUp = vec3(0.0, 1.0, 0.0);
-uniform vec3 lightdir = vec3(1.0f, 1.0f, 1.0f);
+uniform vec3 lightdir;
+uniform vec3 viewpos;
+
+// Goals for
+// Base Material/Shader
+
+// Blinn-Phong
+// Half-Lambert
+// HDR / Tonemapping
+// Bloom
+// SSAO
 
 void main()
 {
+	float specularStrength = 0.5f;
+	float shineyness = 32;
+
+	// TODO Work out specular but prob just for snow?
+
+	vec3 specLight = lightdir;
+	vec3 specDir = normalize(specLight);
+	vec3 specNorm = normalize(nNormal);
+
 	// TODO Work out specular but prob just for snow?
 
 
-    vec3 colorA = vec3(1.0f, 1.0f, 1.0f);						// Snow
-	vec3 colorB = vec3(0.5,0.4,0.5);							// Rock
-	vec3 colorC = vec3(46/255.0f, 180/255.0f, 47/255.0f);		// Grass
-	vec3 colorD = vec3(0.89, 0.84, 0.57);						// Sand
+	// Blinn-Phong
+
+	vec3 viewDir    = normalize(viewpos - vPos);
+	vec3 halfwayDir = normalize(lightdir + viewDir);
+
+
+	float spec = pow(max(dot(viewDir, halfwayDir), 0.0), shineyness);
+	vec3 specular = specularStrength * spec * vec3(1.0,1.0,1.0);  
+
+	vec3 dir = normalize(lightdir);
+	vec3 norm = normalize(nNormal);
+
+
+		// Half Lambert
+	float dp = dot(norm, dir) * 0.5 + 0.5f;
+
+	//FragColor =  vec4(dp*specular, 1.0f);
+
+	// The 4th component is the specular value
+    vec4 colorA = vec4(1.0f, 1.0f, 1.0f, 1.0f);						// Snow
+	vec4 colorB = vec4(0.5,0.4,0.5, 0.1f);							// Rock
+	vec4 colorC = vec4(46/255.0f, 180/255.0f, 47/255.0f, 0.0f);		// Grass
+	vec4 colorD = vec4(0.89, 0.84, 0.57, 0.5f);						// Sand
 	
 
 	// Shadow Colors
-	vec3 ambientA = vec3(0.0f, 0.25f, 0.5f);
-	vec3 ambientB = vec3(0.2, 0.15, 0.3) * 0.25f;
-	vec3 ambientC = vec3(0.3, 0.3, 0.25) * 0.25f;
-	vec3 ambientD = vec3(0.0, 0.3, 0.1) * 0.25f;
+	vec4 ambientA = vec4(0.0f, 0.25f, 0.5f, 1.0f);
+	vec4 ambientB = vec4(0.2, 0.15, 0.3, 0.1f) * 0.35f;
+	vec4 ambientC = vec4(0.3, 0.3, 0.25, 0.0f) * 0.35f;
+	vec4 ambientD = vec4(0.0, 0.3, 0.1, 0.5f) * 0.35f;
 
-
-    vec3 dir = normalize(lightdir);
-	vec3 norm = normalize(nNormal);
-
-	float dp = -1* dot(norm, dir);
 
 	// Shadow Mix
-	vec3 mixedA = mix(ambientA, colorA, dp);
-	vec3 mixedB = mix(ambientB, colorB, dp);
-	vec3 mixedC = mix(ambientC, colorC, dp);
-	vec3 mixedD = mix(ambientD, colorD, dp);
+	vec4 mixedA = mix(ambientA, colorA, dp);
+	vec4 mixedB = mix(ambientB, colorB, dp);
+	vec4 mixedC = mix(ambientC, colorC, dp);
+	vec4 mixedD = mix(ambientD, colorD, dp);
 	
 	
 	// Snow-Rock
 	float dpMix = (vPos.y-16)/32.0f;
-	vec3 mixed = mix(mixedB, mixedA, dpMix);
+	vec4 mixed = mix(mixedB, mixedA, dpMix);
 	
 	// Rock-Grass
 	float dpMix2 = clamp((vPos.y-12)/24.0f, 0, 1);
@@ -53,5 +85,6 @@ void main()
 	mixed = mix(mixedD, mixed, dpMix3);
 	
 
-	FragColor =  vec4(mixed, 1.0f);
+	FragColor =  vec4(mixed.rgb + specular*mixed.a, 1.0f);
+
 }

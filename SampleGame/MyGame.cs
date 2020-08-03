@@ -36,7 +36,7 @@ namespace SampleGame
          //   m_ImGuiDriver = new ImGuiDriver();
          //   m_ImGuiDriver.Initalise(GraphicsDevice, m_ResourceManager);
 
-            camera = new GameCamera(new Vector3(0,1,-3), new Vector3(0,1,0), 90, 0);
+            camera = new GameCamera(new Vector3(40,40,40), new Vector3(80,80,0), 55, -20);
 
             m_QuadBatch = new QuadBatch();
 
@@ -168,7 +168,7 @@ namespace SampleGame
             GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
             GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
 
-            
+            /*
             m_QuadBatch.Start();
 
             m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
@@ -176,7 +176,7 @@ namespace SampleGame
             m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
 
             m_QuadBatch.Commit();
-            
+            */
 
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 

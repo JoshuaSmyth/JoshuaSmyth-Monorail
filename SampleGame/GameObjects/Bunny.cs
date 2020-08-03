@@ -32,7 +32,9 @@ namespace SampleGame
             renderQueue.SetUniform(ShaderId, "model", model);
             renderQueue.SetUniform(ShaderId, "view", camera.ViewMatrix);
             renderQueue.SetUniform(ShaderId, "proj", camera.ProjMatrix);
-            renderQueue.SetUniform(ShaderId, "lightdir", new Vector3(1, -1, 1));
+            renderQueue.SetUniform(ShaderId, "lightdir", new Vector3(1, 1, 1));
+            renderQueue.SetUniform(ShaderId, "viewpos", camera.Position);
+
         }
 
         float rot;

@@ -119,6 +119,13 @@ namespace OpenGL
         GL_TEXTURE_CUBE_MAP_POSITIVE_X = 0x8515
     }
 
+    public enum FrameBuffer
+    {
+        GL_DRAW_FRAMEBUFFER = 0x8CA9,
+        GL_READ_FRAMEBUFFER = 0x8CA8,
+        GL_FRAMEBUFFER = 0x8D40
+    }
+
     internal enum PixelInternalFormat
     {
 
@@ -334,6 +341,11 @@ namespace OpenGL
         public static GenTexturesDelegate GenTextures;
 
         [SuppressUnmanagedCodeSecurity()]
+        public delegate void GenFramebuffersDelegate(int count, out int buffer);
+        [BindMethod("glGenFramebuffers")]
+        public static GenFramebuffersDelegate GenFramebuffers;
+
+        [SuppressUnmanagedCodeSecurity()]
         public delegate void GenVertexArraysDelegate(int count, out int buffer);
         [BindMethod("glGenVertexArrays")]
         public static GenVertexArraysDelegate GenVertexArrays;
@@ -352,6 +364,11 @@ namespace OpenGL
         public delegate void BindTextureDelegate(TextureType target, int textureId);
         [BindMethod("glBindTexture")]
         public static BindTextureDelegate BindTexture;
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void BindFramebufferDelegate(FrameBuffer target, int framebufferId);
+        [BindMethod("glBindFramebuffer")]
+        public static BindFramebufferDelegate BindFrameBuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         public unsafe delegate void BufferDataDelegate(BufferTarget target, int size, IntPtr data, BufferUsageHint usage);

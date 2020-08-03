@@ -9,7 +9,7 @@ namespace SampleGame
             // TODO:(Joshua) NEXT: Implement a camera
             // https://learnopengl.com/#!Getting-started/Camera
 
-            using (var window = new GameWindow("Test", 800, 600))
+            using (var window = new GameWindow("Test", 1280, 720))
             {
                 window.RunGame(new MySampleGame());
             }

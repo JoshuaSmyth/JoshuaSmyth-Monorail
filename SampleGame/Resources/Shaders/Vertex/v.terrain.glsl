@@ -18,12 +18,11 @@ void main()
 {
 	vColor = aColor.rgba;
 	TexCoord = aTexCoord.xy;
+	vPos = vec3(model * vec4(aPos, 1.0));
 
 	gl_Position = proj * view * model * vec4(aPos, 1.0);
 
-	vPos = vec3(model * vec4(aPos, 1.0));
-
+	
 	// Todo this should be cpu side and passed as uniform
-	mat3 newNorm = mat3(model);
-	nNormal = newNorm * aNormal;
+	nNormal= mat3(transpose(inverse(model))) * aNormal;
 }
