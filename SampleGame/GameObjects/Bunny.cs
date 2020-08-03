@@ -21,9 +21,9 @@ namespace SampleGame
             VertexCount = vertexCount;
 
             HasIndexBuffer = true;
-            CubemapTextureId = -1;
-            TextureIdA = -1;
-            TextureIdB = -1;
+            CubemapTextureId = 0;
+            TextureIdA = 0;
+            TextureIdB = 0;
             DepthBufferEnabled = true;
         }
 

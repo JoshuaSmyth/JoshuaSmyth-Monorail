@@ -24,7 +24,7 @@ namespace SampleGame.GameObjects
             this.VertexCount = vertexCount;
 
             this.HasIndexBuffer = false;
-            this.CubemapTextureId = -1;
+            this.CubemapTextureId = 0;
             this.DepthBufferEnabled = true;
         }
 

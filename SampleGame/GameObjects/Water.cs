@@ -23,7 +23,7 @@ namespace SampleGame.GameObjects
             this.HasIndexBuffer = true;
             this.BlendMode = BlendModes.Alpha;
             this.DepthBufferEnabled = true; //?
-            this.CubemapTextureId = -1;
+            this.CubemapTextureId = 0;
 
         }
 

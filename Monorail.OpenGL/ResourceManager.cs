@@ -45,10 +45,10 @@ namespace Monorail
     {
         // TODO What about QuadBatches?
         private Dictionary<int, ShaderProgram> Shaders = new Dictionary<int, ShaderProgram>();
-        private Dictionary<int, Texture2D> Textures = new Dictionary<int, Texture2D>();
-        private Dictionary<int, TextureFont> TextureFonts = new Dictionary<int, TextureFont>();
+        private Dictionary<uint, Texture2D> Textures = new Dictionary<uint, Texture2D>();
+        private Dictionary<uint, TextureFont> TextureFonts = new Dictionary<uint, TextureFont>();
 
-        private Dictionary<int, TextureCubeMap> CubeMaps = new Dictionary<int, TextureCubeMap>();
+        private Dictionary<uint, TextureCubeMap> CubeMaps = new Dictionary<uint, TextureCubeMap>();
         private Dictionary<int, VertexArrayObject> VertexArrayObjects = new Dictionary<int, VertexArrayObject>();
 
         // TODO Set Resources Folder

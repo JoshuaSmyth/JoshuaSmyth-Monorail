@@ -137,6 +137,11 @@ namespace SampleGame
             {
                 m_FontAriel = m_ResourceManager.LoadTextureFont("ariel.fnt");
             }
+
+
+            var rt = RenderTarget.Create(1024, 1024);
+
+
         }
 
         public override void RenderScene()

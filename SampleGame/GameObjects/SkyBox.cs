@@ -10,7 +10,7 @@ namespace SampleGame
 {
     public class SkyBox : RenderableObject
     {
-        public SkyBox(int shaderId, int vaoId, int vertexCount, int cubeMapId)
+        public SkyBox(int shaderId, int vaoId, int vertexCount, uint cubeMapId)
         {
             HasIndexBuffer = false;
 
@@ -20,8 +20,8 @@ namespace SampleGame
             CubemapTextureId = cubeMapId;
 
             // TODO
-            TextureIdA = -1;
-            TextureIdB = -1;
+            TextureIdA = 0;
+            TextureIdB = 0;
             DepthBufferEnabled = false;
         }
 

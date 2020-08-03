@@ -21,9 +21,9 @@ namespace Monorail.Platform
 
         void DrawElements(PrimitiveType primitiveType, int count, DrawElementsType elementType, int offset);
 
-        void BindTexture(int textureId, TextureType textureType, TextureUnits textureUnit =TextureUnits.GL_TEXTURE0);
+        void BindTexture(uint textureId, TextureType textureType, TextureUnits textureUnit =TextureUnits.GL_TEXTURE0);
 
-        void BindTexture2D(int textureId, TextureUnits textureUnit = TextureUnits.GL_TEXTURE0);
+        void BindTexture2D(uint textureId, TextureUnits textureUnit = TextureUnits.GL_TEXTURE0);
 
         void SetTextureSamplingAttribute(TextureAttributeValue attribute);
 

@@ -126,6 +126,24 @@ namespace OpenGL
         GL_FRAMEBUFFER = 0x8D40
     }
 
+    public enum RenderBuffer
+    {
+        GL_RENDERBUFFER = 0x8D41
+    }
+
+    public enum InternalFormat
+    {
+        GL_DEPTH24_STENCIL8 = 0x88F0
+    }
+
+    public enum Attachment
+    {
+        GL_COLOR_ATTACHMENT0  = 0x8CE0,
+        GL_DEPTH_ATTACHMENT = 0x8D00,
+        GL_STENCIL_ATTACHMENT = 0x8D20,
+        GL_DEPTH_STENCIL_ATTACHMENT = 0x821A
+    }
+
     internal enum PixelInternalFormat
     {
 
@@ -229,6 +247,11 @@ namespace OpenGL
         GL_STENCIL_TEST = 0x0B90,
         GL_MULTISAMPLE = 0x809D,
         GL_BLEND = 0x0BE2
+    }
+
+    public enum ReturnValue
+    {
+        GL_FRAMEBUFFER_COMPLETE = 0x8CD5
     }
 
     internal class EntryPointHelper
@@ -336,7 +359,7 @@ namespace OpenGL
         public static GenerateMipmapDelegate GenerateMipmap;
 
         [SuppressUnmanagedCodeSecurity()]
-        public delegate void GenTexturesDelegate(int count, out int buffer);
+        public delegate void GenTexturesDelegate(int count, out uint buffer);
         [BindMethod("glGenTextures")]
         public static GenTexturesDelegate GenTextures;
 
@@ -361,7 +384,7 @@ namespace OpenGL
         public static BindBufferDelegate BindBuffer;
 
         [SuppressUnmanagedCodeSecurity()]
-        public delegate void BindTextureDelegate(TextureType target, int textureId);
+        public delegate void BindTextureDelegate(TextureType target, uint textureId);
         [BindMethod("glBindTexture")]
         public static BindTextureDelegate BindTexture;
 
@@ -484,6 +507,37 @@ namespace OpenGL
         public delegate int glViewportFuncDelegate(int x​, int y​, uint width​, uint height​);
         [BindMethod("glViewport")]
         public static glViewportFuncDelegate glViewport;
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glFramebufferTexture2DFuncDelegate(FrameBuffer target, Attachment attachment, TextureType textureTarget, uint textureId, int mipmap);
+        [BindMethod("glFramebufferTexture2D")]
+        public static glFramebufferTexture2DFuncDelegate glFramebufferTexture2D;
+
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glGenRenderbuffersFuncDelegate(int size,out uint renderbuffers);
+        [BindMethod("glGenRenderbuffers")]
+        public static glGenRenderbuffersFuncDelegate glGenRenderbuffers;
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glBindRenderbufferFuncDelegate(RenderBuffer target, uint renderbufferId);
+        [BindMethod("glBindRenderbuffer")]
+        public static glBindRenderbufferFuncDelegate glBindRenderbuffer;
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void glRenderbufferStorageFuncDelegate(RenderBuffer target, InternalFormat internationalformat, int width, int height);
+        [BindMethod("glRenderbufferStorage")]
+        public static glRenderbufferStorageFuncDelegate glRenderbufferStorage;
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void glFramebufferRenderbufferFuncDelegate(RenderBuffer target, Attachment attachment, RenderBuffer renderbuffertarget, uint renderbuffer);
+        [BindMethod("glFramebufferRenderbuffer")]
+        public static glFramebufferRenderbufferFuncDelegate glFramebufferRenderbuffer;
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate int glCheckFramebufferStatusFuncDelegate(FrameBuffer framebufferType);
+        [BindMethod("glCheckFramebufferStatus")]
+        public static glCheckFramebufferStatusFuncDelegate glCheckFramebufferStatus;
 
 
         public static void InitaliseOpenGLEntryPoints()

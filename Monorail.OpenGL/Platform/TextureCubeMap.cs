@@ -12,8 +12,8 @@ namespace Monorail.Platform
 {
     public class TextureCubeMap
     {
-        private int m_TextureId;
-        public int TextureId { get { return m_TextureId; } }
+        private uint m_TextureId;
+        public uint TextureId { get { return m_TextureId; } }
 
         internal static TextureCubeMap CreateFromFile(string front, string back, string bottom, string top, string left, string right, bool generateMipmaps = false)
         {
