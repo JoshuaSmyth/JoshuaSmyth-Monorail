@@ -26,7 +26,7 @@ namespace SampleGame
 
         // TODO Implement multiple cameras
         GameCamera camera;
-
+        ScreenSpaceQuad quad;
 
         float rot;
         bool IsWireframeMode;
@@ -141,7 +141,8 @@ namespace SampleGame
 
             var rt = RenderTarget.Create(1024, 1024);
 
-
+            quad = new ScreenSpaceQuad();
+            quad.Create();
         }
 
         public override void RenderScene()
@@ -173,7 +174,7 @@ namespace SampleGame
             GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
             GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
 
-            /*
+            
             m_QuadBatch.Start();
 
             m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
@@ -181,10 +182,14 @@ namespace SampleGame
             m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
 
             m_QuadBatch.Commit();
-            */
+
+
+            quad.Draw(m_FontAriel.FontTexture.TextureId);
+
 
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
+  
 
             //// Render IMGUI
             //m_ImGuiDriver.Begin();
@@ -193,7 +198,7 @@ namespace SampleGame
             //    m_ImGuiDriver.Draw();
 
             //m_ImGuiDriver.Submit();
-            
+
         }
 
 
