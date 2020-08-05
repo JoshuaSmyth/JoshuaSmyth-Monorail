@@ -37,6 +37,8 @@ namespace Monorail.Platform
 
         internal static ShaderProgram QuadBatchShader { get; private set; } // TODO Createa a Shader database?
 
+        internal static ShaderProgram FullScreenShader { get; set; }
+
         public GameWindow(String windowName, Int32 screenWidth, Int32 screenHeight)
         {
             m_WindowName = windowName;
@@ -125,7 +127,7 @@ namespace Monorail.Platform
 
             // TODO Embed these as resources
             QuadBatchShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.quadbatch.glsl", "Resources/Shaders/Fragment/f.quadbatch.glsl");
-
+            FullScreenShader = ShaderProgram.CreateFromFile("Resources/Shaders/Vertex/v.fullscreenquad.glsl", "Resources/Shaders/Fragment/f.fullscreenquad.glsl");
             using (TracedStopwatch.Start("Loading Game Resources"))
             {
                 game.Load();

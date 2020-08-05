@@ -34,10 +34,10 @@ namespace Monorail.Platform
             m_Verticies[2].Color = new Vector3(1f, 1f, 1.0f);
             m_Verticies[3].Color = new Vector3(1f, 1.0f, 1.0f);
 
-            m_Verticies[0].Texture = new Vector2(1f, 1f);                      // Note: Inverted Y
-            m_Verticies[1].Texture = new Vector2(1f, 0f);
-            m_Verticies[2].Texture = new Vector2(0f, 0f);
-            m_Verticies[3].Texture = new Vector2(0f, 1f);
+            m_Verticies[0].Texture = new Vector2(1f, 0f);
+            m_Verticies[1].Texture = new Vector2(1f, 1f);
+            m_Verticies[2].Texture = new Vector2(0f, 1f);
+            m_Verticies[3].Texture = new Vector2(0f, 0f);
 
             m_Indicies = new uint[6];
             m_Indicies[0] = 0;
@@ -60,7 +60,7 @@ namespace Monorail.Platform
             GameWindow.GraphicsDevice.BindTexture2D(textureId, OpenGL.TextureUnits.GL_TEXTURE0);
             GameWindow.GraphicsDevice.BindTexture2D(0, OpenGL.TextureUnits.GL_TEXTURE1);
 
-            GameWindow.GraphicsDevice.BindShaderProgram(GameWindow.QuadBatchShader.ShaderProgramId);
+            GameWindow.GraphicsDevice.BindShaderProgram(GameWindow.FullScreenShader.ShaderProgramId);
 
             GameWindow.QuadBatchShader.SetUniform("texture1", 0);
 

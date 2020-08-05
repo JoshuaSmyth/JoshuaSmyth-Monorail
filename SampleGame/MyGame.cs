@@ -184,7 +184,7 @@ namespace SampleGame
             m_QuadBatch.Commit();
 
 
-            quad.Draw(m_FontAriel.FontTexture.TextureId);
+            quad.Draw(m_AwesomeFace.TextureId);
 
 
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
