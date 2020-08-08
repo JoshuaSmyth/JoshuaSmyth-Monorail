@@ -128,7 +128,8 @@ namespace OpenGL
 
     public enum RenderBuffer
     {
-        GL_RENDERBUFFER = 0x8D41
+        GL_RENDERBUFFER = 0x8D41,
+        GL_FRAMEBUFFER = 0x8D40
     }
 
     public enum InternalFormat

@@ -28,6 +28,9 @@ namespace SampleGame
         GameCamera camera;
         ScreenSpaceQuad quad;
 
+
+        RenderTarget renderTarget;
+
         float rot;
         bool IsWireframeMode;
 
@@ -139,7 +142,7 @@ namespace SampleGame
             }
 
 
-            var rt = RenderTarget.Create(1024, 1024);
+            renderTarget = RenderTarget.Create(GameWindow.ScreenWidth, GameWindow.ScreenHeight); // TODO This should be the size of the screen
 
             quad = new ScreenSpaceQuad();
             quad.Create();
@@ -147,7 +150,14 @@ namespace SampleGame
 
         public override void RenderScene()
         {
+            // Set Render Target
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
+
+
+            GraphicsDevice.SetRenderTarget(renderTarget);
+
+            GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
+            GraphicsDevice.Enable(OpenGL.Enable.GL_DEPTH_TEST);
 
             m_TerrainRenderObject.IsWireframe = IsWireframeMode;
 
@@ -161,6 +171,15 @@ namespace SampleGame
             }
 
             m_RenderQueue.Render(m_WaterRenderObject, camera);
+
+            // End Set Render Target
+            GraphicsDevice.SetRenderTarget(null);
+
+            // Render Render Target
+            // TODO
+
+            GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
+             quad.Draw((uint)renderTarget.TextureColorBufferId);
         }
 
         public override void Render2D()
@@ -174,7 +193,7 @@ namespace SampleGame
             GraphicsDevice.Enable(OpenGL.Enable.GL_BLEND);
             GraphicsDevice.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
 
-            
+            /*
             m_QuadBatch.Start();
 
             m_QuadBatch.DrawText("Bunny!", Vector2.Zero, m_FontAriel, PresetColors.White);
@@ -182,9 +201,8 @@ namespace SampleGame
             m_QuadBatch.DrawText("Bunny!", new Vector2(20, 160), m_FontAriel, PresetColors.White);
 
             m_QuadBatch.Commit();
+            */
 
-
-            quad.Draw(m_AwesomeFace.TextureId);
 
 
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);

@@ -34,10 +34,10 @@ namespace Monorail.Platform
             m_Verticies[2].Color = new Vector3(1f, 1f, 1.0f);
             m_Verticies[3].Color = new Vector3(1f, 1.0f, 1.0f);
 
-            m_Verticies[0].Texture = new Vector2(1f, 0f);
-            m_Verticies[1].Texture = new Vector2(1f, 1f);
-            m_Verticies[2].Texture = new Vector2(0f, 1f);
-            m_Verticies[3].Texture = new Vector2(0f, 0f);
+            m_Verticies[0].Texture = new Vector2(1, 1f);
+            m_Verticies[1].Texture = new Vector2(1, 0);
+            m_Verticies[2].Texture = new Vector2(0, 0);
+            m_Verticies[3].Texture = new Vector2(0, 1f);
 
             m_Indicies = new uint[6];
             m_Indicies[0] = 0;

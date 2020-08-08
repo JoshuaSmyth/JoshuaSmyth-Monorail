@@ -34,5 +34,7 @@ namespace Monorail.Platform
         void FillMode(Mode mode);
 
         void SetViewport(int x, int y, uint width, uint height);
+
+        void SetRenderTarget(RenderTarget renderTarget);
     }
 }

@@ -16,7 +16,7 @@ namespace Monorail.Platform
 
         // TODO Will probably need to handle resizing the framebuffer
 
-            // TODO Make internal
+            // TODO Make internal and store
         public static RenderTarget Create(int width, int height)
         {
             var rv = new RenderTarget();
@@ -36,11 +36,12 @@ namespace Monorail.Platform
             GlBindings.glFramebufferTexture2D(FrameBuffer.GL_FRAMEBUFFER, Attachment.GL_COLOR_ATTACHMENT0, TextureType.GL_TEXTURE_2D, rv.m_TextureColorBuffer, 0);
 
 
+            // TODO Depth buffer!
 
             GlBindings.glGenRenderbuffers(1, out rv.m_RenderBufferObjectId);
             GlBindings.glBindRenderbuffer(RenderBuffer.GL_RENDERBUFFER, rv.m_RenderBufferObjectId);
             GlBindings.glRenderbufferStorage(RenderBuffer.GL_RENDERBUFFER, InternalFormat.GL_DEPTH24_STENCIL8, width, height);
-            GlBindings.glFramebufferRenderbuffer(RenderBuffer.GL_RENDERBUFFER, Attachment.GL_DEPTH_STENCIL_ATTACHMENT, RenderBuffer.GL_RENDERBUFFER, rv.RenderBufferObjectId);
+            GlBindings.glFramebufferRenderbuffer(RenderBuffer.GL_FRAMEBUFFER, Attachment.GL_DEPTH_STENCIL_ATTACHMENT, RenderBuffer.GL_RENDERBUFFER, rv.RenderBufferObjectId);
 
             if (GlBindings.glCheckFramebufferStatus(FrameBuffer.GL_FRAMEBUFFER) != (int) ReturnValue.GL_FRAMEBUFFER_COMPLETE)
             {
@@ -50,7 +51,7 @@ namespace Monorail.Platform
 
             // Store previous
             GlBindings.BindFrameBuffer(OpenGL.FrameBuffer.GL_FRAMEBUFFER, 0);
-            return null;
+            return rv;
         }
     }
 }

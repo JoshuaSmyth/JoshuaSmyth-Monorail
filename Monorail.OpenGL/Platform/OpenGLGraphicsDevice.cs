@@ -89,5 +89,17 @@ namespace Monorail.Platform
         {
             GlBindings.glViewport(x, y, width, height);
         }
+
+        public void SetRenderTarget(RenderTarget renderTarget)
+        {
+            if (renderTarget != null)
+            {
+                GlBindings.BindFrameBuffer(OpenGL.FrameBuffer.GL_FRAMEBUFFER, renderTarget.RenderTargetId);
+            }
+            else
+            {
+                GlBindings.BindFrameBuffer(OpenGL.FrameBuffer.GL_FRAMEBUFFER, 0);
+            }
+        }
     }
 }
