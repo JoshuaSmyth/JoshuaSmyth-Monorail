@@ -13,11 +13,11 @@ uniform vec3 viewpos;
 // Goals for
 // Base Material/Shader
 
-// Blinn-Phong
-// Half-Lambert
-// HDR / Tonemapping
-// Bloom
-// SSAO
+// [+] Blinn-Phong
+// [+] Half-Lambert
+// [-] HDR / Tonemapping
+// [-] Bloom
+// [-] SSAO
 
 void main()
 {
@@ -47,7 +47,8 @@ void main()
 
 
 		// Half Lambert
-	float dp = dot(norm, dir) * 0.5 + 0.5f;
+	float lightIntensity = 1.0f;
+	float dp = lightIntensity*dot(norm, dir) * 0.75 + 0.25f;
 
 	//FragColor =  vec4(dp*specular, 1.0f);
 
@@ -85,6 +86,6 @@ void main()
 	mixed = mix(mixedD, mixed, dpMix3);
 	
 
-	FragColor =  vec4(mixed.rgb + specular*mixed.a, 1.0f);
+	FragColor =  vec4(1.0*(mixed.rgb + specular*mixed.a), 1.0f);
 
 }

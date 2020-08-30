@@ -119,6 +119,32 @@ namespace OpenGL
         GL_TEXTURE_CUBE_MAP_POSITIVE_X = 0x8515
     }
 
+    public enum StencilEnum
+    {
+        GL_ZERO = 0,
+        GL_KEEP = 0x1E00,
+        GL_REPLACE = 0x1E01,
+        GL_INCR = 0x1E02,
+        GL_DECR = 0x1E03,
+        GL_INCR_WRAP = 0x8507,
+        GL_DECR_WRAP = 0x8508,
+        GL_INVERT = 0x150A
+    }
+
+    public enum CompareEnum
+    {
+        GL_NEVER = 0x0200,      // Always Fails
+        GL_LESS = 0x0201,       // Passes if ( ref & mask ) < ( stencil & mask ).
+        GL_LEQUAL = 0x0203,     // Passes if ( ref & mask ) <= ( stencil & mask ).
+        GL_GREATER = 0x0204,    // Passes if ( ref & mask ) > ( stencil & mask ).
+        GL_GEQUAL = 0x0206,     // Passes if ( ref & mask ) >= ( stencil & mask ).
+        GL_EQUAL = 0x0202,      // Passes if ( ref & mask ) = ( stencil & mask ).
+        GL_NOTEQUAL = 0x0205,   // Passes if ( ref & mask ) != ( stencil & mask ).
+        GL_ALWAYS = 0x0207      // Always passes.
+    }
+
+
+
     public enum FrameBuffer
     {
         GL_DRAW_FRAMEBUFFER = 0x8CA9,
@@ -541,6 +567,36 @@ namespace OpenGL
         public static glCheckFramebufferStatusFuncDelegate glCheckFramebufferStatus;
 
 
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void glStencilMaskFuncDelegate(uint value);
+        [BindMethod("glStencilMask")]
+        public static glStencilMaskFuncDelegate glStencilMask;
+
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void glStencilOpFuncDelegate(StencilEnum sfail, StencilEnum dpfail, StencilEnum dppass);
+        [BindMethod("glStencilOp")]
+        public static glStencilOpFuncDelegate glStencilOp;
+
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void glStencilFuncDelegate(CompareEnum func, int reference, uint mask);
+        [BindMethod("glStencilFunc")]
+        public static glStencilFuncDelegate glStencilFunc;
+
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void glClearStencilFuncDelegate(int value);
+        [BindMethod("glClearStencil")]
+        public static glClearStencilFuncDelegate glClearStencil;
+
+
+        [SuppressUnmanagedCodeSecurity()]
+        public delegate void glColorMaskFuncDelegate(int r, int g, int b, int a);
+        [BindMethod("glColorMask")]
+        public static glColorMaskFuncDelegate glColorMask;
+
+
         public static void InitaliseOpenGLEntryPoints()
         {
             using (TracedStopwatch.Start("Init OpenGL Bindings"))
@@ -731,6 +787,7 @@ namespace OpenGL
                 }
             }
         }
+
     }
 
     public class BindMethod : Attribute

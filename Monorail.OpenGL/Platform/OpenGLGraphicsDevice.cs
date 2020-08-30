@@ -7,6 +7,7 @@ namespace Monorail.Platform
     public class OpenGLGraphicsDevice : IPlatformGraphicsDevice
     {
         IntPtr OpenGLContext;
+
         GraphicsCapabilities capabilities;
 
         public OpenGLGraphicsDevice(IntPtr openGLContext)
@@ -100,6 +101,31 @@ namespace Monorail.Platform
             {
                 GlBindings.BindFrameBuffer(OpenGL.FrameBuffer.GL_FRAMEBUFFER, 0);
             }
+        }
+
+        public void StencilMask(byte value)
+        {
+            GlBindings.glStencilMask(value);
+        }
+
+        public void StencilOp(StencilEnum sfail, StencilEnum dpfail, StencilEnum dppass)
+        {
+            GlBindings.glStencilOp(sfail, dpfail, dppass);
+        }
+
+        public void StencilFunc(CompareEnum func, int reference, uint mask)
+        {
+            GlBindings.glStencilFunc(func, reference, mask);
+        }
+
+        public void ClearStencil(int value)
+        {
+            GlBindings.glClearStencil(value);
+        }
+
+        public void ColorMask(int r, int g, int b, int a)
+        {
+            GlBindings.glColorMask(r, g, b, a);
         }
     }
 }

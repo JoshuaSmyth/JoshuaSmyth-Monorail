@@ -10,6 +10,7 @@ out vec2 TexCoord;
 out vec3 nNormal;
 out vec3 vPos;
 
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
@@ -26,4 +27,5 @@ void main()
 	// Todo this should be cpu side and passed as uniform
 	mat3 newNorm = mat3(model);
 	nNormal = newNorm * aNormal;
+	
 }

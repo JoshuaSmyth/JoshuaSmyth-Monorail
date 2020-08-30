@@ -77,6 +77,10 @@ namespace Monorail.Graphics
             var tileWidthX = 1.0f;
             var tileWidthZ = 1.0f;
 
+            var centreX = widthX / 2.0f;
+            var centreZ = widthZ / 2.0f;
+
+
             var i = 0;
             var h = 0;
             for (int x = 0; x < widthX; x++)
@@ -87,10 +91,10 @@ namespace Monorail.Graphics
                     
                     var yHeight = height;
 
-                    rv[i + 0].Position = new Vector3(dx + 0.5f, yHeight, dz + 0.5f);     // Top Right
-                    rv[i + 1].Position = new Vector3(dx + 0.5f, yHeight, dz + -0.5f);    // Bottom Right
-                    rv[i + 2].Position = new Vector3(dx + -0.5f, yHeight, dz + -0.5f);   // Bottom Left
-                    rv[i + 3].Position = new Vector3(dx + -0.5f, yHeight, dz + 0.5f);    // Top Left
+                    rv[i + 0].Position = new Vector3(dx + 0.5f - centreX, yHeight, dz + 0.5f - centreZ);     // Top Right
+                    rv[i + 1].Position = new Vector3(dx + 0.5f - centreX, yHeight, dz + -0.5f - centreZ);    // Bottom Right
+                    rv[i + 2].Position = new Vector3(dx + -0.5f - centreX, yHeight, dz + -0.5f - centreZ);   // Bottom Left
+                    rv[i + 3].Position = new Vector3(dx + -0.5f - centreX, yHeight, dz + 0.5f - centreZ);    // Top Left
 
                     rv[i + 0].Color = new Vector4(0f, 0f, 1.0f, 0.5f);
                     rv[i + 1].Color = new Vector4(0f, 0f, 1.0f, 0.5f);

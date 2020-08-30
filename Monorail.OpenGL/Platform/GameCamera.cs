@@ -25,10 +25,14 @@ namespace Monorail.Platform
 
         public float Pitch;
 
+        public float NearPlane = 0.1f;
+
+        public float FarPLane = 1000.0f;
+
         public GameCamera(Vector3 position, Vector3 lookAt, float yaw, float pitch)
         {
             var aspect = GameWindow.ScreenWidth / (float)GameWindow.ScreenHeight;
-            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(60), aspect, 1f, 1000.0f);
+            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(60), aspect, NearPlane, FarPLane);
             Position = position;
 
             Forward = Vector3.Normalize(lookAt - position);
@@ -70,7 +74,7 @@ namespace Monorail.Platform
         public void Update()
         {
             var aspect = GameWindow.ScreenWidth / (float)GameWindow.ScreenHeight;
-            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(60), aspect, 1f, 1000.0f);
+            ProjMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.ToRads(60), aspect, NearPlane, FarPLane);
 
             Forward.X = (float)(Math.Cos(MathHelper.ToRads(Yaw)) * Math.Cos(MathHelper.ToRads(Pitch)));
             Forward.Y = (float)Math.Sin(MathHelper.ToRads(Pitch));

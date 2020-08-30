@@ -4,15 +4,27 @@ in vec3 vColor;
 in vec2 TexCoord;
 out vec4 FragColor;
 
+
 uniform sampler2D texture1;
 
 void main()
 {
-	vec4 texColor = 1 - texture(texture1, TexCoord).rgba;
-	 // vec4 texColor = vec4(vec3(1.0 - texture(texture1, TexCoord)), 0.5);
 
-	//if(texColor.a < 0.5)
-    //    discard;
+	// todo multiple render buffer targets
+	// todo hdr / tone mapping
 
-	FragColor = texColor;
+	// check whether fragment output is higher than threshold, if so output as brightness color
+    
+	vec4 texColor = texture(texture1, TexCoord).rgba;
+	vec4 BrightColor;
+
+	
+	float brightness = dot(texColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 0.0)
+        BrightColor = vec4(texColor.rgb, 1.0);
+    else
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+
+	FragColor = BrightColor;
 }

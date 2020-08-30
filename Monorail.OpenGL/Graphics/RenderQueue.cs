@@ -51,6 +51,8 @@ namespace Monorail.Graphics
             {
                 m_Graphics.Enable(OpenGL.Enable.GL_BLEND);
                 m_Graphics.BlendFunc(OpenGL.BlendFunc.GL_SRC_ALPHA, OpenGL.BlendFunc.GL_ONE_MINUS_SRC_ALPHA);
+
+
             }
 
             m_Graphics.BindVertexArrayObject(renderObject.VaoId);

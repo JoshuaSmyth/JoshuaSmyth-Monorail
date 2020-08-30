@@ -4,6 +4,7 @@ in vec4 vColor;
 in vec2 TexCoord;
 in vec3 nNormal;
 in vec3 vPos;
+in float w;
 
 out vec4 FragColor;
 
@@ -12,5 +13,5 @@ uniform vec3 lightdir = vec3(1.0f, 1.0f, 1.0f);
 
 void main()
 {
-	FragColor =  vec4(0.0f, 0.8f, 1.0f, 0.5f);
+	FragColor =  vec4(0.0f, 0.8f, 1.0f, 0.5f);	
 }

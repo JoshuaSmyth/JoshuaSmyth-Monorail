@@ -9,7 +9,7 @@ namespace SampleGame
 {
     public class MySampleGame : Game
     {
-     //   ImGuiDriver m_ImGuiDriver;
+        ImGuiDriver m_ImGuiDriver;
 
         // Render Objects
         SkyBox m_SkyBoxRenderObject;
@@ -28,7 +28,6 @@ namespace SampleGame
         GameCamera camera;
         ScreenSpaceQuad quad;
 
-
         RenderTarget renderTarget;
 
         float rot;
@@ -36,8 +35,8 @@ namespace SampleGame
 
         public override void Load()
         {
-         //   m_ImGuiDriver = new ImGuiDriver();
-         //   m_ImGuiDriver.Initalise(GraphicsDevice, m_ResourceManager);
+            m_ImGuiDriver = new ImGuiDriver();
+            m_ImGuiDriver.Initalise(GraphicsDevice, m_ResourceManager);
 
             camera = new GameCamera(new Vector3(40,40,40), new Vector3(80,80,0), 55, -20);
 
@@ -63,20 +62,15 @@ namespace SampleGame
                 var heightMapData = HeightMapData.LoadHeightmapData("Resources/Textures/Heightmaps/1.png");
                 var model = ModelLoader.CreateTerrain(heightMapData);
 
-                // Memory leak this has to come from somewhere...
-                //var terrainVAO = new VertexArrayObject();
                 var terrainVAO = m_ResourceManager.LoadVAO(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
-                //terrainVAO.BindElementsArrayBuffer(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
                 m_TerrainRenderObject = new Terrain(terrainShader.ShaderProgramId, terrainVAO.VaoId, terrainVAO.VertexCount);
             }
 
             // Create Water
             {
-                var model = ModelLoader.CreatePlane(512, 512, 12.2f);
+                var model = ModelLoader.CreatePlane(1024, 1024, 12.2f);
 
-                // Memory Leak
-                //var waterVAO = new VertexArrayObject();
                 var waterVAO = m_ResourceManager.LoadVAO(model.Verts, model.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
                 m_WaterRenderObject = new Water(waterShader.ShaderProgramId, waterVAO.VaoId, waterVAO.VertexCount);
@@ -86,23 +80,23 @@ namespace SampleGame
             {
                 var bunnyVerts = ModelLoader.LoadObj("Resources/Models/bunny.obj");
 
-                // Memory leak this needs to be cleaned up
-                //var bunnyVAO = new VertexArrayObject();
                 var bunnyVAO = m_ResourceManager.LoadVAO(bunnyVerts.Verts, bunnyVerts.Indicies, VertexPositionColorTextureNormal.Stride, VertexPositionColorTextureNormal.AttributeLengths, VertexPositionColorTextureNormal.AttributeOffsets);
 
                 m_BunnyRenderObject = new Bunny(terrainShader.ShaderProgramId, bunnyVAO.VaoId, bunnyVAO.VertexCount);
             }
 
+            
             // Create Cube
             {
+                Maploader mp = new Maploader();
+                mp.Load();
+
                 var verts = Geometry.CreateCube();
 
-                // memory leak
-               // var m_CubeVAO = new VertexArrayObject();    // TODO Generate indicies
                 var m_CubeVAO = m_ResourceManager.LoadNonIndexedVAO(verts, VertexPositionColorTexture.Stride, VertexPositionColorTexture.AttributeLengths, VertexPositionColorTexture.AttributeOffsets);
 
-                m_Cube = new Cube[10];
-                for(int i=0;i<10;i++)
+                m_Cube = new Cube[Maploader.width*Maploader.height];
+                for(int i=0;i< Maploader.width * Maploader.height; i++)
                 {
                     m_Cube[i] = new Cube(cubeShader.ShaderProgramId, m_CubeVAO.VaoId, m_CubeVAO.VertexCount);
                     m_Cube[i].i = i;
@@ -110,18 +104,23 @@ namespace SampleGame
                     m_Cube[i].TextureIdB = m_Texture.TextureId;
                 }
 
-                // Create Cube Positions
+                int k = 0;
+                for (int i = 0; i < Maploader.width; i++)
                 {
-                    m_Cube[0].Position = new Vector3(  -2.0f,  0.0f,   0.0f);
-                    m_Cube[1].Position = new Vector3(  2.0f,  5.0f, -15.0f);
-                    m_Cube[2].Position = new Vector3( -1.5f,  2.2f,  -2.5f);
-                    m_Cube[3].Position = new Vector3( -3.8f, -2.0f, -12.3f);
-                    m_Cube[4].Position = new Vector3(  2.4f, -0.4f,  -3.5f);
-                    m_Cube[5].Position = new Vector3( -1.7f,  3.0f,  -7.5f);
-                    m_Cube[6].Position = new Vector3(  1.3f, -2.0f,  -2.5f);
-                    m_Cube[7].Position = new Vector3(  1.5f,  2.0f,  -2.5f);
-                    m_Cube[8].Position = new Vector3(  1.5f,  0.2f,  -1.5f);
-                    m_Cube[9].Position = new Vector3( -1.3f,  1.0f,  -1.5f);
+                    for (int j = 0; j < Maploader.height; j++)
+                    {
+                        var height = (float)mp.cubes[i, j];
+
+                        height /= 2.0f;
+
+                        if (height < 0)
+                        {
+                            height = -100; // Temp
+                        }
+                        height += 20;
+                        m_Cube[k].Position = new Vector3(i, height, j);
+                        k++;
+                    }
                 }
             }
 
@@ -153,7 +152,6 @@ namespace SampleGame
             // Set Render Target
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
 
-
             GraphicsDevice.SetRenderTarget(renderTarget);
 
             GraphicsDevice.Clear(PresetColors.CornFlowerBlue);
@@ -161,25 +159,167 @@ namespace SampleGame
 
             m_TerrainRenderObject.IsWireframe = IsWireframeMode;
 
-            m_RenderQueue.Render(m_SkyBoxRenderObject, camera);
-            m_RenderQueue.Render(m_BunnyRenderObject, camera);
-            m_RenderQueue.Render(m_TerrainRenderObject, camera);
+            // Clear all buffers
+            GraphicsDevice.ClearStencil(0);
+            GraphicsDevice.Clear(new Vector4(0, 0, 0, 0), ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
-            foreach (var cube in m_Cube)
+            m_RenderQueue.Render(m_SkyBoxRenderObject, camera);
+
+            // TODO
+            // Due to the depth planes being split we probably want to generate bounding spheres for each of our render objects so we can determine which depth plane
+            // They are in.
+
+
+
+            // Far Far
+            if (true)
             {
-                m_RenderQueue.Render(cube, camera);
+                camera.NearPlane = 999f;
+                camera.FarPLane = 10000f;
+                camera.Update();
+
+
+                // Render terrain
+                // Overwrite the stencil (not strictly nessesary in the far far plane.
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_ALWAYS, 1, 0xFF);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_KEEP, OpenGL.StencilEnum.GL_ZERO);
+                m_RenderQueue.Render(m_TerrainRenderObject, camera);
+
+
+                // TODO Write to stencil buffer only
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_REPLACE);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_ALWAYS, 1, 0xFF);
+                GraphicsDevice.StencilMask(0xFF);
+                GraphicsDevice.ColorMask(0, 0, 0, 0);
+                    m_RenderQueue.Render(m_WaterRenderObject, camera);
+                GraphicsDevice.Disable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.ColorMask(1, 1, 1, 1);
+
+
+                // Clear depth buffer between splitting the rendering
+                GraphicsDevice.Clear(new Vector4(1, 1, 1, 1), ClearBufferMask.DepthBufferBit);
             }
 
-            m_RenderQueue.Render(m_WaterRenderObject, camera);
+
+            // Far
+            
+            if (true)
+            {
+                // For opaque geometry overlapping the near plane with the far plane works best.
+                // But for transparency you get more of an 'apha line'
+                // Maybe in the next pass some kind of w-buffer could be used?
+
+                camera.NearPlane = 99.5f; // Could we scale the error based on the angle of the camera?
+                camera.FarPLane = 1000f;
+                camera.Update();
+
+
+                // Render terrain
+
+                // Overwrite the stencil
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_ALWAYS, 1, 0xFF);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_KEEP, OpenGL.StencilEnum.GL_ZERO);
+                m_RenderQueue.Render(m_TerrainRenderObject, camera);
+
+
+                // Want to pass the test, but zero it out when we pass
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_ALWAYS, 1, 0xFF);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_KEEP, OpenGL.StencilEnum.GL_ZERO);
+
+                foreach (var cube in m_Cube)
+                {
+                    m_RenderQueue.Render(cube, camera);
+                }
+
+                m_RenderQueue.Render(m_BunnyRenderObject, camera);
+
+
+                // TODO Write to stencil buffer only
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_KEEP, OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_REPLACE);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_ALWAYS, 1, 0xFF);
+                GraphicsDevice.StencilMask(0xFF);
+                GraphicsDevice.ColorMask(0, 0, 0, 0);
+                    m_RenderQueue.Render(m_WaterRenderObject, camera);
+                GraphicsDevice.Disable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.ColorMask(1, 1, 1, 1);
+
+                //m_RenderQueue.Render(m_WaterRenderObject, camera);
+
+                // Clear depth buffer between splitting the rendering
+                GraphicsDevice.Clear(new Vector4(1, 1, 1, 1), ClearBufferMask.DepthBufferBit);
+            }
+            
+
+            // Near
+            if (true)
+            {
+                camera.NearPlane = 0.01f;
+                camera.FarPLane = 100f;
+                camera.Update();
+
+
+                m_RenderQueue.Render(m_TerrainRenderObject, camera);
+
+                // Want to pass the test, but zero it out when we pass
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_ALWAYS, 1, 0xFF);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_KEEP, OpenGL.StencilEnum.GL_ZERO);
+
+                foreach (var cube in m_Cube)
+                {
+                    m_RenderQueue.Render(cube, camera);
+                }
+
+             
+
+
+                // TODO Write to stencil buffer only
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_KEEP, OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_REPLACE);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_ALWAYS, 1, 0xFF);
+                GraphicsDevice.StencilMask(0xFF);
+                GraphicsDevice.ColorMask(0, 0, 0, 0);
+                m_RenderQueue.Render(m_WaterRenderObject, camera);
+                GraphicsDevice.Disable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.ColorMask(1, 1, 1, 1);
+
+
+                // Clear depth buffer between splitting the rendering
+                GraphicsDevice.Clear(new Vector4(1, 1, 1, 1), ClearBufferMask.DepthBufferBit);
+            }
+
+
+            // Draw Large Transparencies
+            if (true)
+            {
+                camera.NearPlane = 0.01f;
+                camera.FarPLane = 10000f;
+                camera.Update();
+
+                // Disable Depth test
+                GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
+
+                // Draw water based on 
+                GraphicsDevice.Enable(OpenGL.Enable.GL_STENCIL_TEST);
+                GraphicsDevice.StencilMask(0xFF);
+                GraphicsDevice.StencilOp(OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_ZERO, OpenGL.StencilEnum.GL_ZERO);
+                GraphicsDevice.StencilFunc(OpenGL.CompareEnum.GL_EQUAL, 1, 0xFF);
+                m_RenderQueue.Render(m_WaterRenderObject, camera);
+                GraphicsDevice.Disable(OpenGL.Enable.GL_STENCIL_TEST);
+            }
 
             // End Set Render Target
             GraphicsDevice.SetRenderTarget(null);
 
-            // Render Render Target
-            // TODO
 
+            // Render the render Target
             GraphicsDevice.Disable(OpenGL.Enable.GL_DEPTH_TEST);
-             quad.Draw((uint)renderTarget.TextureColorBufferId);
+            quad.Draw((uint)renderTarget.TextureColorBufferId);
         }
 
         public override void Render2D()
@@ -207,16 +347,17 @@ namespace SampleGame
 
             GraphicsDevice.Disable(OpenGL.Enable.GL_BLEND);
 
-  
+
 
             //// Render IMGUI
-            //m_ImGuiDriver.Begin();
+            /*
+            m_ImGuiDriver.Begin();
 
-            //// TODO ImGUI calls here.
-            //    m_ImGuiDriver.Draw();
+            // TODO ImGUI calls here.
+            m_ImGuiDriver.Draw();
 
-            //m_ImGuiDriver.Submit();
-
+            m_ImGuiDriver.Submit();
+            */
         }
 
 
@@ -226,7 +367,8 @@ namespace SampleGame
             camera.Update();
             m_BunnyRenderObject.Update(GameTime.ElapsedMilliseconds);
 
-            rot += (float)(GameTime.ElapsedSeconds * 15.0f);
+            rot = 0; //+= (float)(GameTime.ElapsedSeconds * 15.0f);
+
 
             foreach (var cube in m_Cube)
             {

@@ -36,5 +36,15 @@ namespace Monorail.Platform
         void SetViewport(int x, int y, uint width, uint height);
 
         void SetRenderTarget(RenderTarget renderTarget);
+
+        void StencilMask(byte value);
+
+        void StencilOp(StencilEnum stencilFail, StencilEnum depthFail, StencilEnum depthStencilPass);
+
+        void StencilFunc(CompareEnum func, int reference, uint mask);
+
+        void ClearStencil(int value);
+
+        void ColorMask(int r, int g, int b, int a);
     }
 }

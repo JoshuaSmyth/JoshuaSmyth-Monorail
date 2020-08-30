@@ -84,6 +84,7 @@
     <Compile Include="GameObjects\Terrain.cs" />
     <Compile Include="GameObjects\Water.cs" />
     <Compile Include="ImGuiDriver.cs" />
+    <Compile Include="Maploader.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -120,6 +121,9 @@
     <None Include="Resources\Shaders\Vertex\v.terrain.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Resources\Maps\testmap1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Textures\awesomeface.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
