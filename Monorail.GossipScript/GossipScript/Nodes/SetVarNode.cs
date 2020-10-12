@@ -49,6 +49,8 @@ namespace TranspileTest.Nodes
         {
             bw.Write((UInt16)0); // Version
             //bw.Write(value);
+
+            ExpressionSerializer.Write(expression, bw);
             bw.Write(variableId);
         }
 
@@ -56,6 +58,8 @@ namespace TranspileTest.Nodes
         {
             br.ReadUInt16();
             //value = br.ReadString();
+
+            expression = ExpressionSerializer.Read(br);
             variableId = br.ReadString();
         }
     }

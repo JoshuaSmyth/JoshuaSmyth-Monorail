@@ -47,6 +47,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="ExpressionParser\Expression.cs" />
     <Compile Include="ExpressionParser\ExpressionContext.cs" />
+    <Compile Include="ExpressionParser\ExpressionSerializer.cs" />
     <Compile Include="ExpressionParser\HostCall.cs" />
     <Compile Include="ExpressionParser\HostCallTable.cs" />
     <Compile Include="ExpressionParser\HostSymbol.cs" />

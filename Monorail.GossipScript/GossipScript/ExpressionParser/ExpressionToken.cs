@@ -26,7 +26,7 @@ namespace TranspileTest.Parser
 
         public OperatorAssociativity OperatorAssociativity;
 
-        public Int32 Precedence; // Higher evaluates first
+        public byte Precedence; // Higher evaluates first
 
         public ExpressionData Data;
 

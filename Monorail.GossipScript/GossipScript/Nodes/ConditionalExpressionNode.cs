@@ -46,19 +46,16 @@ namespace TranspileTest.Nodes
             bw.Write((UInt16)0);
 
             // TODO Write expression
-            /*
-            bw.Write(expression.Instructions.Count);
-            foreach(var i in expression.Instructions)
-            {
-                bw.Write((int)i.TokenType);
-                bw.Write(i.Data);
-            }*/
+
+            ExpressionSerializer.Write(Expression, bw);
         }
 
+        
         public override void readData(BinaryReader br)
         {
             br.ReadUInt16();
-            //expression = br.ReadString();
+            Expression = ExpressionSerializer.Read(br);
         }
+        
     }
 }

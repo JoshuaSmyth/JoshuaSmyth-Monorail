@@ -2,7 +2,6 @@
 {
 	# TODO Implement local variables
 
-	#TODO Allow player.money as a variable name rather than player_money
 	def name:$fee			type:int	scope:global	default:200
 	def name:$player_money	type:int	scope:global	default:100
 }

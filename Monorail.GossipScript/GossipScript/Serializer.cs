@@ -119,6 +119,13 @@ namespace TranspileTest
                         node.readData(br);
                         return node;
                     }
+                case NodeType.ConditionalIf:
+                    {
+                        var node = new ConditionalExpressionNode();
+                        node.Id = id;
+                        node.readData(br);
+                        return node;
+                    }
                 case NodeType.Command:
                     {
                         switch(commandType)
@@ -154,6 +161,13 @@ namespace TranspileTest
                             case CommandType.Print:
                                 {
                                     var command = new PrintNode();
+                                    command.Id = id;
+                                    command.readData(br);
+                                    return command;
+                                }
+                            case CommandType.SetVar:
+                                {
+                                    var command = new SetVarNode();
                                     command.Id = id;
                                     command.readData(br);
                                     return command;

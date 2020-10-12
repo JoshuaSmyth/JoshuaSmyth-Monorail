@@ -71,6 +71,8 @@ namespace TranspileTest
 
             var program = scriptCompiler.CompileScript("Scripts/Test007.gs", new List<string>());
 
+            ScriptNode script4 = LoadScript("Test007.gs");
+
             nodeEngine.LoadVariableTable(program.GlobalVariables);
 
             foreach (var s in program.Scripts.Values)
